@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore, calcularPendencias } from '../state/store';
+import SemAcesso from '../pages/SemAcesso';
 
 const C = {
   acento: '#FFC213',
@@ -82,17 +83,20 @@ export default function AppLayout() {
 
   const perfil = state.perfil_ativo;
 
-  // Guard: no profile → login; cliente → portal
+  // Guard: sem perfil → login. Cliente não tem acesso às rotas internas —
+  // bloqueio visível, nunca redirecionamento silencioso.
   if (!perfil) return <Navigate to="/entrar" replace />;
-  if (perfil === 'cliente') return <Navigate to="/portal" replace />;
+  if (perfil === 'cliente') return <SemAcesso />;
 
   const isAdmin = perfil === 'administracao';
-  const navItems = isAdmin ? NAV_ADMIN : NAV_GERENTE;
+  const isFinanceiro = perfil === 'financeiro';
+  const acessoTotal = isAdmin || isFinanceiro;
+  const navItems = acessoTotal ? NAV_ADMIN : NAV_GERENTE;
 
   // Derive user info from profile
-  const pessoaId = isAdmin ? 'p01' : 'p04';
+  const pessoaId = isAdmin ? 'p01' : isFinanceiro ? 'p03' : 'p04';
   const pessoa = state.pessoas.find(p => p.id === pessoaId);
-  const perfilLabel = isAdmin ? 'ADMINISTRAÇÃO' : 'GERENTE DE OBRAS';
+  const perfilLabel = isAdmin ? 'ADMINISTRAÇÃO' : isFinanceiro ? 'FINANCEIRO' : 'GERENTE DE OBRAS';
 
   const handleLogout = () => {
     state.setPerfil(null);
@@ -156,7 +160,7 @@ export default function AppLayout() {
                 <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.tintaFraca }}>
                   {perfilLabel}
                 </p>
-                {isAdmin && (
+                {acessoTotal && (
                   <button
                     onClick={() => state.resetarDados()}
                     title="Restaurar dados iniciais"

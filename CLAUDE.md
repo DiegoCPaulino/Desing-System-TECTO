@@ -130,13 +130,19 @@ O código da obra deriva das iniciais do cliente.
 
 ## Rotas
 
-`/entrar` · `/entrar/primeiro-acesso` · `/` (Painel) · `/obras` · `/obras/22-mcl`
-e sub-rotas `/diarios` `/checklist` `/andamento` `/fotos` `/financeiro`
-`/documentos` · `/planejamento` · `/orcamentos` · `/financeiro` · `/indicadores` ·
-`/equipe` · `/equipe/rafael-duarte` · `/portal` · `/portal/diario` ·
-`/portal/financeiro` · `/design-system`
+`/entrar` · `/entrar/primeiro-acesso` · `/` (Painel) · `/obras` ·
+`/obras/:obraId` e sub-rotas `/diario` `/diarios` `/checklist` `/andamento`
+`/fotos` `/financeiro` `/documentos` — genérica, abre as cinco obras (22-mcl,
+18-gfr, 25-atb, 31-mbp, 04-lsm) a partir do estado · `/planejamento` ·
+`/orcamentos` · `/financeiro` · `/indicadores` · `/equipe` ·
+`/equipe/:pessoaId` · `/portal` · `/portal/diario` · `/portal/financeiro` ·
+`/design-system`
 
 Rota sem tela construída renderiza a página "Em breve" — nunca link morto.
+Rota fora do perfil do usuário logado renderiza `SemAcesso` — nunca
+redirecionamento silencioso. Perfis por rota declarados em `routes.ts` (rota
+sem perfil declarado é negada por padrão); para `/obras/:obraId` e sub-rotas, o
+Gerente de Obras só acessa as obras às quais está vinculado no estado.
 
 ## Permissões visíveis
 
@@ -150,20 +156,18 @@ Rota sem tela construída renderiza a página "Em breve" — nunca link morto.
 ## Situação atual
 
 **Construído:** Design System · layouts e rotas · Painel do dia · Carteira de
-obras · Obra: visão geral · Equipe · Planejamento semanal com interações ·
-Diário de Obra · Portal do Cliente (3 telas) · Login com perfis · abas
-Checklist, Andamento, Diários e Fotos (verificar se completou).
+obras · Obra: visão geral e sub-abas (Diários, Checklist, Andamento, Fotos),
+genéricas para as cinco obras · Diário de Obra em `/obras/:obraId/diario`,
+tela normal dentro do `AppLayout` · Equipe · Planejamento semanal com
+interações · Portal do Cliente (3 telas) · Login com perfis (Administração,
+Financeiro, Gerente de Obras, Cliente) · controle de acesso por rota.
 
 **Falta construir:** Fechamento de Ciclo em `/financeiro` · Indicadores em
 `/indicadores`.
 
-**Correções pendentes:**
-1. Remover a moldura de celular do Diário de Obra. Ele deve ser tela normal,
-   fluida, como as outras.
-2. Remover o `CampoLayout`. Todos os perfis usam o mesmo layout interno; a
-   diferença é permissão, não layout.
-3. Na tela de Login, o botão de demonstração de Rafael Duarte deve entrar em `/`,
-   não em rota separada.
+**Correções pendentes:** nenhuma no momento. As três anteriores — moldura de
+celular no Diário de Obra, `CampoLayout` separado, destino do botão de
+demonstração de Rafael Duarte — foram resolvidas.
 
 **Pendência transversal:** nenhuma tela tem pontos de quebra. Todas precisam
 funcionar em desktop e em celular — o mesmo usuário acessa dos dois. A grade do

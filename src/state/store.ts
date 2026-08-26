@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { AppState, Planejamento, Presenca, Diaria, TipoPerfil, ItemForaEscopo } from './types';
+import type { AppState, Planejamento, Presenca, Diaria, Diario, Obra, TipoPerfil, ItemForaEscopo } from './types';
 import DADOS_INICIAIS, { HOJE } from './dados-iniciais';
 
 /** Descreve o novo conteúdo de uma célula do planejamento */
@@ -159,11 +159,23 @@ export const useStore = create<Store>(() => ({
     useStore.setState((s) => {
       const agora = new Date().toISOString();
 
-      const updatedDiarios = s.diarios.map((d) =>
-        d.id === diario_id
-          ? { ...d, estado: 'finalizado' as const, texto: texto_linhas, fotos, finalizado_por, finalizado_em: agora, removidos_planejados, houve_execucao, motivo_sem_execucao }
-          : d
-      );
+      const diarioExistente = s.diarios.find((d) => d.id === diario_id);
+      const diarioFinalizado: Diario = {
+        id: diario_id,
+        obra_id,
+        data,
+        estado: 'finalizado',
+        texto: texto_linhas,
+        fotos,
+        finalizado_por,
+        finalizado_em: agora,
+        removidos_planejados,
+        houve_execucao,
+        motivo_sem_execucao,
+      };
+      const updatedDiarios = diarioExistente
+        ? s.diarios.map((d) => (d.id === diario_id ? diarioFinalizado : d))
+        : [...s.diarios, diarioFinalizado];
 
       // Remove old presencas for this diary, keep others
       const outrasPresencas = s.presencas.filter((p) => p.diario_id !== diario_id);
@@ -232,6 +244,24 @@ export function getPessoaNome(state: AppState, pessoa_id: string): string {
 
 export function getPessoaIniciais(state: AppState, pessoa_id: string): string {
   return state.pessoas.find(p => p.id === pessoa_id)?.iniciais ?? '?';
+}
+
+/** Slug de rota derivado do código da obra — "Obra 22 - MCL" → "22-mcl" */
+export function obraSlug(obra: Obra): string {
+  const [primeira, sigla] = obra.codigo.split(' - ');
+  const numero = primeira.match(/\d+/)?.[0] ?? '';
+  return `${numero}-${(sigla ?? '').toLowerCase()}`;
+}
+
+export function obraPorSlug(state: AppState, slug: string): Obra | undefined {
+  return state.obras.find((o) => obraSlug(o) === slug);
+}
+
+/** Obras às quais o Gerente de Obras (perfil de demonstração) está vinculado como gerente */
+export function gerenteTemAcessoAObra(state: AppState, obra_id: string): boolean {
+  return state.vinculos_obra.some(
+    (v) => v.obra_id === obra_id && v.pessoa_id === GERENTE_ID && v.papel === 'gerente' && !v.fim
+  );
 }
 
 export function getGerenteDaObra(state: AppState, obra_id: string) {

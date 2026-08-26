@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useStore } from '../state/store';
+import { useParams } from 'react-router-dom';
+import { useStore, obraPorSlug } from '../state/store';
 
 const C = {
   acento: '#FFC213',
@@ -55,26 +56,30 @@ interface FotoEntry {
   index: number;
 }
 
-const AMBIENTE_TABS = [
-  { key: 'todos', label: 'Todos' },
-  { key: 'a01', label: 'Suíte Master' },
-  { key: 'a02', label: 'Banheiro da Suíte' },
-  { key: 'a03', label: 'Cozinha' },
-  { key: 'a04', label: 'Sala' },
-  { key: 'a05', label: 'Lavabo' },
-];
-
 export default function ObraFotos() {
   const state = useStore();
+  const { obraId } = useParams<{ obraId: string }>();
   const [activeAmbiente, setActiveAmbiente] = useState('todos');
   const [ordem, setOrdem] = useState<'recentes' | 'antigas'>('recentes');
   const [lightbox, setLightbox] = useState<{ index: number } | null>(null);
 
-  // Collect all photos from obra o01 diaries
+  const obra = obraId ? obraPorSlug(state, obraId) : undefined;
+
+  const ambientesDaObra = useMemo(
+    () => (obra ? state.ambientes.filter(a => a.obra_id === obra.id) : []),
+    [state.ambientes, obra]
+  );
+  const AMBIENTE_TABS = useMemo(
+    () => [{ key: 'todos', label: 'Todos' }, ...ambientesDaObra.map(a => ({ key: a.id, label: a.nome }))],
+    [ambientesDaObra]
+  );
+
+  // Collect all photos from this obra's diaries
   const todasFotos: FotoEntry[] = useMemo(() => {
+    if (!obra) return [];
     const entries: FotoEntry[] = [];
     let globalIdx = 0;
-    const diariosFiltrados = [...state.diarios.filter(d => d.obra_id === 'o01' && d.fotos.length > 0)]
+    const diariosFiltrados = [...state.diarios.filter(d => d.obra_id === obra.id && d.fotos.length > 0)]
       .sort((a, b) => b.data.localeCompare(a.data));
     for (const d of diariosFiltrados) {
       for (const url of d.fotos) {
@@ -82,7 +87,9 @@ export default function ObraFotos() {
       }
     }
     return entries;
-  }, [state.diarios]);
+  }, [state.diarios, obra]);
+
+  if (!obra) return null;
 
   // Since photos have no ambiente tag, ambiente filter is decorative
   const fotosVisiveis = useMemo(() => {

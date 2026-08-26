@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useStore, calcularPctObra, calcularPctAmbiente } from '../state/store';
+import { useParams } from 'react-router-dom';
+import { useStore, calcularPctObra, calcularPctAmbiente, obraPorSlug } from '../state/store';
 
 const C = {
   acento: '#FFC213',
@@ -14,22 +15,6 @@ const C = {
   informativo: '#215FD7',
   neutro: '#9A9A9A',
 } as const;
-
-const AMBIENTE_ORDER = ['a01', 'a02', 'a03', 'a04', 'a05'];
-
-const SERVICOS_TERCEIROS = [
-  { id: 't1', servico: 'Marcenaria', ambiente: 'Cozinha e dormitórios', fornecedor: 'NX Marcenaria', situacao: 'Em execução' },
-  { id: 't2', servico: 'Marmoraria', ambiente: 'Cozinha e banheiro', fornecedor: 'Mármores Paulista', situacao: 'Concluído' },
-  { id: 't3', servico: 'Vidro', ambiente: 'Suíte master', fornecedor: 'Vidraçaria Santos', situacao: 'Concluído' },
-  { id: 't4', servico: 'Ar-condicionado', ambiente: 'Sala e quartos', fornecedor: 'Eletromed', situacao: 'Aguardando' },
-  { id: 't5', servico: 'Gesso', ambiente: 'Sala', fornecedor: 'Gesseiro Independente', situacao: 'Aguardando' },
-];
-
-const SITUACAO_STYLES: Record<string, { bg: string; color: string }> = {
-  'Concluído':   { bg: '#EDFAF3', color: '#2E9E5B' },
-  'Em execução': { bg: '#E7F1FF', color: '#215FD7' },
-  'Aguardando':  { bg: '#F2F2F2', color: '#666666' },
-};
 
 function IconChevron({ open }: { open: boolean }) {
   return (
@@ -54,10 +39,6 @@ function IconCircleEmpty() {
     </svg>
   );
 }
-function IconWarning() {
-  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2L1.5 13h13L8 2z" /><path d="M8 6v4M8 11.5v.5" /></svg>;
-}
-
 function ProgressBar({ pct, done }: { pct: number; done?: boolean }) {
   return (
     <div style={{ flex: 1, height: '5px', backgroundColor: C.borda, borderRadius: '999px', overflow: 'hidden' }}>
@@ -68,21 +49,20 @@ function ProgressBar({ pct, done }: { pct: number; done?: boolean }) {
 
 export default function ObraAndamento() {
   const state = useStore();
+  const { obraId } = useParams<{ obraId: string }>();
   const [expandedTecto, setExpandedTecto] = useState<Set<string>>(new Set());
 
   const perfilAtivo = state.perfil_ativo;
-  const pessoaId = perfilAtivo === 'gerente_obras' ? 'p04' : 'p01';
+  const pessoaId = perfilAtivo === 'gerente_obras' ? 'p04' : perfilAtivo === 'financeiro' ? 'p03' : 'p01';
 
-  const obra = state.obras.find(o => o.id === 'o01');
+  const obra = obraId ? obraPorSlug(state, obraId) : undefined;
   if (!obra) return null;
 
-  const pctTecto = calcularPctObra(state, 'o01');
-  const totalItens = state.itens_orcamento.filter(i => i.obra_id === 'o01').length;
-  const executadosItens = state.itens_orcamento.filter(i => i.obra_id === 'o01' && i.executado).length;
+  const pctTecto = calcularPctObra(state, obra.id);
+  const totalItens = state.itens_orcamento.filter(i => i.obra_id === obra.id).length;
+  const executadosItens = state.itens_orcamento.filter(i => i.obra_id === obra.id && i.executado).length;
 
-  const ambientes = state.ambientes
-    .filter(a => a.obra_id === 'o01')
-    .sort((a, b) => AMBIENTE_ORDER.indexOf(a.id) - AMBIENTE_ORDER.indexOf(b.id));
+  const ambientes = state.ambientes.filter(a => a.obra_id === obra.id);
 
   const toggleTecto = (id: string) => {
     setExpandedTecto(prev => {
@@ -103,20 +83,6 @@ export default function ObraAndamento() {
 
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
-
-      {/* Faixa de escopo ampliado */}
-      <div style={{
-        display: 'flex', alignItems: 'flex-start', gap: '12px',
-        backgroundColor: '#FFF6D6', border: '1px solid #FFC213', borderRadius: '10px',
-        padding: '14px 18px', marginBottom: '28px',
-      }}>
-        <span style={{ color: '#D4A000', marginTop: '1px', flexShrink: 0 }}><IconWarning /></span>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.grafite, margin: 0, lineHeight: '1.6' }}>
-          <strong>Escopo ampliado em 19/08.</strong>{' '}
-          Dois serviços adicionais aprovados acrescentaram 6 itens ao checklist.{' '}
-          O percentual recuou de 51% para 48% por esse motivo.
-        </p>
-      </div>
 
       {/* Two-column layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
@@ -150,6 +116,11 @@ export default function ObraAndamento() {
           </div>
 
           {/* Per-ambiente */}
+          {ambientes.length === 0 ? (
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, margin: 0 }}>
+              Nenhum ambiente cadastrado para esta obra ainda.
+            </p>
+          ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {ambientes.map(amb => {
               const pct = calcularPctAmbiente(state, amb.id);
@@ -197,6 +168,7 @@ export default function ObraAndamento() {
               );
             })}
           </div>
+          )}
         </div>
 
         {/* ── ANDAMENTO GERAL ── */}
@@ -228,6 +200,11 @@ export default function ObraAndamento() {
             </div>
 
             {/* Per-ambiente — no detail, with "marcar" button */}
+            {ambientes.length === 0 ? (
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, margin: 0 }}>
+                Nenhum ambiente cadastrado para esta obra ainda.
+              </p>
+            ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {ambientes.map(amb => {
                 const pct = calcularPctAmbiente(state, amb.id);
@@ -264,59 +241,7 @@ export default function ObraAndamento() {
                 );
               })}
             </div>
-          </div>
-
-          {/* Serviços de terceiros */}
-          <div style={cardStyle}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <p style={{
-                fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700,
-                letterSpacing: '0.1em', textTransform: 'uppercase', color: C.neutro, margin: 0,
-              }}>
-                Serviços de Terceiros
-              </p>
-              <button style={{
-                fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 500,
-                color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
-                borderRadius: '6px', padding: '6px 12px', cursor: 'pointer',
-              }}>
-                + Adicionar
-              </button>
-            </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-              {SERVICOS_TERCEIROS.map((t, i) => {
-                const badge = SITUACAO_STYLES[t.situacao] ?? SITUACAO_STYLES['Aguardando'];
-                return (
-                  <div key={t.id} style={{
-                    display: 'grid', gridTemplateColumns: '1fr 1fr auto',
-                    alignItems: 'center', gap: '12px',
-                    padding: '12px 0', borderTop: i === 0 ? 'none' : `1px solid ${C.borda}`,
-                  }}>
-                    <div>
-                      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, margin: '0 0 2px' }}>
-                        {t.servico}
-                      </p>
-                      <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.neutro, margin: 0 }}>
-                        {t.ambiente}
-                      </p>
-                    </div>
-                    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca, margin: 0 }}>
-                      {t.fornecedor}
-                    </p>
-                    <span style={{
-                      fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600,
-                      backgroundColor: badge.bg, color: badge.color,
-                      padding: '3px 10px', borderRadius: '999px', whiteSpace: 'nowrap',
-                      display: 'inline-flex', alignItems: 'center', gap: '5px',
-                    }}>
-                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: badge.color, flexShrink: 0 }} />
-                      {t.situacao}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
+            )}
           </div>
         </div>
       </div>

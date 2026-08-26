@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useStore, calcularPctAmbiente, getPessoaNome } from '../state/store';
+import { useParams } from 'react-router-dom';
+import { useStore, calcularPctAmbiente, getPessoaNome, obraPorSlug } from '../state/store';
 
 const C = {
   acento: '#FFC213',
@@ -12,8 +13,6 @@ const C = {
   positivo: '#2E9E5B',
   neutro: '#9A9A9A',
 } as const;
-
-const AMBIENTE_ORDER = ['a01', 'a02', 'a03', 'a04', 'a05'];
 
 function formatarDataCurta(iso: string): string {
   const date = iso.slice(0, 10);
@@ -41,11 +40,10 @@ function IconWarning() {
 
 export default function ObraChecklist() {
   const state = useStore();
+  const { obraId } = useParams<{ obraId: string }>();
   const [search, setSearch] = useState('');
   const [filterTab, setFilterTab] = useState<'todos' | 'pendentes' | 'concluidos'>('todos');
-  const [expandedAmbientes, setExpandedAmbientes] = useState<Set<string>>(
-    new Set(['a01', 'a02', 'a03', 'a04', 'a05'])
-  );
+  const [expandedAmbientes, setExpandedAmbientes] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState<string | null>(null);
   const [sidePanel, setSidePanel] = useState(false);
   const [foraDescricao, setForaDescricao] = useState('');
@@ -53,14 +51,15 @@ export default function ObraChecklist() {
   const [foraUnidade, setForaUnidade] = useState('vb');
 
   const perfilAtivo = state.perfil_ativo;
-  const pessoaId = perfilAtivo === 'gerente_obras' ? 'p04' : 'p01';
+  const pessoaId = perfilAtivo === 'gerente_obras' ? 'p04' : perfilAtivo === 'financeiro' ? 'p03' : 'p01';
 
-  const ambientes = state.ambientes
-    .filter(a => a.obra_id === 'o01')
-    .sort((a, b) => AMBIENTE_ORDER.indexOf(a.id) - AMBIENTE_ORDER.indexOf(b.id));
+  const obra = obraId ? obraPorSlug(state, obraId) : undefined;
+  if (!obra) return null;
+
+  const ambientes = state.ambientes.filter(a => a.obra_id === obra.id);
 
   const foraEscopoCount = state.itens_fora_escopo.filter(
-    i => i.obra_id === 'o01' && i.estado === 'rascunho'
+    i => i.obra_id === obra.id && i.estado === 'rascunho'
   ).length;
 
   const toggleAmbiente = (id: string) => {
@@ -89,7 +88,7 @@ export default function ObraChecklist() {
   const handleSalvarFora = () => {
     if (!foraDescricao.trim()) return;
     state.adicionarItemForaEscopo({
-      obra_id: 'o01',
+      obra_id: obra.id,
       descricao: foraDescricao.trim(),
       quantidade: parseFloat(foraQtd) || 1,
       unidade: foraUnidade.trim() || 'vb',
@@ -191,6 +190,11 @@ export default function ObraChecklist() {
       </div>
 
       {/* Ambiente blocks */}
+      {ambientes.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '48px 0', color: C.neutro, fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>
+          Nenhum ambiente cadastrado para esta obra ainda.
+        </div>
+      ) : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {ambientes.map(amb => {
           const allItens = state.itens_orcamento.filter(i => i.ambiente_id === amb.id);
@@ -304,6 +308,7 @@ export default function ObraChecklist() {
           );
         })}
       </div>
+      )}
 
       {/* Side panel backdrop + panel */}
       {sidePanel && (

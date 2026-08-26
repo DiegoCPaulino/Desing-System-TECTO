@@ -16,8 +16,9 @@ const C = {
 
 const AVATAR_BGS: Record<string, string> = {
   PA: '#363636',
+  FS: '#7D7D7D',
   RD: '#5A5A5A',
-  MC: '#7D7D7D',
+  MC: '#9A9A9A',
 };
 
 const DEMO_USERS: Array<{
@@ -28,7 +29,8 @@ const DEMO_USERS: Array<{
   destino: string;
 }> = [
   { initials: 'PA', nome: 'Pedro Almeida', perfil: 'Administração', tipo: 'administracao', destino: '/' },
-  { initials: 'RD', nome: 'Rafael Duarte', perfil: 'Gerente de Obras', tipo: 'gerente_obras', destino: '/campo/diario' },
+  { initials: 'FS', nome: 'Fernanda Sousa', perfil: 'Financeiro', tipo: 'financeiro', destino: '/' },
+  { initials: 'RD', nome: 'Rafael Duarte', perfil: 'Gerente de Obras', tipo: 'gerente_obras', destino: '/' },
   { initials: 'MC', nome: 'Mariana Costa Lima', perfil: 'Cliente', tipo: 'cliente', destino: '/portal' },
 ];
 

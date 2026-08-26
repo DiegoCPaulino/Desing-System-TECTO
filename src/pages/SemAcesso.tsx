@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useStore } from '../state/store';
 
 const C = {
   acento: '#FFC213',
@@ -14,6 +15,9 @@ const C = {
 
 export default function SemAcesso() {
   const navigate = useNavigate();
+  const perfil = useStore(s => s.perfil_ativo);
+  const destino = perfil === 'cliente' ? '/portal' : '/';
+  const rotulo = perfil === 'cliente' ? 'Voltar ao portal' : 'Voltar ao painel';
   return (
     <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ textAlign: 'center', maxWidth: '400px' }}>
@@ -27,10 +31,10 @@ export default function SemAcesso() {
           Você não tem acesso a esta área
         </h2>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', color: C.tintaFraca, lineHeight: '22px', marginBottom: '28px' }}>
-          Esta seção está disponível apenas para o perfil de Administração.
+          Esta seção não está disponível para o seu perfil de acesso.
         </p>
         <button
-          onClick={() => navigate('/', { replace: true })}
+          onClick={() => navigate(destino, { replace: true })}
           style={{
             fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600,
             color: C.tinta, backgroundColor: C.acento, border: 'none',
@@ -38,7 +42,7 @@ export default function SemAcesso() {
             letterSpacing: '-0.01em',
           }}
         >
-          Voltar ao painel
+          {rotulo}
         </button>
       </div>
     </div>

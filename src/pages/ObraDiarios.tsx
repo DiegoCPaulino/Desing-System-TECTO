@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useStore, getPessoaNome } from '../state/store';
+import { Link, useParams } from 'react-router-dom';
+import { useStore, getPessoaNome, obraSlug, obraPorSlug } from '../state/store';
 
 const C = {
   acento: '#FFC213',
@@ -69,12 +69,24 @@ const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A', '#B0B0B0'];
 
 export default function ObraDiarios() {
   const state = useStore();
+  const { obraId } = useParams<{ obraId: string }>();
   const [search, setSearch] = useState('');
   const [filterTab, setFilterTab] = useState<'todos' | 'com_fotos' | 'sem_execucao'>('todos');
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
+  const obra = obraId ? obraPorSlug(state, obraId) : undefined;
+  if (!obra) return null;
+
+  if (obra.tipo === 'pequeno_servico') {
+    return (
+      <div style={{ padding: '48px 40px', fontFamily: 'Inter, sans-serif', color: C.neutro, fontSize: '14px', textAlign: 'center' }}>
+        {obra.codigo} é um pequeno serviço e não tem Diário de Obra.
+      </div>
+    );
+  }
+
   const diarios = state.diarios
-    .filter(d => d.obra_id === 'o01')
+    .filter(d => d.obra_id === obra.id)
     .sort((a, b) => b.data.localeCompare(a.data));
 
   const toggleExpanded = (id: string) => {
@@ -122,7 +134,7 @@ export default function ObraDiarios() {
           Diários da obra
         </h1>
         <Link
-          to="/campo/diario"
+          to={`/obras/${obraSlug(obra)}/diario`}
           style={{
             fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600,
             color: C.tinta, backgroundColor: C.acento, border: 'none',

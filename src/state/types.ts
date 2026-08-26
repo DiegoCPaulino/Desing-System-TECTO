@@ -139,7 +139,7 @@ export interface Lancamento {
   data: string;
 }
 
-export type TipoPerfil = 'administracao' | 'gerente_obras' | 'cliente';
+export type TipoPerfil = 'administracao' | 'financeiro' | 'gerente_obras' | 'cliente';
 
 export interface ItemForaEscopo {
   id: string;

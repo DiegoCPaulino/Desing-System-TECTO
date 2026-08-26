@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore, calcularPctObra, getGerenteDaObra, getPessoaIniciais, formatarReais } from '../state/store';
+import { useStore, calcularPctObra, getGerenteDaObra, getPessoaIniciais, formatarReais, obraSlug } from '../state/store';
 
 const C = {
   acento: '#FFC213',
@@ -170,11 +170,10 @@ export default function CarteiraDObras() {
             const gerenteNome = gerente ? gerente.nome : '—';
             const photo = OBRA_PHOTOS[obra.id];
             const isSmall = obra.tipo === 'pequeno_servico';
-            const obraSlug = obra.id === 'o01' ? '22-mcl' : obra.id;
             return (
               <div
                 key={obra.id}
-                onClick={() => navigate(`/obras/${obraSlug}`)}
+                onClick={() => navigate(`/obras/${obraSlug(obra)}`)}
                 style={{ backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`, overflow: 'hidden', cursor: 'pointer', transition: 'box-shadow 0.15s ease' }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.08)'; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; }}

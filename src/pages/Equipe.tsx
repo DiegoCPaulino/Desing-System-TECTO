@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { useStore } from '../state/store';
 
 const C = {
@@ -122,37 +121,32 @@ export default function Equipe() {
           {filtered.map(({ pessoa, category, avatarBg }) => {
             const catStyle = CATEGORY_STYLES[category];
             return (
-              <Link key={pessoa.id} to={`/equipe/${pessoa.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`,
-                  padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center',
-                  gap: '12px', textAlign: 'center', cursor: 'pointer',
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.07)'; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; }}
-                >
-                  <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: 700, color: '#FFFFFF' }}>{pessoa.iniciais}</span>
-                  </div>
-                  <div>
-                    <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 600, color: C.tinta, letterSpacing: '-0.01em', lineHeight: '20px' }}>
-                      {pessoa.nome}
-                    </p>
-                    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca, marginTop: '4px', lineHeight: '18px' }}>
-                      {pessoa.funcao}
-                    </p>
-                  </div>
-                  <span style={{
-                    fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 500,
-                    color: catStyle.color, backgroundColor: catStyle.bg,
-                    padding: '3px 10px', borderRadius: '999px',
-                    display: 'inline-flex', alignItems: 'center', gap: '5px',
-                  }}>
-                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: catStyle.color, flexShrink: 0 }} />
-                    {catStyle.label}
-                  </span>
+              <div key={pessoa.id} style={{
+                backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`,
+                padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center',
+                gap: '12px', textAlign: 'center',
+              }}>
+                <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: 700, color: '#FFFFFF' }}>{pessoa.iniciais}</span>
                 </div>
-              </Link>
+                <div>
+                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 600, color: C.tinta, letterSpacing: '-0.01em', lineHeight: '20px' }}>
+                    {pessoa.nome}
+                  </p>
+                  <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca, marginTop: '4px', lineHeight: '18px' }}>
+                    {pessoa.funcao}
+                  </p>
+                </div>
+                <span style={{
+                  fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 500,
+                  color: catStyle.color, backgroundColor: catStyle.bg,
+                  padding: '3px 10px', borderRadius: '999px',
+                  display: 'inline-flex', alignItems: 'center', gap: '5px',
+                }}>
+                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: catStyle.color, flexShrink: 0 }} />
+                  {catStyle.label}
+                </span>
+              </div>
             );
           })}
         </div>

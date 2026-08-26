@@ -1,7 +1,7 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { useStore, GERENTE_ID } from '../state/store';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useStore, obraPorSlug, GERENTE_ID } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
-import { CampoCtx } from '../layouts/CampoLayout';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
@@ -432,20 +432,52 @@ function WaveGravacao({ segundos }: { segundos: number }) {
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
+const DIAS_SEMANA = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+function formatarDataBR(iso: string): string {
+  const d = new Date(iso + 'T12:00:00');
+  return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
+}
+
 export default function DiarioObra() {
-  const { setFooter, showSheet, hideSheet } = useContext(CampoCtx);
+  const { obraId } = useParams<{ obraId: string }>();
+  const state = useStore();
+  const obra = obraId ? obraPorSlug(state, obraId) : undefined;
+
+  if (!obra) return null;
+  if (obra.tipo === 'pequeno_servico') {
+    return (
+      <div style={{ padding: '48px 40px', fontFamily: 'Inter, sans-serif', color: C.neutro, fontSize: '14px', textAlign: 'center' as const }}>
+        {obra.codigo} é um pequeno serviço e não tem Diário de Obra.
+      </div>
+    );
+  }
+
+  // key={obra.id} força remontagem completa ao trocar de obra, resetando o formulário
+  return <DiarioObraConteudo key={obra.id} obraId={obra.id} obraCodigo={obra.codigo} />;
+}
+
+function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo: string }) {
   const s = useStore();
   const finalizarDiario = useStore((st) => st.finalizarDiario);
+  const perfilAtivo = s.perfil_ativo;
+  const pessoaAtuante = perfilAtivo === 'gerente_obras' ? GERENTE_ID : perfilAtivo === 'financeiro' ? 'p03' : 'p01';
 
-  const diario = s.diarios.find((d) => d.id === 'd02')!;
-  const finalizado = diario.estado === 'finalizado';
+  const [sheetContent, setSheetContent] = useState<React.ReactNode>(null);
+  const showSheet = useCallback((c: React.ReactNode) => setSheetContent(c), []);
+  const hideSheet = useCallback(() => setSheetContent(null), []);
+
+  const diarioIdHoje = s.diarios.find((d) => d.obra_id === obraId && d.data === HOJE)?.id ?? `d_${obraId}_${HOJE}`;
+  const diario = s.diarios.find((d) => d.id === diarioIdHoje);
+  const finalizado = diario?.estado === 'finalizado';
 
   // People helpers
   const pessoasMap = Object.fromEntries(s.pessoas.map((p) => [p.id, p]));
 
-  // Pre-populate workers from published planejamento for MCL on HOJE
+  // Pre-populate workers from published planejamento da obra em HOJE
   const planejadosHoje = s.planejamento.filter(
-    (p) => p.obra_id === 'o01' && p.data === HOJE && p.estado === 'publicado'
+    (p) => p.obra_id === obraId && p.data === HOJE && p.estado === 'publicado'
   );
 
   // ── Form state (pre-finalization) ──
@@ -521,7 +553,7 @@ export default function DiarioObra() {
 
     // Check if planned in another obra today
     const emOutraObra = s.planejamento.some(
-      (pl) => pl.pessoa_id === pid && pl.data === HOJE && pl.estado === 'publicado' && pl.obra_id && pl.obra_id !== 'o01'
+      (pl) => pl.pessoa_id === pid && pl.data === HOJE && pl.estado === 'publicado' && pl.obra_id && pl.obra_id !== obraId
     );
 
     if (emOutraObra) {
@@ -585,21 +617,21 @@ export default function DiarioObra() {
       : undefined;
 
     finalizarDiario({
-      diario_id: 'd02',
-      obra_id: 'o01',
+      diario_id: diarioIdHoje,
+      obra_id: obraId,
       data: HOJE,
       texto_linhas: texto ? texto.split('\n').filter((l) => l.trim()) : [],
       fotos: fotosLocais.map((f) => f.url),
       confirmados,
       removidos_planejados: removidosPlanejados,
-      finalizado_por: GERENTE_ID,
+      finalizado_por: pessoaAtuante,
       houve_execucao: houveExecucao,
       motivo_sem_execucao: motivoFinalSemExecucao,
     });
 
     const cont = confirmados.length;
     showSheet(<ConfirmacaoSheet contConfirmados={cont} onClose={hideSheet} />);
-  }, [workers, texto, fotosLocais, houveExecucao, motivoSemExecucao, motivoOutroTexto, finalizarDiario, showSheet, hideSheet]);
+  }, [workers, texto, fotosLocais, houveExecucao, motivoSemExecucao, motivoOutroTexto, diarioIdHoje, obraId, pessoaAtuante, finalizarDiario, showSheet, hideSheet]);
 
   const handleSalvarRascunho = useCallback(() => {
     showSheet(
@@ -655,36 +687,47 @@ export default function DiarioObra() {
     }
   }, [sheetEstado, buscarTexto, workers, pessoasMap, showSheet, hideSheet, handleConfirmarRemocao, handleCancelarRemocao, handleConfirmarAdicao, handleSelecionarWorker, s.pessoas]);
 
-  // ── Footer ──
-  useEffect(() => {
-    if (finalizado) { setFooter(null); return; }
-    setFooter(
-      <div style={{ flexShrink: 0, backgroundColor: C.superficie, borderTop: `1px solid ${C.borda}`, padding: '12px 16px 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        <button
-          onClick={handleFinalizar}
-          style={{ padding: '14px', borderRadius: '10px', border: 'none', cursor: 'pointer', backgroundColor: C.acento, fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.01em' }}
-        >
-          Finalizar diário
-        </button>
-        <button
-          onClick={handleSalvarRascunho}
-          style={{ padding: '12px', borderRadius: '10px', border: `1.5px solid ${C.borda}`, backgroundColor: 'transparent', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, cursor: 'pointer' }}
-        >
-          Salvar rascunho
-        </button>
+  const cabecalho = (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', flexWrap: 'wrap' as const, gap: '12px' }}>
+      <div>
+        <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, color: C.tinta, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
+          Diário de hoje
+        </h1>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.tintaFraca, margin: 0 }}>
+          {obraCodigo} · {formatarDataBR(HOJE)}
+        </p>
       </div>
-    );
-    return () => setFooter(null);
-  }, [finalizado, handleFinalizar, handleSalvarRascunho, setFooter]);
+      <span style={{
+        fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600,
+        color: finalizado ? '#207A46' : C.tintaFraca, backgroundColor: finalizado ? C.positivoFundo : '#F0F0F0',
+        padding: '3px 10px', borderRadius: '999px',
+      }}>
+        {finalizado ? 'Finalizado' : 'Rascunho'}
+      </span>
+    </div>
+  );
+
+  const overlaySheet = sheetContent && (
+    <div
+      style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.52)', zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+      onClick={hideSheet}
+    >
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: '480px' }}>
+        {sheetContent}
+      </div>
+    </div>
+  );
 
   // ── Read-only view ──
-  if (finalizado) {
+  if (finalizado && diario) {
     const finalizadoPorPessoa = diario.finalizado_por ? pessoasMap[diario.finalizado_por] : null;
     const finalizadoEmFmt = diario.finalizado_em ? formatarFinalizadoEm(diario.finalizado_em) : '—';
-    const presencasFinais = s.presencas.filter((p) => p.diario_id === 'd02');
+    const presencasFinais = s.presencas.filter((p) => p.diario_id === diarioIdHoje);
 
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+        {cabecalho}
+        <div style={{ maxWidth: '640px', backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`, overflow: 'hidden' }}>
         {/* Banner */}
         <div style={{ backgroundColor: C.infoFundo, padding: '10px 16px', borderBottom: `1px solid #D0E4FF` }}>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.info, lineHeight: '17px' }}>
@@ -748,6 +791,8 @@ export default function DiarioObra() {
             </div>
           )}
         </div>
+        </div>
+        {overlaySheet}
       </div>
     );
   }
@@ -757,7 +802,9 @@ export default function DiarioObra() {
   const videosCount = fotosLocais.filter((f) => f.tipo === 'video').length;
 
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px', paddingBottom: '20px' }}>
+    <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+      {cabecalho}
+      <div style={{ maxWidth: '640px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
       {/* ── Section 3: Houve trabalho hoje? ── */}
       <div>
@@ -992,6 +1039,24 @@ export default function DiarioObra() {
           </div>
         </>
       )}
+
+      {/* ── Ações ── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px', paddingTop: '20px', borderTop: `1px solid ${C.borda}` }}>
+        <button
+          onClick={handleFinalizar}
+          style={{ padding: '14px', borderRadius: '10px', border: 'none', cursor: 'pointer', backgroundColor: C.acento, fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.01em' }}
+        >
+          Finalizar diário
+        </button>
+        <button
+          onClick={handleSalvarRascunho}
+          style={{ padding: '12px', borderRadius: '10px', border: `1.5px solid ${C.borda}`, backgroundColor: 'transparent', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, cursor: 'pointer' }}
+        >
+          Salvar rascunho
+        </button>
+      </div>
+      </div>
+      {overlaySheet}
     </div>
   );
 }

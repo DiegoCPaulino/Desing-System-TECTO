@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais } from './state/store';
+import { Link, useLocation, useParams } from 'react-router-dom';
+import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais, obraSlug, obraPorSlug } from './state/store';
+import EmBreve from './pages/EmBreve';
 
 const C = {
   acento: '#FFC213',
@@ -28,79 +29,20 @@ function IconChevronDown() {
 
 const ALL_TABS = ['Visão geral', 'Diários', 'Checklist', 'Andamento', 'Fotos', 'Financeiro', 'Documentos'];
 
-const TAB_PATHS: Record<string, string> = {
-  'Visão geral': '/obras/22-mcl',
-  'Diários': '/obras/22-mcl/diarios',
-  'Checklist': '/obras/22-mcl/checklist',
-  'Andamento': '/obras/22-mcl/andamento',
-  'Fotos': '/obras/22-mcl/fotos',
-  'Financeiro': '/obras/22-mcl/financeiro',
-  'Documentos': '/obras/22-mcl/documentos',
+const ESTADO_PT: Record<string, string> = {
+  em_andamento: 'Em andamento',
+  aguardando_inicio: 'Aguardando início',
+  pausada: 'Pausada',
+  concluida: 'Concluída',
+  cancelada: 'Cancelada',
 };
-
-const TEAM = [
-  { initials: 'RD', name: 'Rafael Duarte', role: 'Gerente de obras', bg: '#363636' },
-  { initials: 'AC', name: 'Ana Carvalho', role: 'Assistente de gerenciamento', bg: '#5A5A5A' },
-  { initials: 'MB', name: 'Marcos Bittencourt', role: 'Pedreiro', bg: '#7D7D7D' },
-  { initials: 'JR', name: 'Jonas Ribeiro', role: 'Ajudante', bg: '#9A9A9A' },
-  { initials: 'CM', name: 'Cleber Matos', role: 'Eletricista (terceirizado)', bg: '#5A5A5A' },
-];
-
-const ROOMS = [
-  { name: 'Suíte Master', pct: 100, badge: { label: 'Concluída', bg: '#EDFAF3', color: '#207A46' } },
-  { name: 'Banheiro da Suíte', pct: 80, badge: null },
-  { name: 'Cozinha', pct: 45, badge: null },
-  { name: 'Sala', pct: 20, badge: null },
-  { name: 'Lavabo', pct: 0, badge: null },
-];
-
-const DIARY_TEXT = [
-  'Assentamento de porcelanato na sala de estar — finalizadas 3 fiadas. Rejuntamento previsto para 23/08.',
-  'Passagem de conduítes elétricos na cozinha concluída. Quadro de distribuição posicionado e fixado.',
-  'Preparação de parede para instalação de box na suíte master iniciada.',
-];
-
-const DIARY_WORKERS = [
-  { initials: 'MB', name: 'Marcos Bittencourt', role: 'Pedreiro', bg: '#7D7D7D' },
-  { initials: 'JR', name: 'Jonas Ribeiro', role: 'Ajudante', bg: '#9A9A9A' },
-  { initials: 'CM', name: 'Cleber Matos', role: 'Eletricista', bg: '#5A5A5A' },
-];
-
-const DIARY_PHOTOS = [
-  'https://images.unsplash.com/photo-1618832515490-e181c4794a45?w=280&h=280&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1634586648651-f1fb9ec10d90?w=280&h=280&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1505798577917-a65157d3320a?w=280&h=280&fit=crop&auto=format',
-  'https://images.unsplash.com/photo-1674649207083-281c2517ab49?w=280&h=280&fit=crop&auto=format',
-];
-
-const FINANCIALS = [
-  { label: 'Valor contratado', value: 'R$ 148.320,00', bold: false, separator: false },
-  { label: 'Adicionais aprovados', value: 'R$ 12.480,00', bold: false, separator: false },
-  { label: 'Total da obra', value: 'R$ 160.800,00', bold: false, separator: true },
-  { label: 'Recebido', value: 'R$ 96.480,00', bold: false, separator: false },
-  { label: 'A receber', value: 'R$ 64.320,00', bold: true, separator: false },
-];
-
-const COSTS = [
-  {
-    supplier: 'Mármores Paulista',
-    service: 'Marmoraria banheiro e cozinha',
-    value: 'R$ 18.400,00',
-    badge: { label: 'Repassado com margem', bg: '#E7F1FF', color: '#215FD7' },
-  },
-  {
-    supplier: 'Eletromed',
-    service: 'Instalações de ar-condicionado',
-    value: 'R$ 9.200,00',
-    badge: { label: 'Reembolsável', bg: '#F5F5F5', color: '#555555' },
-  },
-  {
-    supplier: 'NX Marcenaria',
-    service: 'Marcenaria dormitórios',
-    value: 'R$ 45.600,00',
-    badge: { label: 'Direto do cliente', bg: '#EDFAF3', color: '#207A46' },
-  },
-];
+const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
+  em_andamento: { bg: '#E7F1FF', color: '#215FD7' },
+  aguardando_inicio: { bg: '#F2F2F2', color: '#555555' },
+  pausada: { bg: '#FFF3E8', color: '#D4712A' },
+  concluida: { bg: '#EDFAF3', color: '#2E9E5B' },
+  cancelada: { bg: '#FDEAEA', color: '#C94141' },
+};
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -165,16 +107,33 @@ function CardHeader({ children, right }: { children: React.ReactNode; right?: Re
 
 export default function ObraVisaoGeral() {
   const { pathname } = useLocation();
+  const { obraId } = useParams<{ obraId: string }>();
   const state = useStore();
   const perfilAtivo = state.perfil_ativo;
-  const isAdmin = perfilAtivo === 'administracao';
+  const temVisaoTotal = perfilAtivo === 'administracao' || perfilAtivo === 'financeiro';
   const [viewMode, setViewMode] = useState<'admin' | 'gerente'>(
     perfilAtivo === 'gerente_obras' ? 'gerente' : 'admin'
   );
-  const obra = state.obras.find(o => o.id === 'o01')!;
-  const ambientes = state.ambientes.filter(a => a.obra_id === 'o01');
-  const tectoPct = calcularPctObra(state, 'o01');
-  const vinculosObra = state.vinculos_obra.filter(v => v.obra_id === 'o01' && !v.fim);
+
+  const obra = obraId ? obraPorSlug(state, obraId) : undefined;
+  if (!obra) return <EmBreve />;
+
+  const isPequenoServico = obra.tipo === 'pequeno_servico';
+  const slug = obraSlug(obra);
+  const basePath = `/obras/${slug}`;
+  const TAB_PATHS: Record<string, string> = {
+    'Visão geral': basePath,
+    'Diários': `${basePath}/diarios`,
+    'Checklist': `${basePath}/checklist`,
+    'Andamento': `${basePath}/andamento`,
+    'Fotos': `${basePath}/fotos`,
+    'Financeiro': `${basePath}/financeiro`,
+    'Documentos': `${basePath}/documentos`,
+  };
+
+  const ambientes = state.ambientes.filter(a => a.obra_id === obra.id);
+  const tectoPct = calcularPctObra(state, obra.id);
+  const vinculosObra = state.vinculos_obra.filter(v => v.obra_id === obra.id && !v.fim);
   const teamMembers = vinculosObra.map((vo, i) => {
     const pessoa = state.pessoas.find(p => p.id === vo.pessoa_id);
     const bgs = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A'];
@@ -182,8 +141,8 @@ export default function ObraVisaoGeral() {
   });
   const gerenteName = teamMembers.find(t => t.role === 'Gerente de obras')?.name ?? '—';
   const assistanteName = teamMembers.find(t => t.role === 'Assistente')?.name;
-  // Diary (MCL 19/08 finalizado)
-  const diarioFinalizado = state.diarios.find(d => d.obra_id === 'o01' && d.estado === 'finalizado');
+
+  const diarioFinalizado = state.diarios.find(d => d.obra_id === obra.id && d.estado === 'finalizado');
   const diarioTexto = diarioFinalizado?.texto ?? [];
   const diarioFotos = diarioFinalizado?.fotos ?? [];
   const diarioPresencas = diarioFinalizado
@@ -194,19 +153,23 @@ export default function ObraVisaoGeral() {
     return { initials: pessoa?.iniciais ?? '?', name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?', bg: ['#7D7D7D','#9A9A9A','#5A5A5A','#363636'][i % 4] };
   });
 
+  const tabsDisponiveis = isPequenoServico ? ALL_TABS.filter(t => t !== 'Diários') : ALL_TABS;
   const tabs = viewMode === 'gerente'
-    ? ALL_TABS.filter((t) => t !== 'Financeiro')
-    : ALL_TABS;
+    ? tabsDisponiveis.filter((t) => t !== 'Financeiro')
+    : tabsDisponiveis;
 
   const isTabActive = (tab: string) => {
     const path = TAB_PATHS[tab];
-    if (tab === 'Visão geral') return pathname === '/obras/22-mcl';
+    if (tab === 'Visão geral') return pathname === basePath;
     return pathname === path;
   };
 
   const handleViewMode = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setViewMode(e.target.value as 'admin' | 'gerente');
   };
+
+  const statusStyle = STATUS_STYLES[obra.estado] ?? STATUS_STYLES.em_andamento;
+  const statusLabel = ESTADO_PT[obra.estado] ?? obra.estado;
 
   return (
     <div style={{ padding: '32px 40px 80px', display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: 'Inter, sans-serif' }}>
@@ -217,7 +180,7 @@ export default function ObraVisaoGeral() {
           Obras
         </Link>
         <IconChevronRight />
-        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca }}>Obra 22 - MCL</span>
+        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca }}>{obra.codigo}</span>
       </div>
 
       {/* ── Foto de capa ── */}
@@ -237,7 +200,7 @@ export default function ObraVisaoGeral() {
               <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, margin: 0 }}>
                 {obra.codigo}
               </h1>
-              <StatusBadge label="Em andamento" bg={C.informativoFundo} color={C.informativo} />
+              <StatusBadge label={statusLabel} bg={statusStyle.bg} color={statusStyle.color} />
             </div>
             <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', lineHeight: '22px', color: C.tintaFraca, marginTop: '8px' }}>
               {obra.cliente} · {obra.endereco}
@@ -261,7 +224,7 @@ export default function ObraVisaoGeral() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '12px', flexShrink: 0 }}>
-            {isAdmin && (
+            {temVisaoTotal && (
             <div>
               <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.tintaFraca, marginBottom: '6px' }}>
                 Visualizar como
@@ -297,15 +260,17 @@ export default function ObraVisaoGeral() {
               }}>
                 Ver como o cliente vê
               </Link>
-              <Link to="/campo/diario" style={{
-                fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600,
-                color: C.tinta, backgroundColor: C.acento, border: 'none',
-                borderRadius: '8px', padding: '10px 20px', cursor: 'pointer',
-                whiteSpace: 'nowrap' as const, letterSpacing: '-0.01em',
-                textDecoration: 'none', display: 'inline-block',
-              }}>
-                Abrir diário de hoje
-              </Link>
+              {!isPequenoServico && (
+                <Link to={`${basePath}/diario`} style={{
+                  fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600,
+                  color: C.tinta, backgroundColor: C.acento, border: 'none',
+                  borderRadius: '8px', padding: '10px 20px', cursor: 'pointer',
+                  whiteSpace: 'nowrap' as const, letterSpacing: '-0.01em',
+                  textDecoration: 'none', display: 'inline-block',
+                }}>
+                  Abrir diário de hoje
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -383,6 +348,11 @@ export default function ObraVisaoGeral() {
           {/* AMBIENTES */}
           <Card>
             <CardHeader>Ambientes</CardHeader>
+            {ambientes.length === 0 ? (
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro, lineHeight: '21px' }}>
+                Nenhum ambiente cadastrado para esta obra ainda.
+              </p>
+            ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {ambientes.map((amb, i) => {
                 const pct = calcularPctAmbiente(state, amb.id);
@@ -400,14 +370,21 @@ export default function ObraVisaoGeral() {
                 );
               })}
             </div>
+            )}
           </Card>
 
           {/* ÚLTIMO DIÁRIO */}
-          {diarioFinalizado && (
+          {!isPequenoServico && (
           <Card>
-            <CardHeader right={<span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: C.tintaFraca }}>{diarioFinalizado.data.split('-').reverse().join('/')}</span>}>
+            <CardHeader right={diarioFinalizado && <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px', color: C.tintaFraca }}>{diarioFinalizado.data.split('-').reverse().join('/')}</span>}>
               Último Diário
             </CardHeader>
+            {!diarioFinalizado ? (
+              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro, lineHeight: '21px' }}>
+                Nenhum diário registrado para esta obra ainda.
+              </p>
+            ) : (
+            <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
               {diarioTexto.map((line, i) => (
                 <div key={i} style={{ display: 'flex', gap: '10px' }}>
@@ -441,6 +418,8 @@ export default function ObraVisaoGeral() {
             <button style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, backgroundColor: 'transparent', border: 'none', padding: '0', cursor: 'pointer', letterSpacing: '-0.01em' }}>
               Ver todos os diários →
             </button>
+            </>
+            )}
           </Card>
           )}
         </div>
@@ -490,26 +469,6 @@ export default function ObraVisaoGeral() {
                       </div>
                     ));
                   })()}
-                </div>
-              </Card>
-
-              <Card>
-                <CardHeader>Custos Externos</CardHeader>
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {COSTS.map(({ supplier, service, value, badge }, i) => (
-                    <div key={supplier} style={{ padding: '14px 0', borderBottom: i < COSTS.length - 1 ? `1px solid ${C.borda}` : 'none' }}>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '10px', marginBottom: '6px' }}>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 600, color: C.grafite, lineHeight: '17px' }}>{supplier}</p>
-                          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.tintaFraca, marginTop: '2px', lineHeight: '16px' }}>{service}</p>
-                        </div>
-                        <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: C.grafite, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' as const, letterSpacing: '-0.01em', flexShrink: 0 }}>
-                          {value}
-                        </span>
-                      </div>
-                      <StatusBadge label={badge.label} bg={badge.bg} color={badge.color} />
-                    </div>
-                  ))}
                 </div>
               </Card>
             </>
