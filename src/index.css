@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+
+@keyframes wavePulse {
+  0%, 100% { transform: scaleY(1); opacity: 1; }
+  50% { transform: scaleY(0.4); opacity: 0.6; }
+}
+
+.wave-bar { animation: wavePulse 0.9s ease-in-out infinite; transform-origin: center; }
+.wave-bar-0 { animation-delay: 0s; }
+.wave-bar-1 { animation-delay: 0.15s; }
+.wave-bar-2 { animation-delay: 0.3s; }
+.wave-bar-3 { animation-delay: 0.45s; }
