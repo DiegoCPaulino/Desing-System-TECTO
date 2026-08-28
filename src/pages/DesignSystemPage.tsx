@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import TituloSecao from '../components/TituloSecao';
+import CabecalhoTabela from '../components/CabecalhoTabela';
 
 const C = {
   acento: '#FFC213',
@@ -500,7 +501,14 @@ export default function DesignSystemPage() {
               <thead>
                 <tr>
                   {['Descrição', 'Data', 'Valor'].map((h, i) => (
-                    <th key={h} style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.tintaFraca, textAlign: (i === 2 ? 'right' : 'left') as any, paddingBottom: '12px', borderBottom: `1px solid ${C.borda}`, paddingLeft: i === 1 ? '16px' : 0 }}>{h}</th>
+                    <CabecalhoTabela
+                      key={h}
+                      scope="col"
+                      alinhamento={i === 2 ? 'right' : 'left'}
+                      style={{ paddingBottom: '12px', borderBottom: `1px solid ${C.borda}`, paddingLeft: i === 1 ? '16px' : 0 }}
+                    >
+                      {h}
+                    </CabecalhoTabela>
                   ))}
                 </tr>
               </thead>

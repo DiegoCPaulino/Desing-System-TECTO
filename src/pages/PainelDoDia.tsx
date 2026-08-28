@@ -3,6 +3,7 @@ import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGe
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
+import CabecalhoTabela from '../components/CabecalhoTabela';
 
 const C = {
   acento: '#FFC213',
@@ -270,14 +271,12 @@ export default function PainelDoDia() {
                 <thead>
                   <tr>
                     {['Obra', 'Pessoas', 'Gerente', 'Diário'].map((h, i) => (
-                      <th key={h} style={{
-                        fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600,
-                        letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.tintaFraca,
-                        textAlign: 'left' as const, paddingBottom: '12px', borderBottom: `1px solid ${C.borda}`,
+                      <CabecalhoTabela key={h} scope="col" style={{
+                        paddingBottom: '12px', borderBottom: `1px solid ${C.borda}`,
                         paddingLeft: i > 0 ? '20px' : 0, paddingRight: i < 3 ? '20px' : 0,
                       }}>
                         {h}
-                      </th>
+                      </CabecalhoTabela>
                     ))}
                   </tr>
                 </thead>

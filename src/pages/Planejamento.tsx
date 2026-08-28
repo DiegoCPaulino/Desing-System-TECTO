@@ -19,6 +19,7 @@ import {
 import type { Planejamento as Cel } from '../state/types';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
+import CabecalhoTabela from '../components/CabecalhoTabela';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -307,13 +308,13 @@ export default function Planejamento() {
         {/* Cabeçalho da grade */}
         <div style={gridRow(true)}>
           <div style={{ ...nameCell, borderBottom: `1px solid ${C.borda}` }}>
-            <TituloSecao>Pessoa</TituloSecao>
+            <CabecalhoTabela elemento="span">Pessoa</CabecalhoTabela>
           </div>
           {dias.map((d, i) => (
             <div key={d} style={{ ...dayHeadCell, borderBottom: `1px solid ${C.borda}` }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.tintaFraca }}>
+              <CabecalhoTabela elemento="span">
                 {DIAS_LABEL[i]}
-              </span>
+              </CabecalhoTabela>
               <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 700, color: C.grafite }}>
                 {diaNumero(d)}
               </span>
