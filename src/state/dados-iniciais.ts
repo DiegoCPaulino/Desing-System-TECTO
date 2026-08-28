@@ -6,6 +6,11 @@ export const ONTEM = '2026-08-19';
 export const SEMANA_INICIO = '2026-08-17'; // segunda-feira
 export const SEMANA_2_INICIO = '2026-08-24'; // segunda-feira (próxima semana)
 
+// Toda mídia do seed segue este padrão de URL. A função existe para que a URL
+// gravada em `midias` seja byte a byte a mesma que está em `Diario.fotos` — as
+// duas descrevem a mesma foto, e divergir aqui criaria duas verdades.
+const FOTO = (id: string) => `https://images.unsplash.com/${id}?w=280&h=280&fit=crop&auto=format`;
+
 const DADOS: AppState = {
   // ─── PESSOAS ──────────────────────────────────────────────────────────────
   pessoas: [
@@ -583,6 +588,117 @@ const DADOS: AppState = {
   lancamentos: [
     { id: 'la01', pessoa_id: 'p08', tipo: 'adiantamento', valor_centavos: 40000, parcelas: 1, parcelas_pagas: 0, data: '2026-08-15' },
     { id: 'la02', pessoa_id: 'p07', tipo: 'emprestimo',   valor_centavos: 120000, parcelas: 4, parcelas_pagas: 1, data: '2026-07-01' },
+  ],
+
+  // ─── PARCELAS ─────────────────────────────────────────────────────────────
+  // Derivadas dos lançamentos acima. O adiantamento é parcela única, porque a
+  // regra do Fechamento desconta adiantamento integralmente; o empréstimo do
+  // Marcos tem 4 parcelas de R$300,00, uma já paga no ciclo que fechou em
+  // 15/08. As três restantes caem nos ciclos semanais seguintes.
+  parcelas: [
+    { id: 'pa01', lancamento_id: 'la01', numero: 1, valor_centavos: 40000, situacao: 'pendente', ciclo_periodo_fim: '2026-08-22' },
+    { id: 'pa02', lancamento_id: 'la02', numero: 1, valor_centavos: 30000, situacao: 'paga',     ciclo_periodo_fim: '2026-08-15' },
+    { id: 'pa03', lancamento_id: 'la02', numero: 2, valor_centavos: 30000, situacao: 'pendente', ciclo_periodo_fim: '2026-08-22' },
+    { id: 'pa04', lancamento_id: 'la02', numero: 3, valor_centavos: 30000, situacao: 'pendente', ciclo_periodo_fim: '2026-08-29' },
+    { id: 'pa05', lancamento_id: 'la02', numero: 4, valor_centavos: 30000, situacao: 'pendente', ciclo_periodo_fim: '2026-09-05' },
+  ],
+
+  // ─── NOTIFICAÇÕES ─────────────────────────────────────────────────────────
+  // Cada uma aponta para um registro que existe de fato neste seed. Nenhuma
+  // descreve evento inventado. 6 notificações, 4 não lidas.
+  notificacoes: [
+    {
+      id: 'nt01', tipo: 'divergencia', origem_tipo: 'diario', origem_id: 'd01',
+      titulo: 'Divergência: Rafael Duarte',
+      descricao: 'Planejado em Obra 18 - GFR, presente em Obra 22 - MCL em 19/08/2026',
+      data: '2026-08-19T18:32:00', lida: false,
+    },
+    {
+      id: 'nt02', tipo: 'rateio_pendente', origem_tipo: 'diaria', origem_id: 'di05',
+      titulo: 'Rateio pendente: Marcos Bittencourt',
+      descricao: 'Diária de 19/08/2026 sem obra definida',
+      data: '2026-08-19T18:32:00', lida: false,
+    },
+    {
+      id: 'nt03', tipo: 'fechamento_proximo', origem_tipo: 'fechamento', origem_id: 'fc_sem_1',
+      titulo: 'Fechamento semanal em 22/08/2026',
+      descricao: '18 pessoas aguardando fechamento do ciclo semanal',
+      data: '2026-08-20T08:00:00', lida: false,
+    },
+    {
+      id: 'nt04', tipo: 'planejamento_rascunho', origem_tipo: 'planejamento', origem_id: '2026-08-24',
+      titulo: 'Semana de 24/08 ainda em rascunho',
+      descricao: 'A semana seguinte não foi publicada e tem pessoas sem destino',
+      data: '2026-08-20T08:00:00', lida: false,
+    },
+    {
+      id: 'nt05', tipo: 'diario_finalizado', origem_tipo: 'diario', origem_id: 'd02',
+      titulo: 'Diário finalizado: Obra 22 - MCL',
+      descricao: 'Rafael Duarte finalizou o diário de 20/08/2026',
+      data: '2026-08-20T17:45:00', lida: true,
+    },
+    {
+      id: 'nt06', tipo: 'diario_finalizado', origem_tipo: 'diario', origem_id: 'd_18',
+      titulo: 'Diário finalizado: Obra 22 - MCL',
+      descricao: 'Rafael Duarte finalizou o diário de 18/08/2026',
+      data: '2026-08-18T17:50:00', lida: true,
+    },
+  ],
+
+  // ─── ESPECIALIDADES ───────────────────────────────────────────────────────
+  // Catálogo. É atributo do serviço de terceiro — ver decisão D1.
+  especialidades: [
+    { id: 'es01', nome: 'Marcenaria' },
+    { id: 'es02', nome: 'Marmoraria' },
+    { id: 'es03', nome: 'Vidro' },
+    { id: 'es04', nome: 'Ar-condicionado' },
+    { id: 'es05', nome: 'Gesso' },
+    { id: 'es06', nome: 'Piso de madeira' },
+    { id: 'es07', nome: 'Elétrica' },
+    { id: 'es08', nome: 'Hidráulica' },
+    { id: 'es09', nome: 'Pintura' },
+  ],
+
+  // ─── TIPOS DE DOCUMENTO ───────────────────────────────────────────────────
+  // Três tipos de topo; os cinco tipos de nota são filhos de "Nota fiscal".
+  tipos_documento: [
+    { id: 'td01', nome: 'Nota fiscal' },
+    { id: 'td02', nome: 'Projeto' },
+    { id: 'td03', nome: 'Contrato' },
+    { id: 'td04', nome: 'Depósito de material',   pai_id: 'td01' },
+    { id: 'td05', nome: 'Parte elétrica',         pai_id: 'td01' },
+    { id: 'td06', nome: 'Reembolso de material',  pai_id: 'td01' },
+    { id: 'td07', nome: 'Compra online',          pai_id: 'td01' },
+    { id: 'td08', nome: 'Outros',                 pai_id: 'td01' },
+  ],
+
+  // ─── MÍDIAS ───────────────────────────────────────────────────────────────
+  // Toda mídia já existente em `Diario.fotos` recebe um ambiente. As 18 fotos
+  // do seed pertencem à Obra 22, a única com ambientes hoje. O ambiente segue
+  // o texto do diário correspondente, não é sorteado.
+  midias: [
+    // d_14 (14/08) — porcelanato da cozinha, pintura da sala, lavabo
+    { id: 'md01', obra_id: 'o01', diario_id: 'd_14', ambiente_id: 'a03', url: FOTO('photo-1504307651254-35680f356dfd'), tipo: 'foto',  data: '2026-08-14' },
+    { id: 'md02', obra_id: 'o01', diario_id: 'd_14', ambiente_id: 'a03', url: FOTO('photo-1565043589221-1a6fd9ae45c7'), tipo: 'foto',  data: '2026-08-14' },
+    { id: 'md03', obra_id: 'o01', diario_id: 'd_14', ambiente_id: 'a04', url: FOTO('photo-1484154218962-a197022b5858'), tipo: 'foto',  data: '2026-08-14' },
+    { id: 'md04', obra_id: 'o01', diario_id: 'd_14', ambiente_id: 'a04', url: FOTO('photo-1674649207083-281c2517ab49'), tipo: 'foto',  data: '2026-08-14' },
+    { id: 'md05', obra_id: 'o01', diario_id: 'd_14', ambiente_id: 'a05', url: FOTO('photo-1548946526-f69e2424cf45'), tipo: 'foto',  data: '2026-08-14' },
+    { id: 'md06', obra_id: 'o01', diario_id: 'd_14', ambiente_id: 'a05', url: FOTO('photo-1600585154340-be6161a56a0c'), tipo: 'foto',  data: '2026-08-14' },
+    // d_18 (18/08) — porcelanato recebido, box de vidro da suíte
+    { id: 'md07', obra_id: 'o01', diario_id: 'd_18', ambiente_id: 'a03', url: FOTO('photo-1590073243968-827440c4e68d'), tipo: 'foto',  data: '2026-08-18' },
+    { id: 'md08', obra_id: 'o01', diario_id: 'd_18', ambiente_id: 'a03', url: FOTO('photo-1581094794329-c8112a89af12'), tipo: 'foto',  data: '2026-08-18' },
+    { id: 'md09', obra_id: 'o01', diario_id: 'd_18', ambiente_id: 'a02', url: FOTO('photo-1558618666-fcd25c85cd64'), tipo: 'video', data: '2026-08-18' },
+    { id: 'md10', obra_id: 'o01', diario_id: 'd_18', ambiente_id: 'a01', url: FOTO('photo-1527271433-4e34d1dbebc9'), tipo: 'foto',  data: '2026-08-18' },
+    // d01 (19/08) — preparação de parede para box na suíte master
+    { id: 'md11', obra_id: 'o01', diario_id: 'd01', ambiente_id: 'a01', url: FOTO('photo-1618832515490-e181c4794a45'), tipo: 'foto',  data: ONTEM },
+    { id: 'md12', obra_id: 'o01', diario_id: 'd01', ambiente_id: 'a01', url: FOTO('photo-1634586648651-f1fb9ec10d90'), tipo: 'foto',  data: ONTEM },
+    { id: 'md13', obra_id: 'o01', diario_id: 'd01', ambiente_id: 'a02', url: FOTO('photo-1505798577917-a65157d3320a'), tipo: 'foto',  data: ONTEM },
+    { id: 'md14', obra_id: 'o01', diario_id: 'd01', ambiente_id: 'a02', url: FOTO('photo-1674649207083-281c2517ab49'), tipo: 'foto',  data: ONTEM },
+    // d02 (20/08) — rejuntamento da cozinha e pintura da sala
+    { id: 'md15', obra_id: 'o01', diario_id: 'd02', ambiente_id: 'a03', url: FOTO('photo-1618832515490-e181c4794a45'), tipo: 'foto',  data: HOJE },
+    { id: 'md16', obra_id: 'o01', diario_id: 'd02', ambiente_id: 'a03', url: FOTO('photo-1634586648651-f1fb9ec10d90'), tipo: 'foto',  data: HOJE },
+    { id: 'md17', obra_id: 'o01', diario_id: 'd02', ambiente_id: 'a04', url: FOTO('photo-1505798577917-a65157d3320a'), tipo: 'foto',  data: HOJE },
+    { id: 'md18', obra_id: 'o01', diario_id: 'd02', ambiente_id: 'a04', url: FOTO('photo-1556909114-f6e7ad7d3136'), tipo: 'video', data: HOJE },
   ],
 
   // ─── ITENS FORA DO ESCOPO ─────────────────────────────────────────────────

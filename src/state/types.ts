@@ -139,6 +139,67 @@ export interface Lancamento {
   data: string;
 }
 
+// Parcela de um Lançamento. A pessoa vem do lançamento de origem; o ciclo em
+// que a parcela cai é identificado pela data de FIM do período, e não por um
+// id de Fechamento, porque parcela futura cai em ciclo que ainda não tem
+// registro de Fechamento.
+export interface Parcela {
+  id: string;
+  lancamento_id: string;
+  numero: number;
+  valor_centavos: number;
+  situacao: 'paga' | 'pendente';
+  ciclo_periodo_fim: string;
+}
+
+// Título e descrição são CONGELADOS no momento do evento, como o valor de um
+// registro financeiro. Uma notificação é o registro de um fato passado: se o
+// texto fosse derivado na leitura, mudaria quando o dado de origem mudasse, e
+// a notificação passaria a descrever algo que não aconteceu.
+export interface Notificacao {
+  id: string;
+  tipo:
+    | 'divergencia'
+    | 'rateio_pendente'
+    | 'ausencia_sem_decisao'
+    | 'diario_pendente'
+    | 'diario_finalizado'
+    | 'fechamento_proximo'
+    | 'planejamento_rascunho';
+  origem_tipo: 'diario' | 'diaria' | 'planejamento' | 'fechamento' | 'obra';
+  origem_id: string;
+  titulo: string;
+  descricao: string;
+  data: string;
+  lida: boolean;
+}
+
+export interface Especialidade {
+  id: string;
+  nome: string;
+}
+
+// Catálogo em um nível de profundidade: os tipos de topo não têm `pai_id`;
+// os tipos de nota apontam para o tipo "Nota fiscal".
+export interface TipoDocumento {
+  id: string;
+  nome: string;
+  pai_id?: string;
+}
+
+// Mídia deixa de ser uma URL solta em `Diario.fotos` e passa a ter ambiente.
+// A coleção é ADITIVA: `Diario.fotos` continua existindo e continua sendo o
+// que as telas atuais leem.
+export interface Midia {
+  id: string;
+  obra_id: string;
+  diario_id?: string;
+  ambiente_id: string;
+  url: string;
+  tipo: 'foto' | 'video';
+  data: string;
+}
+
 export type TipoPerfil = 'administracao' | 'financeiro' | 'gerente_obras' | 'cliente';
 
 export interface ItemForaEscopo {
@@ -167,4 +228,9 @@ export interface AppState {
   diarias: Diaria[];
   fechamentos: Fechamento[];
   lancamentos: Lancamento[];
+  parcelas: Parcela[];
+  notificacoes: Notificacao[];
+  especialidades: Especialidade[];
+  tipos_documento: TipoDocumento[];
+  midias: Midia[];
 }
