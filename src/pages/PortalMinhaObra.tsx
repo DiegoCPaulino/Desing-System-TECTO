@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import TituloSecao from '../components/TituloSecao';
 
 const C = {
   acento: '#FFC213',
@@ -33,14 +34,6 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
     <div style={{ backgroundColor: C.superficie, borderRadius: '16px', border: `1px solid ${C.borda}`, padding: '28px', ...style }}>
       {children}
     </div>
-  );
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase' as const, color: C.neutro, marginBottom: '20px' }}>
-      {children}
-    </p>
   );
 }
 
@@ -160,7 +153,7 @@ export default function PortalMinhaObra() {
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'start' }}>
 
         <Card>
-          <SectionLabel>Andamento</SectionLabel>
+          <TituloSecao margemInferior={20}>Andamento</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
 
             {/* Serviços TECTO */}
@@ -212,7 +205,7 @@ export default function PortalMinhaObra() {
       {/* ── Ambiente por ambiente ── */}
       <Card style={{ padding: '28px 0 0 0', overflow: 'hidden' }}>
         <div style={{ padding: '0 28px 20px' }}>
-          <SectionLabel>Ambiente por ambiente</SectionLabel>
+          <TituloSecao margemInferior={20}>Ambiente por ambiente</TituloSecao>
         </div>
 
         {ambientes.map((amb, idx) => {
@@ -281,7 +274,7 @@ export default function PortalMinhaObra() {
         {/* O Que Aconteceu Hoje */}
         <Card>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', gap: '16px' }}>
-            <SectionLabel>O que aconteceu hoje</SectionLabel>
+            <TituloSecao margemInferior={20}>O que aconteceu hoje</TituloSecao>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: C.neutro, flexShrink: 0, marginTop: '-2px' }}>
               {formatDateShort(diarioData)}
             </span>
@@ -316,7 +309,7 @@ export default function PortalMinhaObra() {
 
         {/* Quem Está na Sua Obra */}
         <Card>
-          <SectionLabel>Quem está na sua obra</SectionLabel>
+          <TituloSecao margemInferior={20}>Quem está na sua obra</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             {pessoasHoje.map(({ initials, name, role, bg }) => (
               <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#FAFAFA', borderRadius: '10px', padding: '12px 14px' }}>

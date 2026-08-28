@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, obraPorSlug, GERENTE_ID } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import TituloSecao from '../components/TituloSecao';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
@@ -99,14 +100,6 @@ function formatarTimer(seg: number): string {
 }
 
 // ─── UI sub-components ────────────────────────────────────────────────────────
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.tintaFraca, marginBottom: '12px' }}>
-      {children}
-    </p>
-  );
-}
 
 function Avatar({ iniciais, bg, size = 34 }: { iniciais: string; bg: string; size?: number }) {
   return (
@@ -737,7 +730,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
         <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
           {/* Houve execução */}
           <div>
-            <SectionLabel>Houve trabalho</SectionLabel>
+            <TituloSecao margemInferior={12}>Houve trabalho</TituloSecao>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: C.grafite }}>
               {diario.houve_execucao === false ? 'Não teve execução' : 'Sim, teve execução'}
             </span>
@@ -748,7 +741,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
           {/* Quem trabalhou */}
           {presencasFinais.length > 0 && (
             <div>
-              <SectionLabel>Quem trabalhou</SectionLabel>
+              <TituloSecao margemInferior={12}>Quem trabalhou</TituloSecao>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {presencasFinais.map((pr, i) => {
                   const p = pessoasMap[pr.pessoa_id];
@@ -771,7 +764,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
           {/* Relato */}
           {diario.texto.length > 0 && (
             <div>
-              <SectionLabel>O que foi executado</SectionLabel>
+              <TituloSecao margemInferior={12}>O que foi executado</TituloSecao>
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.grafite, lineHeight: '21px', whiteSpace: 'pre-wrap' as const }}>
                 {diario.texto.join('\n')}
               </p>
@@ -780,7 +773,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
           {/* Fotos */}
           {diario.fotos.length > 0 && (
             <div>
-              <SectionLabel>{diario.fotos.length} fotos</SectionLabel>
+              <TituloSecao margemInferior={12}>{diario.fotos.length} fotos</TituloSecao>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
                 {diario.fotos.slice(0, 9).map((url, i) => (
                   <div key={i} style={{ aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#CCCCCC' }}>
@@ -808,7 +801,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
 
       {/* ── Section 3: Houve trabalho hoje? ── */}
       <div>
-        <SectionLabel>Houve trabalho hoje?</SectionLabel>
+        <TituloSecao margemInferior={12}>Houve trabalho hoje?</TituloSecao>
         <div style={{ display: 'flex', gap: '8px' }}>
           {[
             { value: true, label: 'Sim, teve execução' },
@@ -836,7 +829,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
       {/* ── Section for "não teve execução" ── */}
       {!houveExecucao && (
         <div>
-          <SectionLabel>Motivo</SectionLabel>
+          <TituloSecao margemInferior={12}>Motivo</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
             {MOTIVOS_SEM_EXECUCAO.map((m) => (
               <button
@@ -940,7 +933,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
 
           {/* ── Section 5: O que foi executado ── */}
           <div>
-            <SectionLabel>O que foi executado</SectionLabel>
+            <TituloSecao margemInferior={12}>O que foi executado</TituloSecao>
 
             {/* Recording button */}
             {gravacaoEstado !== 'transcrito' && (

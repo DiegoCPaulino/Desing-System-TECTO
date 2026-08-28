@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGerenteDaObra, getPessoaIniciais } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import TituloSecao from '../components/TituloSecao';
 
 const C = {
   acento: '#FFC213',
@@ -57,13 +58,6 @@ function acaoParaTipo(tipo: string) {
   return 'Ver';
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.tintaFraca }}>
-      {children}
-    </p>
-  );
-}
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`, padding: '24px', ...style }}>
@@ -178,7 +172,7 @@ export default function PainelDoDia() {
       {/* ===== INDICATOR CARDS ===== */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
         <Card style={{ padding: '24px' }}>
-          <SectionLabel>Pessoas em campo hoje</SectionLabel>
+          <TituloSecao>Pessoas em campo hoje</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {ind.pessoasEmCampo}
           </p>
@@ -188,7 +182,7 @@ export default function PainelDoDia() {
         </Card>
 
         <Card style={{ padding: '24px' }}>
-          <SectionLabel>Obras em andamento</SectionLabel>
+          <TituloSecao>Obras em andamento</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {obrasEmAndamento}
           </p>
@@ -198,7 +192,7 @@ export default function PainelDoDia() {
         </Card>
 
         <Card style={{ padding: '24px' }}>
-          <SectionLabel>Diários pendentes</SectionLabel>
+          <TituloSecao>Diários pendentes</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: ind.diariosPendentes > 0 ? C.atencao : C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {ind.diariosPendentes}
           </p>
@@ -208,7 +202,7 @@ export default function PainelDoDia() {
         </Card>
 
         <Card style={{ padding: '24px' }}>
-          <SectionLabel>A fechar esta semana</SectionLabel>
+          <TituloSecao>A fechar esta semana</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {formatarReais(ind.totalAFechar)}
           </p>
@@ -227,7 +221,7 @@ export default function PainelDoDia() {
           {/* PRECISA DA SUA ATENÇÃO */}
           <Card>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-              <SectionLabel>Precisa da sua atenção</SectionLabel>
+              <TituloSecao>Precisa da sua atenção</TituloSecao>
               {pendencias.length > 0 && (
                 <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '11px', fontWeight: 500, color: C.superficie, backgroundColor: C.atencao, padding: '2px 8px', borderRadius: '999px' }}>
                   {pendencias.length}
@@ -272,7 +266,7 @@ export default function PainelDoDia() {
           {/* QUEM ESTÁ ONDE HOJE */}
           <Card>
             <div style={{ marginBottom: '20px' }}>
-              <SectionLabel>Quem está onde hoje</SectionLabel>
+              <TituloSecao>Quem está onde hoje</TituloSecao>
             </div>
             {whereRows.length === 0 ? (
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro }}>Nenhuma presença registrada hoje.</p>
@@ -347,7 +341,7 @@ export default function PainelDoDia() {
           {/* ÚLTIMAS FOTOS */}
           <Card>
             <div style={{ marginBottom: '16px' }}>
-              <SectionLabel>Últimas fotos</SectionLabel>
+              <TituloSecao>Últimas fotos</TituloSecao>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {fotosMCL.slice(0, 6).map((url, i) => (
@@ -366,7 +360,7 @@ export default function PainelDoDia() {
           {/* PRÓXIMOS FECHAMENTOS */}
           <Card>
             <div style={{ marginBottom: '20px' }}>
-              <SectionLabel>Próximos fechamentos</SectionLabel>
+              <TituloSecao>Próximos fechamentos</TituloSecao>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {gruposFechamento.map(({ ciclo, periodo_fim, qtd, total }, i) => {

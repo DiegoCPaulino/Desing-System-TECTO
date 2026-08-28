@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais, obraSlug, obraPorSlug } from '../state/store';
 import EmBreve from './EmBreve';
+import TituloSecao from '../components/TituloSecao';
 
 const C = {
   acento: '#FFC213',
@@ -46,14 +47,6 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: C.tintaFraca }}>
-      {children}
-    </p>
-  );
-}
-
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
     <div style={{ backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`, padding: '24px', ...style }}>
@@ -97,7 +90,7 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
 function CardHeader({ children, right }: { children: React.ReactNode; right?: React.ReactNode }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-      <SectionLabel>{children}</SectionLabel>
+      <TituloSecao>{children}</TituloSecao>
       {right}
     </div>
   );

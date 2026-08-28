@@ -1,5 +1,6 @@
 import React from 'react';
 import { useStore, formatarReais } from '../state/store';
+import TituloSecao from '../components/TituloSecao';
 
 const C = {
   acento: '#FFC213',
@@ -46,14 +47,6 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.09em', textTransform: 'uppercase' as const, color: C.neutro }}>
-      {children}
-    </p>
-  );
-}
-
 type Situacao = 'paga' | 'vencendo' | 'futura';
 
 const SITUACAO_STYLE: Record<Situacao, { label: string; color: string; bg: string }> = {
@@ -92,7 +85,7 @@ export default function PortalFinanceiro() {
 
         {/* Total da obra */}
         <Card style={{ padding: '28px' }}>
-          <SectionLabel>Total da obra</SectionLabel>
+          <TituloSecao>Total da obra</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.02em', marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {formatarReais(total)}
           </p>
@@ -103,7 +96,7 @@ export default function PortalFinanceiro() {
 
         {/* Já pago */}
         <Card style={{ padding: '28px' }}>
-          <SectionLabel>Já pago</SectionLabel>
+          <TituloSecao>Já pago</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, color: C.positivo, letterSpacing: '-0.02em', marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {formatarReais(jaPago)}
           </p>
@@ -114,7 +107,7 @@ export default function PortalFinanceiro() {
 
         {/* A pagar */}
         <Card style={{ padding: '28px' }}>
-          <SectionLabel>A pagar</SectionLabel>
+          <TituloSecao>A pagar</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.02em', marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             {formatarReais(aPagar)}
           </p>
@@ -129,7 +122,7 @@ export default function PortalFinanceiro() {
         {/* ── Parcelas ── */}
         <Card>
           <div style={{ padding: '24px 28px 20px' }}>
-            <SectionLabel>Parcelas</SectionLabel>
+            <TituloSecao>Parcelas</TituloSecao>
           </div>
 
           {/* Table header */}
@@ -176,7 +169,7 @@ export default function PortalFinanceiro() {
         {/* ── Serviços Adicionais Aprovados ── */}
         <Card>
           <div style={{ padding: '24px 28px 20px' }}>
-            <SectionLabel>Serviços adicionais aprovados</SectionLabel>
+            <TituloSecao>Serviços adicionais aprovados</TituloSecao>
           </div>
 
           {ADICIONAIS.map((a, idx) => (
@@ -208,7 +201,7 @@ export default function PortalFinanceiro() {
         {/* ── Materiais e Notas ── */}
         <Card>
           <div style={{ padding: '24px 28px 20px' }}>
-            <SectionLabel>Materiais e notas</SectionLabel>
+            <TituloSecao>Materiais e notas</TituloSecao>
           </div>
 
           {MATERIAIS.map((m, idx) => {

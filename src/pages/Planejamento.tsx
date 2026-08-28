@@ -17,6 +17,7 @@ import {
   type CelulaValor,
 } from '../state/store';
 import type { Planejamento as Cel } from '../state/types';
+import TituloSecao from '../components/TituloSecao';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -69,14 +70,6 @@ function IconChevronLeft() {
 }
 function IconChevronRight() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6 3.5 10.5 8 6 12.5" /></svg>;
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.tintaFraca, margin: 0 }}>
-      {children}
-    </p>
-  );
 }
 
 export default function Planejamento() {
@@ -313,7 +306,7 @@ export default function Planejamento() {
         {/* Cabeçalho da grade */}
         <div style={gridRow(true)}>
           <div style={{ ...nameCell, borderBottom: `1px solid ${C.borda}` }}>
-            <SectionLabel>Pessoa</SectionLabel>
+            <TituloSecao>Pessoa</TituloSecao>
           </div>
           {dias.map((d, i) => (
             <div key={d} style={{ ...dayHeadCell, borderBottom: `1px solid ${C.borda}` }}>
@@ -578,7 +571,7 @@ function CelulaConteudo({ state, cel }: { state: StoreState; cel?: Cel }) {
 function ResumoTile({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
   return (
     <div style={{ backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px', padding: '18px 20px' }}>
-      <SectionLabel>{label}</SectionLabel>
+      <TituloSecao>{label}</TituloSecao>
       <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, color: destaque ? C.atencao : C.tinta, letterSpacing: '-0.02em', margin: '8px 0 0' }}>
         {valor}
       </p>

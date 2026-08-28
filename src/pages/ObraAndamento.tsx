@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente, obraPorSlug } from '../state/store';
+import TituloSecao from '../components/TituloSecao';
 
 const C = {
   acento: '#FFC213',
@@ -90,13 +91,7 @@ export default function ObraAndamento() {
         {/* ── ANDAMENTO TECTO ── */}
         <div style={cardStyle}>
           <div>
-            <p style={{
-              fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase', color: C.neutro,
-              margin: '0 0 12px',
-            }}>
-              Andamento TECTO
-            </p>
+            <TituloSecao margemInferior={12}>Andamento TECTO</TituloSecao>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px' }}>
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace", fontSize: '52px', fontWeight: 700,
@@ -175,13 +170,7 @@ export default function ObraAndamento() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div style={cardStyle}>
             <div>
-              <p style={{
-                fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700,
-                letterSpacing: '0.1em', textTransform: 'uppercase', color: C.neutro,
-                margin: '0 0 12px',
-              }}>
-                Andamento Geral
-              </p>
+              <TituloSecao margemInferior={12}>Andamento Geral</TituloSecao>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px' }}>
                 <span style={{
                   fontFamily: "'JetBrains Mono', monospace", fontSize: '52px', fontWeight: 700,

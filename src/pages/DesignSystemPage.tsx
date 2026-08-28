@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import TituloSecao from '../components/TituloSecao';
 
 const C = {
   acento: '#FFC213',
@@ -62,18 +63,6 @@ function IconBuilding() {
 }
 function IconGrid() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>;
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <p style={{
-      fontFamily: 'Inter, sans-serif', fontSize: '11px', lineHeight: '16px',
-      fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase' as const,
-      color: C.tintaFraca, marginBottom: '24px',
-    }}>
-      {children}
-    </p>
-  );
 }
 
 function InlineLabel({ children }: { children: React.ReactNode }) {
@@ -179,7 +168,7 @@ export default function DesignSystemPage() {
 
         {/* PALETA DE CORES */}
         <Card>
-          <SectionLabel>Paleta de Cores</SectionLabel>
+          <TituloSecao margemInferior={24}>Paleta de Cores</TituloSecao>
           <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
             {PALETTE.map(({ name, hex }) => (
               <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -199,7 +188,7 @@ export default function DesignSystemPage() {
         {/* TIPOGRAFIA + REGRAS DE COR */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 440px', gap: '28px', alignItems: 'start' }}>
           <Card>
-            <SectionLabel>Tipografia</SectionLabel>
+            <TituloSecao margemInferior={24}>Tipografia</TituloSecao>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {[
                 { name: 'Display', spec: '32 / 40', font: "'Space Grotesk', sans-serif", weight: 700, size: '32px', lh: '40px', ls: '-0.02em', sample: 'Gestão de obras residenciais' },
@@ -234,7 +223,7 @@ export default function DesignSystemPage() {
           </Card>
 
           <Card>
-            <SectionLabel>Regras de Cor</SectionLabel>
+            <TituloSecao margemInferior={24}>Regras de Cor</TituloSecao>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               {[
                 'Amarelo #FFC213 nunca é cor de texto, ícone pequeno ou link. É sempre preenchimento, com texto preto por cima.',
@@ -284,7 +273,7 @@ export default function DesignSystemPage() {
 
         {/* BOTÕES */}
         <Card>
-          <SectionLabel>Botões</SectionLabel>
+          <TituloSecao margemInferior={24}>Botões</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', paddingBottom: '14px', borderBottom: `1px solid ${C.borda}`, marginBottom: '20px' }}>
               <div style={{ width: '110px', flexShrink: 0 }} />
@@ -345,7 +334,7 @@ export default function DesignSystemPage() {
         {/* CAMPOS + BADGES */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
           <Card>
-            <SectionLabel>Campos de Formulário</SectionLabel>
+            <TituloSecao margemInferior={24}>Campos de Formulário</TituloSecao>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
               <div>
                 <label style={{ display: 'block', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, marginBottom: '6px' }}>Nome do cliente</label>
@@ -379,7 +368,7 @@ export default function DesignSystemPage() {
           </Card>
 
           <Card>
-            <SectionLabel>Badges de Estado</SectionLabel>
+            <TituloSecao margemInferior={24}>Badges de Estado</TituloSecao>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
               {BADGES.map(({ label, bg, color }) => (
                 <StatusBadge key={label} label={label} bg={bg} color={color} />
@@ -410,7 +399,7 @@ export default function DesignSystemPage() {
 
         {/* BARRA DE PROGRESSO */}
         <Card style={{ padding: '28px 32px' }}>
-          <SectionLabel>Barra de Progresso</SectionLabel>
+          <TituloSecao margemInferior={24}>Barra de Progresso</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
             {[
               { label: 'Obra 22 - MCL', pct: 68, badge: BADGES[0] },
@@ -433,7 +422,7 @@ export default function DesignSystemPage() {
 
           {/* CARD DE OBRA */}
           <Card style={{ padding: '0', overflow: 'hidden' }}>
-            <div style={{ padding: '24px 24px 16px' }}><SectionLabel>Card de Obra</SectionLabel></div>
+            <div style={{ padding: '24px 24px 16px' }}><TituloSecao margemInferior={24}>Card de Obra</TituloSecao></div>
             <div style={{ margin: '0 24px', borderRadius: '10px', overflow: 'hidden', border: `1px solid ${C.borda}`, marginBottom: '24px' }}>
               <div style={{ height: '196px', backgroundColor: '#CCCCCC', overflow: 'hidden' }}>
                 <img src="https://images.unsplash.com/photo-1618832515490-e181c4794a45?w=760&h=392&fit=crop&auto=format" alt="Cozinha em reforma" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
@@ -466,7 +455,7 @@ export default function DesignSystemPage() {
           {/* MIDDLE COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
             <Card>
-              <SectionLabel>Chip de Pessoa</SectionLabel>
+              <TituloSecao margemInferior={24}>Chip de Pessoa</TituloSecao>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {[
                   { initials: 'RD', name: 'Rafael Duarte', role: 'Gerente de obra', bg: C.grafite },
@@ -486,7 +475,7 @@ export default function DesignSystemPage() {
             </Card>
 
             <Card style={{ padding: '20px' }}>
-              <div style={{ padding: '4px 12px 16px' }}><SectionLabel>Navegação Lateral</SectionLabel></div>
+              <div style={{ padding: '4px 12px 16px' }}><TituloSecao margemInferior={24}>Navegação Lateral</TituloSecao></div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
                 {NAV_ITEMS_DS.map(({ label, selected }) => (
                   <div key={label} style={{
@@ -506,7 +495,7 @@ export default function DesignSystemPage() {
 
           {/* TABELA FINANCEIRA */}
           <Card>
-            <SectionLabel>Tabela Financeira</SectionLabel>
+            <TituloSecao margemInferior={24}>Tabela Financeira</TituloSecao>
             <table style={{ width: '100%', borderCollapse: 'collapse' as const }}>
               <thead>
                 <tr>
