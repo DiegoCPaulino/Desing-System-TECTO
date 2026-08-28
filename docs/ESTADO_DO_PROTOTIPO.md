@@ -3,8 +3,8 @@
 Fotografia do que existe no repositório. Este arquivo descreve o código atual;
 não substitui regra de negócio, decisão de produto nem pergunta em aberto.
 
-**Atualizado em:** 28/08/2026, após o Pacote 0 de estabilização.
-**Base da auditoria:** branch `agente/codex`, depois do commit `1e2f933`.
+**Atualizado em:** 28/08/2026, após a tarefa P1A.
+**Base da auditoria:** branch `agente/code`, depois do commit do item 6 da P1A.
 **Método:** leitura de rotas, telas, layouts, tipos, store e seed; compilação e
 build; verificação em navegador nos perfis Pedro Almeida, Rafael Duarte e
 Mariana Costa Lima, em 390, 800 e 1440 px.
@@ -44,9 +44,9 @@ tela de fechamento, embora os dados de fechamento existam no estado.
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | não existem |
+| Testes automatizados | 21 testes do Fechamento em `src/state/fechamento.testes.ts`; não há runner instalado — ver §12 |
 | Script de lint | não existe |
-| `src/components/` | não existe |
+| `src/components/` | existe, com `TituloSecao` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
 | Navegador em 800 px | renderiza, com truncamentos visuais |
 | Navegador em 390 px | aplicação interna e Portal têm falhas estruturais de responsividade |
@@ -94,7 +94,7 @@ Em rotas `obraScoped`, o Gerente de Obras também precisa ter um vínculo ativo 
 | `/equipe` | `Equipe` | internos | não |
 | `/equipe/:pessoaId` | **`EmBreve`** | internos | não |
 | `/orcamentos` | **`EmBreve`** | Administração e Financeiro | não |
-| `/financeiro` | **`EmBreve`** | Administração e Financeiro | não |
+| `/financeiro` | `Fechamento` | Administração e Financeiro | não |
 | `/indicadores` | **`EmBreve`** | Administração e Financeiro | não |
 | `*` | **`EmBreve`** | internos | não |
 
@@ -126,42 +126,58 @@ Manter essa rota pública ou protegê-la ainda precisa de decisão explícita.
 
 ### 2.5 Rotas em `EmBreve`
 
-Sete rotas caem em `EmBreve`: Financeiro e Documentos da obra, Ficha da Pessoa,
-Orçamentos, Financeiro/Fechamento, Indicadores e a rota interna não encontrada.
+Seis rotas caem em `EmBreve`: Financeiro e Documentos da obra, Ficha da Pessoa,
+Orçamentos, Indicadores e a rota interna não encontrada. `/financeiro` saiu do
+`EmBreve` na P1A e passou a servir a tela de Fechamento de ciclo.
 
 ---
 
 ## 3. Estado em memória
 
-`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 14 coleções de
+`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 19 coleções de
 domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entidade.
 
 | Coleção | Interface | Registros no seed |
 |---|---|---:|
-| `pessoas` | `Pessoa` | 30 |
-| `vinculos` | `Vinculo` | 17 |
+| `pessoas` | `Pessoa` | 34 |
+| `vinculos` | `Vinculo` | 28 |
 | `obras` | `Obra` | 5 |
-| `vinculos_obra` | `VinculoObra` | 6 |
-| `ambientes` | `Ambiente` | 5 |
-| `itens_orcamento` | `ItemOrcamento` | 30 |
+| `vinculos_obra` | `VinculoObra` | 7 |
+| `ambientes` | `Ambiente` | 18 |
+| `itens_orcamento` | `ItemOrcamento` | 92 |
 | `itens_fora_escopo` | `ItemForaEscopo` | 0 |
-| `planejamento` | `Planejamento` | 130 |
+| `planejamento` | `Planejamento` | 216 |
 | `semanas` | `Semana` | 2 |
-| `diarios` | `Diario` | 7 |
-| `presencas` | `Presenca` | 35 |
-| `diarias` | `Diaria` | 11 |
-| `fechamentos` | `Fechamento` | 28 |
-| `lancamentos` | `Lancamento` | 2 |
+| `diarios` | `Diario` | 11 |
+| `presencas` | `Presenca` | 61 |
+| `diarias` | `Diaria` | 60 |
+| `fechamentos` | `Fechamento` | 23 |
+| `lancamentos` | `Lancamento` | 3 |
+| `parcelas` | `Parcela` | 6 |
+| `notificacoes` | `Notificacao` | 7 |
+| `especialidades` | `Especialidade` | 9 |
+| `tipos_documento` | `TipoDocumento` | 8 |
+| `midias` | `Midia` | 14 |
+
+As cinco últimas nasceram na P1A e são **aditivas**: nenhuma tela existente as
+lê ainda. `Diario.fotos` continua sendo a fonte das telas de foto; `midias` é a
+modelagem real, com ambiente.
 
 ### 3.1 Arquivos de estado
 
 - `types.ts`: tipos das entidades e `AppState`.
 - `dados-iniciais.ts`: seed e data fixa de referência.
 - `store.ts`: store zustand, mutações e funções puras.
+- `fechamento.ts`: cálculo do Fechamento de ciclo — funções puras.
+- `fechamento.testes.ts`: os 21 testes do módulo acima.
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
-`publicarSemana`, `salvarAlteracoes` e `finalizarDiario`.
+`publicarSemana`, `salvarAlteracoes`, `finalizarDiario`,
+`definirObraQueArcaNaDiaria` e `executarFechamentoDoCiclo`.
+
+As datas gravadas pelas mutações usam `agoraNoPrototipo()`, e não o relógio
+real da máquina — ver §11.1.
 
 As principais funções puras disponíveis incluem formatação monetária, cálculo
 de andamento por ambiente e obra, indicadores, pendências, acesso do gerente,
@@ -184,10 +200,10 @@ altera a maquete.
 
 ### 4.1 Páginas e layouts
 
-Existem 18 páginas e 2 layouts:
+Existem 19 páginas e 2 layouts:
 
 - aplicação interna: Painel, Carteira, Visão da Obra, Diário, Diários,
-  Checklist, Andamento, Fotos, Planejamento e Equipe;
+  Checklist, Andamento, Fotos, Planejamento, Equipe e Fechamento;
 - autenticação: Login e Primeiro Acesso;
 - cliente: Minha Obra, Diário e Financeiro;
 - apoio: Design System, Sem Acesso e Em Breve;
@@ -491,3 +507,65 @@ exatamente no fim da Cena 6, que é o momento mais visível da demonstração.
 Corrigido em `src/state/store.ts` com `agoraNoPrototipo()`: a data é sempre
 `HOJE`, a data de referência da maquete, e só a hora vem do relógio. Reverificado
 no navegador — passou a exibir "finalizado em 20/08 às 14:15".
+
+---
+
+## 12. Fechamento de ciclo
+
+Criado na P1A, itens 5 e 6. `/financeiro` deixou de ser `EmBreve`.
+
+### 12.1 O cálculo — `src/state/fechamento.ts`
+
+Funções puras. Nenhuma altera o estado recebido; `executarFechamento` devolve
+os arrays novos e quem grava é o store.
+
+| Função | O que faz |
+|---|---|
+| `todosOsCiclos` / `ciclosAbertos` | agrupa Fechamentos pela tripla tipo + início + fim, e acrescenta o ciclo `por_obra`, derivado dos vínculos de terceirizado |
+| `calcularFechamentoDaPessoa` | devolve o extrato linha a linha, o bruto, os descontos, o a pagar e o saldo que rola |
+| `pendenciasQueBloqueiam` | rateio indefinido, ausência sem decisão, diário não finalizado |
+| `podeExecutarFechamento` | só é verdadeiro quando não há nenhuma pendência |
+| `definirObraQueArca` | uma obra arca com a diária inteira; a outra fica com zero |
+| `periodoEstaFechado` · `diariaEstaFechada` · `presencaEstaFechada` · `diarioEstaFechado` | a trava de imutabilidade |
+| `executarFechamento` | fecha o ciclo, grava autor e data, e rola o saldo devedor |
+
+Três decisões que valem registro:
+
+1. **O ciclo `por_obra` não tem período.** Quando e como o pagamento por Obra
+   acontece é `Q-001` a `Q-003`, em aberto. Ele aparece na tela com obra,
+   pessoa, valor e situação, e não afirma periodicidade — é a saída 2 do
+   `docs/ABERTO.md` §1. `executarFechamento` recusa fechá-lo.
+2. **`'por_obra'` não entra em `Fechamento.ciclo`.** O tipo continua com três
+   valores. Acrescentar um quarto deixaria o rótulo do Painel sem tradução.
+3. **Um diário está travado quando QUALQUER pessoa nele está em período
+   fechado**, e não quando todas. `finalizarDiario` apaga e regrava presenças e
+   diárias de todo mundo do diário, então uma pessoa fechada já basta para
+   proibir a edição. Nenhuma função de imutabilidade recebe perfil: a trava
+   vale para a Administração.
+
+### 12.2 `total_centavos` é o valor LÍQUIDO
+
+O campo guarda o valor **a pagar**, depois dos descontos e com o piso em zero —
+o mesmo significado que `executarFechamento` grava. O seed foi corrigido para
+isso na P1A: antes trazia o bruto, e o Painel dizia R$7.740,00 enquanto a tela
+de Fechamento dizia R$6.680,00 para a mesma semana.
+
+### 12.3 Testes
+
+`src/state/fechamento.testes.ts` — 21 testes, 0 falhas. Cobrem saldo devedor
+maior que o ciclo, diária em duas obras, edição de diário de período fechado,
+valor congelado, adicional não recalculado, e as bordas de ciclo inexistente e
+pessoa sem diária.
+
+**Não há runner de teste no repositório.** Instalar um tocaria `package.json`,
+fora dos arquivos permitidos da P1A. Os testes são auto-contidos, sem framework,
+e foram executados assim:
+
+```
+npx tsc src/state/fechamento.testes.ts --outDir <tmp> --module commonjs \
+  --target es2020 --moduleResolution node --esModuleInterop --skipLibCheck --strict
+node <tmp>/run.js
+```
+
+Transformar isso num `npm test` é tarefa própria, e precisa de autorização para
+mexer no `package.json`.

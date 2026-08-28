@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { AppState, Planejamento, Presenca, Diaria, Diario, Obra, TipoPerfil, ItemForaEscopo } from './types';
 import DADOS_INICIAIS, { HOJE } from './dados-iniciais';
+import { definirObraQueArca, executarFechamento } from './fechamento';
 
 /**
  * Instante "agora" do protótipo: a data é sempre HOJE, a data de referência
@@ -53,6 +54,17 @@ type Store = AppState & {
     houve_execucao: boolean;
     motivo_sem_execucao?: string;
   }) => void;
+  /** Devolvem a mensagem de erro, ou `undefined` quando deu certo. */
+  definirObraQueArcaNaDiaria: (args: {
+    diaria_id: string;
+    obra_id: string;
+    definido_por: string;
+  }) => string | undefined;
+  executarFechamentoDoCiclo: (args: {
+    ciclo_id: string;
+    fechado_por: string;
+    ajustes?: Record<string, number>;
+  }) => string | undefined;
 };
 
 export const useStore = create<Store>(() => ({
@@ -231,6 +243,22 @@ export const useStore = create<Store>(() => ({
         diarias: [...outrasDialias, ...novasDiarias],
       };
     });
+  },
+
+  // As duas mutações do Fechamento apenas aplicam o que as funções puras de
+  // `fechamento.ts` decidiram. Nenhuma regra de cálculo mora aqui.
+  definirObraQueArcaNaDiaria: ({ diaria_id, obra_id, definido_por }) => {
+    const resultado = definirObraQueArca(useStore.getState(), diaria_id, obra_id, definido_por);
+    if (resultado.erro) return resultado.erro;
+    useStore.setState({ diarias: resultado.diarias });
+    return undefined;
+  },
+
+  executarFechamentoDoCiclo: ({ ciclo_id, fechado_por, ajustes }) => {
+    const resultado = executarFechamento(useStore.getState(), ciclo_id, fechado_por, ajustes);
+    if (!resultado.ok) return resultado.erro;
+    useStore.setState({ fechamentos: resultado.fechamentos!, parcelas: resultado.parcelas! });
+    return undefined;
   },
 }));
 

@@ -510,7 +510,17 @@ export interface ResultadoExecucao {
 export function executarFechamento(
   state: AppState,
   cicloId: string,
-  fechado_por: string
+  fechado_por: string,
+  /**
+   * Ajuste de desconto por pessoa, em centavos. O Financeiro pode descontar
+   * MENOS que o proposto — nunca mais. Descontar mais seria cobrar dívida que
+   * não existe; por isso o valor é limitado ao proposto aqui dentro, e não só
+   * na tela. O que deixa de ser descontado continua devido e rola.
+   *
+   * Se um acordo de desconto parcial é legítimo é `Q-008`, em aberto. Esta
+   * função oferece a forma sem afirmar quando usá-la.
+   */
+  ajustes?: Record<string, number>
 ): ResultadoExecucao {
   const ciclo = cicloPorId(state, cicloId);
   if (!ciclo) return { ok: false, erro: 'Ciclo não encontrado.' };
@@ -540,9 +550,15 @@ export function executarFechamento(
   for (const pessoa_id of ciclo.pessoas) {
     const extrato = calcularFechamentoDaPessoa(state, pessoa_id, cicloId);
 
-    // Amortiza as parcelas com o bruto do ciclo, na ordem em que entraram no
-    // extrato. Sobra vira parcela nova no ciclo seguinte.
-    let disponivel = extrato.bruto_centavos;
+    // O desconto efetivo é o proposto, salvo ajuste — e o ajuste só desce.
+    const proposto = extrato.descontos_centavos;
+    const pedido = ajustes?.[pessoa_id];
+    const alvo = pedido === undefined ? proposto : Math.max(0, Math.min(pedido, proposto));
+
+    // Amortiza as parcelas, na ordem em que entraram no extrato, com o que o
+    // ciclo rendeu, limitado ao alvo. Sobra vira parcela no ciclo seguinte.
+    let disponivel = Math.min(extrato.bruto_centavos, alvo);
+    const aPagar = extrato.bruto_centavos - disponivel;
     const idsNoExtrato = new Set(
       extrato.linhas
         .filter((l) => l.tipo === 'adiantamento' || l.tipo === 'emprestimo')
@@ -586,7 +602,7 @@ export function executarFechamento(
       fechamentos[idx] = {
         ...fechamentos[idx],
         estado: 'fechado',
-        total_centavos: extrato.a_pagar_centavos,
+        total_centavos: aPagar,
         fechado_por,
       };
     }

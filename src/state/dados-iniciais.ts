@@ -757,16 +757,24 @@ const DADOS: AppState = {
   // Ciclo semanal: 18 pessoas, fecha 22/08
   // ─── FECHAMENTOS ──────────────────────────────────────────────────────────
   // Um Fechamento por CICLO e por PESSOA, nunca global por semana.
-  // Os totais abaixo são a soma das diárias do período semeadas acima, para
-  // que o número do Painel e o cálculo do item 5 digam a mesma coisa.
+  //
+  // `total_centavos` é o valor A PAGAR — líquido, depois dos descontos e já
+  // com o piso em zero. É o mesmo significado que `executarFechamento` grava
+  // ao fechar o ciclo. Semear o bruto aqui faria o Painel dizer R$7.740,00 e a
+  // tela de Fechamento dizer R$6.680,00 para a mesma semana, que é exatamente
+  // o tipo de número que não bate na frente do cliente.
+  //
   // Quem está na Obra 25 - ATB tem total ZERO: a obra não tem diário, logo não
   // tem presença nem diária. É a pendência que bloqueia o fechamento.
   fechamentos: [
     // ── SEMANAL — 17/08 a 22/08, 14 pessoas ──
+    // Marcos desconta 1 parcela de R$300,00; Jonas, adiantamento de R$400,00
+    // contra R$360,00 de ganho; Valdir, R$1.200,00 contra R$400,00. Os dois
+    // últimos ficam em zero e rolam a diferença.
     ...([
-      ['p07', 50000], ['p08', 36000], ['p11', 50000], ['p12', 75000],
+      ['p07', 20000], ['p08', 0],     ['p11', 50000], ['p12', 75000],
       ['p13', 72000], ['p14', 46000], ['p15', 69000], ['p16', 66000],
-      ['p17', 66000], ['p18', 40000], ['p19', 60000], ['p20', 36000],
+      ['p17', 66000], ['p18', 0],     ['p19', 60000], ['p20', 36000],
       ['p21', 54000], ['p22', 54000],
     ] as [string, number][]).map(([pessoa_id, total]) => ({
       id: `fc_sem_${pessoa_id}`,

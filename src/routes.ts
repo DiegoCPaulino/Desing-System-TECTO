@@ -22,6 +22,7 @@ import PortalFinanceiro from './pages/PortalFinanceiro';
 import Login from './pages/Login';
 import PrimeiroAcesso from './pages/PrimeiroAcesso';
 import SemAcesso from './pages/SemAcesso';
+import Fechamento from './pages/Fechamento';
 
 type RouteHandle = { title?: string; perfis?: TipoPerfil[]; obraScoped?: boolean };
 
@@ -103,7 +104,7 @@ export const rotas = [
           { path: 'equipe', handle: { perfis: TODOS_INTERNOS }, Component: Equipe },
           { path: 'equipe/:pessoaId', handle: { perfis: TODOS_INTERNOS, title: 'Ficha da pessoa' }, Component: EmBreve },
           { path: 'orcamentos', handle: { perfis: ADMIN_FINANCEIRO, title: 'Orçamentos' }, Component: EmBreve },
-          { path: 'financeiro', handle: { perfis: ADMIN_FINANCEIRO, title: 'Fechamento de ciclo' }, Component: EmBreve },
+          { path: 'financeiro', handle: { perfis: ADMIN_FINANCEIRO, title: 'Fechamento de ciclo' }, Component: Fechamento },
           { path: 'indicadores', handle: { perfis: ADMIN_FINANCEIRO, title: 'Indicadores' }, Component: EmBreve },
           { path: '*', handle: { perfis: TODOS_INTERNOS, title: 'Página não encontrada' }, Component: EmBreve },
         ],
