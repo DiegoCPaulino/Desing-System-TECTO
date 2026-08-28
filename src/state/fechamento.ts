@@ -145,6 +145,29 @@ export interface ExtratoFechamento {
   a_pagar_centavos: number;
   /** Quanto do desconto não coube neste ciclo e rola para o seguinte. */
   saldo_a_rolar_centavos: number;
+  /**
+   * `RN-095` — a dívida INTEIRA da pessoa, de todos os ciclos, e não só o que
+   * este ciclo desconta. São coisas diferentes: quem tem empréstimo em quatro
+   * parcelas desconta uma por ciclo e deve as outras três.
+   */
+  saldo_devedor_total_centavos: number;
+}
+
+/**
+ * `RN-095` — o Financeiro sempre enxerga o saldo devedor de cada Pessoa antes
+ * de executar o Fechamento.
+ *
+ * Soma toda parcela pendente da pessoa, caia ela neste ciclo ou em qualquer
+ * ciclo futuro. Não é o mesmo número que `descontos_centavos`, que é só a
+ * fatia cobrada agora.
+ */
+export function saldoDevedorDaPessoa(state: AppState, pessoa_id: string): number {
+  const lancamentosDaPessoa = new Set(
+    state.lancamentos.filter((l) => l.pessoa_id === pessoa_id).map((l) => l.id)
+  );
+  return state.parcelas
+    .filter((p) => lancamentosDaPessoa.has(p.lancamento_id) && p.situacao === 'pendente')
+    .reduce((soma, p) => soma + p.valor_centavos, 0);
 }
 
 /** Diárias da pessoa dentro do período, comparadas como string `YYYY-MM-DD`. */
@@ -207,6 +230,7 @@ export function calcularFechamentoDaPessoa(
     descontos_centavos: 0,
     a_pagar_centavos: 0,
     saldo_a_rolar_centavos: 0,
+    saldo_devedor_total_centavos: saldoDevedorDaPessoa(state, pessoa_id),
   };
 
   const ciclo = cicloPorId(state, cicloId);
@@ -270,6 +294,7 @@ export function calcularFechamentoDaPessoa(
     descontos_centavos: descontos,
     a_pagar_centavos: a_pagar,
     saldo_a_rolar_centavos: saldo_a_rolar,
+    saldo_devedor_total_centavos: saldoDevedorDaPessoa(state, pessoa_id),
   };
 }
 

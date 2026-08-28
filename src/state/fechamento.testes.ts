@@ -10,6 +10,7 @@ import {
   pendenciasQueBloqueiam,
   podeExecutarFechamento,
   proximoFimDeCiclo,
+  saldoDevedorDaPessoa,
 } from './fechamento';
 
 /**
@@ -72,7 +73,9 @@ teste('ciclos abertos incluem semanal, quinzenal, mensal e por obra', () => {
 
   const porObra = ciclos.find((c) => c.tipo === 'por_obra')!;
   igual(porObra.periodo_inicio, undefined, 'ciclo por obra não afirma período');
-  igual(porObra.pessoas.length, 4, 'terceirizados no ciclo por obra');
+  // 4 terceirizados e 2 Gerentes de Obras: a RN-004 põe o Gerente em "valor
+  // fixo por Obra", então ele pertence a este ciclo tanto quanto eles.
+  igual(porObra.pessoas.length, 6, 'pessoas no ciclo por obra');
 });
 
 teste('o ciclo é por pessoa, não global: o semanal tem 14 pessoas', () => {
@@ -300,6 +303,72 @@ teste('cicloId inexistente devolve extrato vazio em vez de estourar', () => {
   const x = calcularFechamentoDaPessoa(estado(), 'p07', 'nao_existe');
   igual(x.bruto_centavos, 0, 'bruto zero');
   igual(x.linhas.length, 0, 'sem linhas');
+});
+
+// ── RN-095 — saldo devedor visível antes de fechar ─────────────────────────
+
+teste('RN-095: o saldo devedor total é a dívida inteira, não o desconto do ciclo', () => {
+  const e = estado();
+
+  // Marcos: empréstimo de R$1.200,00 em 4 parcelas de R$300,00, 1 já paga.
+  // Restam 3 pendentes = R$900,00. Mas este ciclo desconta só uma.
+  igual(saldoDevedorDaPessoa(e, 'p07'), 90000, 'dívida total do Marcos');
+  const marcos = calcularFechamentoDaPessoa(e, 'p07', CICLO_SEMANAL);
+  igual(marcos.descontos_centavos, 30000, 'desconto deste ciclo');
+  igual(marcos.saldo_devedor_total_centavos, 90000, 'saldo devedor no extrato');
+
+  // São números diferentes, e é esse o ponto da RN-095.
+  verdadeiro(
+    marcos.saldo_devedor_total_centavos > marcos.descontos_centavos,
+    'a dívida total excede o desconto do ciclo'
+  );
+});
+
+teste('RN-095: parcela paga sai do saldo devedor', () => {
+  let e = resolverPendencias(estado());
+  const antes = saldoDevedorDaPessoa(e, 'p07');
+  const r = executarFechamento(e, CICLO_SEMANAL, 'p01');
+  e = { ...e, fechamentos: r.fechamentos!, parcelas: r.parcelas! };
+  igual(saldoDevedorDaPessoa(e, 'p07'), antes - 30000, 'baixa de uma parcela');
+});
+
+teste('RN-095: quem não deve nada tem saldo devedor zero', () => {
+  igual(saldoDevedorDaPessoa(estado(), 'p11'), 0, 'Adilson não deve nada');
+});
+
+// ── RN-004 — os seis tipos de vínculo ──────────────────────────────────────
+
+teste('RN-004: a gestão tem vínculo, com o tipo da tabela da RN-004', () => {
+  const e = estado();
+  const tipoDe = (pid: string) => e.vinculos.find((v) => v.pessoa_id === pid && !v.fim)?.tipo;
+  igual(tipoDe('p01'), 'administracao', 'Pedro Almeida');
+  igual(tipoDe('p03'), 'financeiro', 'Fernanda Sousa');
+  igual(tipoDe('p04'), 'gerente_obras', 'Rafael Duarte');
+  igual(tipoDe('p05'), 'gerente_obras', 'Sofia Monteiro');
+  igual(tipoDe('p06'), 'assistente_gerenciamento', 'Ana Carvalho');
+  igual(tipoDe('p07'), 'funcionario_proprio', 'Marcos Bittencourt');
+  igual(tipoDe('p09'), 'terceirizado', 'Cleber Matos');
+});
+
+teste('RN-004: regime em aberto não vira número inventado', () => {
+  const e = estado();
+  const rafael = e.vinculos.find((v) => v.pessoa_id === 'p04' && !v.fim)!;
+  // O Gerente recebe valor fixo por Obra (RN-004), mas se esse valor varia com
+  // duração ou porte é Q-001. O campo fica vazio de propósito.
+  igual(rafael.valor_obra_centavos, undefined, 'valor por obra do Gerente');
+  igual(rafael.ciclo_pagamento, 'por_obra', 'ciclo do Gerente');
+
+  const ana = e.vinculos.find((v) => v.pessoa_id === 'p06' && !v.fim)!;
+  igual(ana.ciclo_pagamento, undefined, 'Assistente sem ciclo — Q-004 em aberto');
+
+  const pedro = e.vinculos.find((v) => v.pessoa_id === 'p01' && !v.fim)!;
+  igual(pedro.ciclo_pagamento, undefined, 'Administração fora do pagamento na V1');
+});
+
+teste('os dois Gerentes entram no ciclo por obra, junto dos terceirizados', () => {
+  const porObra = ciclosAbertos(estado()).find((c) => c.tipo === 'por_obra')!;
+  igual(porObra.pessoas.length, 6, '4 terceirizados + 2 gerentes');
+  verdadeiro(porObra.pessoas.includes('p04'), 'Rafael no ciclo por obra');
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

@@ -7,12 +7,42 @@ export interface Pessoa {
   desativado_em?: string;
 }
 
+/**
+ * Os seis tipos da tabela da `RN-004`. O tipo determina o regime de
+ * remuneração:
+ *
+ *   funcionario_proprio      → Diária, em ciclo semanal, quinzenal ou mensal
+ *   gerente_obras            → Valor fixo por Obra
+ *   assistente_gerenciamento → a confirmar, `Q-004`
+ *   terceirizado             → Contrato com parcelas, ou Diária eventual
+ *   administracao            → fora do escopo de pagamento do sistema na V1
+ *   financeiro               → fora do escopo de pagamento do sistema na V1
+ */
+export type TipoVinculo =
+  | 'funcionario_proprio'
+  | 'gerente_obras'
+  | 'assistente_gerenciamento'
+  | 'terceirizado'
+  | 'administracao'
+  | 'financeiro';
+
 export interface Vinculo {
   id: string;
   pessoa_id: string;
-  tipo: 'funcionario_proprio' | 'terceirizado';
-  ciclo_pagamento: 'diario' | 'semanal' | 'quinzenal' | 'mensal' | 'por_obra';
+  tipo: TipoVinculo;
+  /**
+   * Opcional porque nem todo vínculo tem regime definido: Administração e
+   * Financeiro estão fora do escopo de pagamento na V1, e o regime do
+   * Assistente de Gerenciamento é `Q-004`, em aberto.
+   */
+  ciclo_pagamento?: 'diario' | 'semanal' | 'quinzenal' | 'mensal' | 'por_obra';
   valor_diaria_centavos?: number;
+  /**
+   * O Gerente de Obras recebe valor fixo por Obra (`RN-004`), mas o campo fica
+   * VAZIO para ele: se esse valor varia com a duração ou o porte da obra é
+   * `Q-001`, em aberto, e um único número no vínculo já afirmaria que não
+   * varia. A estrutura existe; a regra não é assumida.
+   */
   valor_obra_centavos?: number;
   inicio: string;
   fim?: string;

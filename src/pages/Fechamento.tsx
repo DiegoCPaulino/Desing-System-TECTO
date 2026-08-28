@@ -218,7 +218,7 @@ export default function Fechamento() {
 
           {/* ── TABELA POR PESSOA ── */}
           <div style={{ overflowX: 'auto', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '8px' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '760px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '880px' }}>
               <thead>
                 <tr>
                   <th style={{ ...celula, ...rotulo }}>Pessoa</th>
@@ -227,6 +227,7 @@ export default function Fechamento() {
                   <th style={{ ...celulaNumero, ...rotulo }}>Descontos</th>
                   <th style={{ ...celulaNumero, ...rotulo }}>A pagar</th>
                   <th style={{ ...celula, ...rotulo }}>Rola</th>
+                  <th style={{ ...celulaNumero, ...rotulo }}>Deve ao todo</th>
                   <th style={{ ...celula, ...rotulo }} />
                 </tr>
               </thead>
@@ -253,6 +254,12 @@ export default function Fechamento() {
                       <td style={{ ...celula, fontSize: '13px', color: rola > 0 ? C.atencao : C.neutro }}>
                         {rola > 0 ? formatarReais(rola) : '—'}
                       </td>
+                      {/* RN-095: o Financeiro sempre enxerga o saldo devedor
+                          antes de fechar. Não é o desconto deste ciclo — é a
+                          dívida inteira, de todos os ciclos. */}
+                      <td style={{ ...celulaNumero, fontSize: '13px', color: x.saldo_devedor_total_centavos > 0 ? C.negativo : C.neutro }}>
+                        {x.saldo_devedor_total_centavos > 0 ? formatarReais(x.saldo_devedor_total_centavos) : '—'}
+                      </td>
                       <td style={celula}>
                         {!fechado && x.descontos_centavos > 0 && (
                           <button
@@ -272,7 +279,7 @@ export default function Fechamento() {
                   <td style={{ ...celula, fontWeight: 600 }}>Total do ciclo</td>
                   <td style={celula} colSpan={3} />
                   <td style={{ ...celulaNumero, fontWeight: 700 }}>{formatarReais(totalAPagar)}</td>
-                  <td style={celula} colSpan={2} />
+                  <td style={celula} colSpan={3} />
                 </tr>
               </tfoot>
             </table>
@@ -416,7 +423,21 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
             </dd>
           </>
         )}
+        {extrato.saldo_devedor_total_centavos > 0 && (
+          <>
+            <dt style={{ color: C.negativo }}>Deve ao todo</dt>
+            <dd style={{ margin: 0, textAlign: 'right', color: C.negativo, fontVariantNumeric: 'tabular-nums' }}>
+              {formatarReais(extrato.saldo_devedor_total_centavos)}
+            </dd>
+          </>
+        )}
       </dl>
+      {extrato.saldo_devedor_total_centavos > extrato.descontos_centavos && (
+        <p style={{ fontSize: '13px', color: C.tintaFraca, marginTop: '12px' }}>
+          A dívida total é maior que o desconto deste ciclo: o restante é cobrado
+          nos ciclos seguintes, uma parcela por vez.
+        </p>
+      )}
       {extrato.saldo_a_rolar_centavos > 0 && (
         <p style={{ fontSize: '13px', color: C.tintaFraca, marginTop: '12px' }}>
           O desconto passou do ganho do ciclo. O pagamento não fica negativo: a pessoa
@@ -546,11 +567,18 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
               ]
                 .map((oid) => state.obras.find((o) => o.id === oid)?.codigo)
                 .filter(Boolean);
+              // O Gerente de Obras recebe valor fixo por Obra (RN-004), mas o
+              // valor não está definido — Q-001. Exibir R$ 0,00 aqui diria que
+              // ele não recebe nada, que é uma afirmação diferente de "ainda
+              // não se sabe quanto".
+              const temValor = vinculo?.valor_obra_centavos !== undefined;
               return (
                 <tr key={pid}>
                   <td style={celula}>{getPessoaNome(state, pid)}</td>
                   <td style={{ ...celula, fontSize: '13px' }}>{obras.length ? obras.join(', ') : '—'}</td>
-                  <td style={celulaNumero}>{formatarReais(vinculo?.valor_obra_centavos ?? 0)}</td>
+                  <td style={temValor ? celulaNumero : { ...celulaNumero, color: C.tintaFraca, fontStyle: 'italic' }}>
+                    {temValor ? formatarReais(vinculo!.valor_obra_centavos!) : 'a definir'}
+                  </td>
                   <td style={{ ...celula, fontSize: '13px', color: C.tintaFraca }}>Em aberto</td>
                 </tr>
               );

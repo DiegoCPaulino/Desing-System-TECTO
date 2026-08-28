@@ -76,10 +76,18 @@ const DADOS: AppState = {
   ],
 
   // ─── VÍNCULOS ─────────────────────────────────────────────────────────────
-  // Gestão (p01–p06) não tem vínculo: o regime de remuneração do Gerente e do
-  // Assistente é Q-001 a Q-004 em docs/ABERTO.md, e inventar um aqui viraria
-  // regra de negócio por conveniência de seed.
   vinculos: [
+    // ── GESTÃO ──
+    // A tabela da RN-004 define o tipo de vínculo de cada um destes. O que
+    // continua em aberto é o VALOR, não o tipo: Q-001 a Q-003 para o Gerente e
+    // Q-004 para o Assistente. Por isso eles têm tipo e não têm remuneração.
+    { id: 'v01', pessoa_id: 'p01', tipo: 'administracao',            inicio: '2024-01-15' },
+    { id: 'v02', pessoa_id: 'p02', tipo: 'administracao',            inicio: '2024-01-15' },
+    { id: 'v03', pessoa_id: 'p03', tipo: 'financeiro',               inicio: '2024-03-01' },
+    { id: 'v04', pessoa_id: 'p04', tipo: 'gerente_obras',            ciclo_pagamento: 'por_obra', inicio: '2024-06-01' },
+    { id: 'v05', pessoa_id: 'p05', tipo: 'gerente_obras',            ciclo_pagamento: 'por_obra', inicio: '2025-02-01' },
+    { id: 'v06', pessoa_id: 'p06', tipo: 'assistente_gerenciamento', inicio: '2025-08-01' },
+
     // ── Ciclo SEMANAL — fecha 22/08 ──
     { id: 'v07', pessoa_id: 'p07', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-03-01' },
     { id: 'v08', pessoa_id: 'p08', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-03-01' },
