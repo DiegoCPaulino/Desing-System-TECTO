@@ -403,7 +403,7 @@ export default function ObraChecklist() {
                 disabled={!foraDescricao.trim()}
                 style={{
                   flex: 2, fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600,
-                  color: C.tinta, backgroundColor: foraDescricao.trim() ? C.acento : '#F0F0F0',
+                  backgroundColor: foraDescricao.trim() ? C.acento : '#F0F0F0',
                   border: 'none', borderRadius: '8px', padding: '11px', cursor: foraDescricao.trim() ? 'pointer' : 'not-allowed',
                   color: foraDescricao.trim() ? C.tinta : C.neutro,
                 }}

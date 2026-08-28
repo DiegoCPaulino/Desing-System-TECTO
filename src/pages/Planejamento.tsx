@@ -18,6 +18,8 @@ import {
 } from '../state/store';
 import type { Planejamento as Cel } from '../state/types';
 
+type StoreState = ReturnType<typeof useStore.getState>;
+
 const C = {
   acento: '#FFC213',
   tinta: '#000000',
@@ -508,7 +510,7 @@ export default function Planejamento() {
 
 // ─── Subcomponentes ───────────────────────────────────────────────────────
 
-function CelulaConteudo({ state, cel }: { state: ReturnType<typeof useStore>; cel?: Cel }) {
+function CelulaConteudo({ state, cel }: { state: StoreState; cel?: Cel }) {
   const tipo = tipoCelula(cel);
   const alteradaTip = cel?.alterada
     ? `Alterado por ${cel.alteracao_por ?? '—'} em ${cel.alteracao_em ? dataHoraLegivel(cel.alteracao_em) : '—'}. Valor anterior: ${cel.valor_anterior ?? '—'}.`
