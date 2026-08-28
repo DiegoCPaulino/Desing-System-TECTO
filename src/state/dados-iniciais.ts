@@ -951,6 +951,70 @@ const DADOS: AppState = {
     // dele são gravadas quando o diário for finalizado, ao vivo.
   ],
 
+  // ─── RECEBIMENTOS ─────────────────────────────────────────────────────────
+  // Parcelas de pagamento do CLIENTE à TECTO — RN-135.
+  // A soma das parcelas de cada obra é igual a valor_contratado + adicionais, e
+  // a soma das pagas é igual a recebido_centavos. Os três números da Obra e
+  // estas linhas descrevem o mesmo fato e não podem divergir.
+  recebimentos: [
+    // Obra 22 - MCL — 6 parcelas, 3 pagas. Soma R$160.800,00 = contratado
+    // R$148.320,00 + adicionais R$12.480,00. Pagas: R$96.480,00 = recebido.
+    { id: 'rc01', obra_id: 'o01', numero: 1, vencimento: '2026-04-14', valor_centavos: 3216000, situacao: 'paga',     pago_em: '2026-04-14' },
+    { id: 'rc02', obra_id: 'o01', numero: 2, vencimento: '2026-05-14', valor_centavos: 3216000, situacao: 'paga',     pago_em: '2026-05-14' },
+    { id: 'rc03', obra_id: 'o01', numero: 3, vencimento: '2026-07-14', valor_centavos: 3216000, situacao: 'paga',     pago_em: '2026-07-15' },
+    { id: 'rc04', obra_id: 'o01', numero: 4, vencimento: '2026-08-25', valor_centavos: 3216000, situacao: 'vencendo' },
+    { id: 'rc05', obra_id: 'o01', numero: 5, vencimento: '2026-09-14', valor_centavos: 1608000, situacao: 'futura'   },
+    { id: 'rc06', obra_id: 'o01', numero: 6, vencimento: '2026-10-14', valor_centavos: 1608000, situacao: 'futura'   },
+    // Obra 18 - GFR — soma R$98.000,00; pagas R$49.000,00
+    { id: 'rc10', obra_id: 'o02', numero: 1, vencimento: '2026-05-02', valor_centavos: 2450000, situacao: 'paga',     pago_em: '2026-05-02' },
+    { id: 'rc11', obra_id: 'o02', numero: 2, vencimento: '2026-07-02', valor_centavos: 2450000, situacao: 'paga',     pago_em: '2026-07-03' },
+    { id: 'rc12', obra_id: 'o02', numero: 3, vencimento: '2026-09-02', valor_centavos: 2450000, situacao: 'futura'   },
+    { id: 'rc13', obra_id: 'o02', numero: 4, vencimento: '2026-11-02', valor_centavos: 2450000, situacao: 'futura'   },
+    // Obra 25 - ATB — soma R$74.000,00; pagas R$17.000,00
+    { id: 'rc20', obra_id: 'o03', numero: 1, vencimento: '2026-06-10', valor_centavos: 1700000, situacao: 'paga',     pago_em: '2026-06-10' },
+    { id: 'rc21', obra_id: 'o03', numero: 2, vencimento: '2026-09-10', valor_centavos: 1900000, situacao: 'futura'   },
+    { id: 'rc22', obra_id: 'o03', numero: 3, vencimento: '2026-11-10', valor_centavos: 1900000, situacao: 'futura'   },
+    { id: 'rc23', obra_id: 'o03', numero: 4, vencimento: '2027-01-10', valor_centavos: 1900000, situacao: 'futura'   },
+    // Obra 31 - MBP — aguardando início, nada recebido. Soma R$186.000,00
+    { id: 'rc30', obra_id: 'o04', numero: 1, vencimento: '2026-09-01', valor_centavos: 4650000, situacao: 'futura' },
+    { id: 'rc31', obra_id: 'o04', numero: 2, vencimento: '2026-11-01', valor_centavos: 4650000, situacao: 'futura' },
+    { id: 'rc32', obra_id: 'o04', numero: 3, vencimento: '2027-01-01', valor_centavos: 4650000, situacao: 'futura' },
+    { id: 'rc33', obra_id: 'o04', numero: 4, vencimento: '2027-03-01', valor_centavos: 4650000, situacao: 'futura' },
+    // Serviço 04 - LSM — soma R$28.000,00; pagas R$23.800,00
+    { id: 'rc40', obra_id: 'o05', numero: 1, vencimento: '2026-07-14', valor_centavos: 1190000, situacao: 'paga', pago_em: '2026-07-14' },
+    { id: 'rc41', obra_id: 'o05', numero: 2, vencimento: '2026-08-14', valor_centavos: 1190000, situacao: 'paga', pago_em: '2026-08-14' },
+    { id: 'rc42', obra_id: 'o05', numero: 3, vencimento: '2026-08-29', valor_centavos: 420000,  situacao: 'futura' },
+  ],
+
+  // ─── ADICIONAIS APROVADOS ─────────────────────────────────────────────────
+  // Somam R$12.480,00, igual a adicionais_centavos da Obra 22.
+  adicionais_obra: [
+    { id: 'ad01', obra_id: 'o01', descricao: 'Reforço de impermeabilização no lavabo',           aprovado_em: '2026-06-15', valor_centavos: 748000 },
+    { id: 'ad02', obra_id: 'o01', descricao: 'Tomadas adicionais e pontos de dados na cozinha',  aprovado_em: '2026-07-03', valor_centavos: 500000 },
+  ],
+
+  // ─── CUSTOS DA OBRA ───────────────────────────────────────────────────────
+  // Modalidade financeira da RN-131. `custo_centavos` é o que a TECTO paga e o
+  // Cliente NUNCA vê (RN-136); `valor_cobrado_centavos` é o que ele vê.
+  // Material é sempre do Cliente (RN-130), logo nunca aparece com margem.
+  custos_obra: [
+    // Obra 22 - MCL — os quatro que o Portal do Cliente exibe
+    { id: 'co01', obra_id: 'o01', fornecedor: 'Mármores Paulista', descricao: 'Bancada de mármore branco — cozinha e banheiro', modalidade: 'reembolsavel',      valor_cobrado_centavos: 1840000, custo_centavos: 1840000, data: '2026-07-22', tipo_documento_id: 'td04', nota_numero: '11482' },
+    { id: 'co02', obra_id: 'o01', fornecedor: 'NX Marcenaria',     descricao: 'Instalação completa de marcenaria — dormitórios e cozinha', modalidade: 'direto_do_cliente', valor_cobrado_centavos: 4560000, custo_centavos: 0,       data: '2026-08-05', tipo_documento_id: 'td07', nota_numero: '2093' },
+    { id: 'co03', obra_id: 'o01', fornecedor: 'Eletromed',         descricao: 'Sistema de ar-condicionado split — 3 ambientes', modalidade: 'reembolsavel',      valor_cobrado_centavos: 920000,  custo_centavos: 920000,  data: '2026-08-10', tipo_documento_id: 'td04', nota_numero: '77310' },
+    { id: 'co04', obra_id: 'o01', fornecedor: 'Vidraçaria Santos', descricao: 'Box de vidro temperado e espelhos sob medida',  modalidade: 'direto_do_cliente', valor_cobrado_centavos: 880000,  custo_centavos: 0,       data: '2026-08-12', tipo_documento_id: 'td07', nota_numero: '4471' },
+    // Repassados com margem — o Cliente vê o valor cobrado, nunca o custo
+    { id: 'co05', obra_id: 'o01', fornecedor: 'Cleber Matos',      descricao: 'Elétrica completa do apartamento',              modalidade: 'repassado_com_margem', valor_cobrado_centavos: 480000, custo_centavos: 320000, data: '2026-05-04', tipo_documento_id: 'td05' },
+    { id: 'co06', obra_id: 'o01', fornecedor: 'Rogério Pastore',   descricao: 'Hidráulica da cozinha e do banheiro da suíte',  modalidade: 'repassado_com_margem', valor_cobrado_centavos: 360000, custo_centavos: 240000, data: '2026-07-01', tipo_documento_id: 'td05' },
+    // Obra 18 - GFR
+    { id: 'co10', obra_id: 'o02', fornecedor: 'Dorival Assunção',  descricao: 'Elétrica do dormitório e banheiro social',      modalidade: 'repassado_com_margem', valor_cobrado_centavos: 420000, custo_centavos: 280000, data: '2026-06-05', tipo_documento_id: 'td05' },
+    { id: 'co11', obra_id: 'o02', fornecedor: 'Tarcísio Melo',     descricao: 'Forro de gesso acartonado do dormitório',       modalidade: 'repassado_com_margem', valor_cobrado_centavos: 285000, custo_centavos: 190000, data: '2026-06-22', tipo_documento_id: 'td05' },
+    { id: 'co12', obra_id: 'o02', fornecedor: 'Depósito Ipiranga', descricao: 'Porcelanato e argamassa — banheiro social',     modalidade: 'reembolsavel',         valor_cobrado_centavos: 620000, custo_centavos: 620000, data: '2026-08-11', tipo_documento_id: 'td04', nota_numero: '58201' },
+    // Obra 25 - ATB
+    { id: 'co20', obra_id: 'o03', fornecedor: 'Rogério Pastore',   descricao: 'Pontos de hidráulica da cozinha',               modalidade: 'repassado_com_margem', valor_cobrado_centavos: 162000, custo_centavos: 108000, data: '2026-07-10', tipo_documento_id: 'td05' },
+    { id: 'co21', obra_id: 'o03', fornecedor: 'Caçambas Moema',    descricao: 'Retirada de entulho — 3 caçambas',              modalidade: 'reembolsavel',         valor_cobrado_centavos: 96000,  custo_centavos: 96000,  data: '2026-06-20', tipo_documento_id: 'td08', nota_numero: '3312' },
+  ],
+
   // ─── ITENS FORA DO ESCOPO ─────────────────────────────────────────────────
   itens_fora_escopo: [],
 };

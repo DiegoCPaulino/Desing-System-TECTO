@@ -220,6 +220,70 @@ export interface TipoDocumento {
 // Mídia deixa de ser uma URL solta em `Diario.fotos` e passa a ter ambiente.
 // A coleção é ADITIVA: `Diario.fotos` continua existindo e continua sendo o
 // que as telas atuais leem.
+/**
+ * As três modalidades da `RN-131`. A modalidade pertence ao registro do custo,
+ * nunca ao cadastro do prestador (`RN-133`): o mesmo eletricista pode ser
+ * repassado com margem numa obra e direto do cliente noutra.
+ */
+export type ModalidadeFinanceira =
+  | 'repassado_com_margem'
+  | 'reembolsavel'
+  | 'direto_do_cliente';
+
+/**
+ * Custo ou serviço contratado a terceiros, por Obra.
+ *
+ * Dois campos de dinheiro, e a diferença entre eles é a margem da TECTO. A
+ * `RN-136` proíbe o Cliente de ver `custo_centavos` e a margem — use
+ * `custoVisivelAoCliente` para montar qualquer coisa que o Cliente enxergue.
+ *
+ * A `RN-130` diz que a TECTO não inclui material: todo material é do Cliente,
+ * logo aparece como reembolsável ou direto do cliente, nunca com margem.
+ */
+export interface CustoObra {
+  id: string;
+  obra_id: string;
+  fornecedor: string;
+  descricao: string;
+  modalidade: ModalidadeFinanceira;
+  /** O que a TECTO cobra do Cliente. Visível a ele. */
+  valor_cobrado_centavos: number;
+  /** O que a TECTO paga. NUNCA visível ao Cliente (`RN-136`). */
+  custo_centavos: number;
+  data: string;
+  /** Aponta para um tipo de nota em `tipos_documento`. */
+  tipo_documento_id?: string;
+  nota_numero?: string;
+}
+
+/**
+ * Parcela de pagamento do CLIENTE à TECTO. Não confundir com `Parcela`, que é
+ * parcela de adiantamento ou empréstimo de uma Pessoa — dinheiro no sentido
+ * oposto.
+ *
+ * A `RN-135` dá ao Cliente o direito de ver quanto deve, quanto já pagou, as
+ * parcelas futuras e os comprovantes.
+ */
+export interface Recebimento {
+  id: string;
+  obra_id: string;
+  numero: number;
+  vencimento: string;
+  valor_centavos: number;
+  situacao: 'paga' | 'vencendo' | 'futura';
+  pago_em?: string;
+  comprovante_url?: string;
+}
+
+/** Serviço adicional aprovado, que soma ao valor contratado da Obra. */
+export interface AdicionalObra {
+  id: string;
+  obra_id: string;
+  descricao: string;
+  aprovado_em: string;
+  valor_centavos: number;
+}
+
 export interface Midia {
   id: string;
   obra_id: string;
@@ -263,4 +327,7 @@ export interface AppState {
   especialidades: Especialidade[];
   tipos_documento: TipoDocumento[];
   midias: Midia[];
+  custos_obra: CustoObra[];
+  recebimentos: Recebimento[];
+  adicionais_obra: AdicionalObra[];
 }
