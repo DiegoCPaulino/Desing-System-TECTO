@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore, calcularPendencias } from '../state/store';
-import SemAcesso from '../pages/SemAcesso';
 
 const C = {
   acento: '#FFC213',
@@ -83,10 +82,10 @@ export default function AppLayout() {
 
   const perfil = state.perfil_ativo;
 
-  // Guard: sem perfil → login. Cliente não tem acesso às rotas internas —
-  // bloqueio visível, nunca redirecionamento silencioso.
+  // Autenticação, não permissão: quem não está logado vai para o login. A
+  // permissão por perfil é decidida em um lugar só, por GuardaPerfil, a partir
+  // de handle.perfis — este layout não checa perfil.
   if (!perfil) return <Navigate to="/entrar" replace />;
-  if (perfil === 'cliente') return <SemAcesso />;
 
   const isAdmin = perfil === 'administracao';
   const isFinanceiro = perfil === 'financeiro';
