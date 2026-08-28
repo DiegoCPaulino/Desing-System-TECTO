@@ -295,6 +295,87 @@ export interface Recebimento {
   comprovante_url?: string;
 }
 
+/**
+ * Serviço executado por terceiro na Obra — marcenaria, marmoraria, vidro,
+ * ar-condicionado e afins. É a matéria-prima do Andamento Geral.
+ *
+ * `especialidade_id` é o que a `RN-125b` chama de "atributo do serviço de
+ * terceiro": é daqui que sai o eixo Especialidade do Andamento, sem tabela
+ * nova espelhando o Checklist.
+ *
+ * **Duplicidade conhecida:** o mesmo eletricista pode aparecer aqui e em
+ * `custos_obra`. A decisão `D2` unifica as duas entidades, e está no degrau 8
+ * por risco — até lá as duas coexistem de propósito.
+ */
+export interface ServicoTerceiro {
+  id: string;
+  obra_id: string;
+  descricao: string;
+  fornecedor: string;
+  /**
+   * Ausente quando o serviço não pertence a um ambiente só — ar-condicionado
+   * em três cômodos, forro da obra inteira. A agregação do Andamento trata
+   * isso como o pseudo-ambiente "Obra inteira" da decisão `[SÓ PROTÓTIPO]`.
+   *
+   * É pseudo de verdade: **não** existe linha correspondente em `ambientes`.
+   * Criar uma faria o Checklist e o Andamento TECTO exibirem um ambiente vazio.
+   */
+  ambiente_id?: string;
+  especialidade_id: string;
+  situacao: 'nao_iniciado' | 'em_andamento' | 'concluido';
+}
+
+/**
+ * Categorias de despesa da empresa. A `Q-030` está **parcialmente respondida**:
+ * estas três vieram do cliente, e faltam as demais. O tipo vai crescer.
+ */
+export type CategoriaDespesa =
+  | 'ferramentas_e_maquinas'
+  | 'uniforme'
+  | 'marketing_e_trafego_pago';
+
+/** `RN-140` — despesa geral da empresa, por lançamento manual, com categoria. */
+export interface DespesaEmpresa {
+  id: string;
+  categoria: CategoriaDespesa;
+  descricao: string;
+  valor_centavos: number;
+  data: string;
+}
+
+/**
+ * Contrato de Terceirizado, por Obra. A `RN-004` define o regime como
+ * "contrato com parcelas"; o prompt da tarefa fixa que o contrato é por Obra,
+ * e não por Vínculo.
+ */
+export interface ContratoTerceirizado {
+  id: string;
+  pessoa_id: string;
+  obra_id: string;
+  escopo: string;
+  valor_centavos: number;
+  situacao: 'ativo' | 'concluido' | 'cancelado';
+}
+
+/**
+ * Parcela de um contrato de terceirizado.
+ *
+ * **Deliberadamente sem `vencimento` e sem `etapa`.** A `Q-005` pergunta se as
+ * parcelas são por data fixa ou por etapa concluída, e quem confirma a etapa —
+ * e continua aberta. Qualquer um dos dois campos afirmaria a resposta.
+ *
+ * É a saída 2 do `docs/ABERTO.md` §1: construir a estrutura sem afirmar a
+ * regra. Número, valor e situação bastam para exibir o contrato; o gatilho da
+ * cobrança entra quando Pedro e Fernando decidirem.
+ */
+export interface ParcelaContrato {
+  id: string;
+  contrato_id: string;
+  numero: number;
+  valor_centavos: number;
+  situacao: 'paga' | 'pendente';
+}
+
 /** Serviço adicional aprovado, que soma ao valor contratado da Obra. */
 export interface AdicionalObra {
   id: string;
@@ -350,4 +431,8 @@ export interface AppState {
   custos_obra: CustoObra[];
   recebimentos: Recebimento[];
   adicionais_obra: AdicionalObra[];
+  servicos_terceiros: ServicoTerceiro[];
+  despesas_empresa: DespesaEmpresa[];
+  contratos_terceirizado: ContratoTerceirizado[];
+  parcelas_contrato: ParcelaContrato[];
 }

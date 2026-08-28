@@ -1015,6 +1015,78 @@ const DADOS: AppState = {
     { id: 'co21', obra_id: 'o03', fornecedor: 'Caçambas Moema',    descricao: 'Retirada de entulho — 3 caçambas',              modalidade: 'reembolsavel',         valor_cobrado_centavos: 96000,  custo_centavos: 96000,  data: '2026-06-20', tipo_documento_id: 'td08', nota_numero: '3312' },
   ],
 
+  // ─── SERVIÇOS DE TERCEIROS ────────────────────────────────────────────────
+  // A matéria-prima do eixo Especialidade do Andamento Geral (RN-125b).
+  // Serviço sem ambiente único fica com `ambiente_id` ausente e é agregado no
+  // pseudo-ambiente "Obra inteira".
+  servicos_terceiros: [
+    // ── Obra 22 - MCL — 11 serviços, 5 concluídos ──
+    { id: 'st01', obra_id: 'o01', descricao: 'Armários planejados da suíte',        fornecedor: 'NX Marcenaria',      ambiente_id: 'a01', especialidade_id: 'es01', situacao: 'concluido' },
+    { id: 'st02', obra_id: 'o01', descricao: 'Armários planejados da cozinha',      fornecedor: 'NX Marcenaria',      ambiente_id: 'a03', especialidade_id: 'es01', situacao: 'em_andamento' },
+    { id: 'st03', obra_id: 'o01', descricao: 'Bancada de mármore da cozinha',       fornecedor: 'Mármores Paulista',  ambiente_id: 'a03', especialidade_id: 'es02', situacao: 'concluido' },
+    { id: 'st04', obra_id: 'o01', descricao: 'Bancada de mármore do banheiro',      fornecedor: 'Mármores Paulista',  ambiente_id: 'a02', especialidade_id: 'es02', situacao: 'concluido' },
+    { id: 'st05', obra_id: 'o01', descricao: 'Box de vidro temperado',              fornecedor: 'Vidraçaria Santos',  ambiente_id: 'a02', especialidade_id: 'es03', situacao: 'nao_iniciado' },
+    { id: 'st06', obra_id: 'o01', descricao: 'Espelhos sob medida',                 fornecedor: 'Vidraçaria Santos',  ambiente_id: 'a05', especialidade_id: 'es03', situacao: 'nao_iniciado' },
+    // Sem ambiente único — vão para o pseudo-ambiente "Obra inteira"
+    { id: 'st07', obra_id: 'o01', descricao: 'Split em três ambientes',             fornecedor: 'Eletromed',                              especialidade_id: 'es04', situacao: 'em_andamento' },
+    { id: 'st08', obra_id: 'o01', descricao: 'Forro de gesso do apartamento',       fornecedor: 'Tarcísio Melo',                          especialidade_id: 'es05', situacao: 'concluido' },
+    { id: 'st09', obra_id: 'o01', descricao: 'Rodapés e soleiras',                  fornecedor: 'Mármores Paulista',                      especialidade_id: 'es02', situacao: 'nao_iniciado' },
+    { id: 'st10', obra_id: 'o01', descricao: 'Piso de madeira dos dormitórios',     fornecedor: 'Casa do Assoalho',   ambiente_id: 'a01', especialidade_id: 'es06', situacao: 'concluido' },
+    { id: 'st11', obra_id: 'o01', descricao: 'Automação de iluminação',             fornecedor: 'Cleber Matos',                           especialidade_id: 'es07', situacao: 'nao_iniciado' },
+    // ── Obra 18 - GFR — 5 serviços, 2 concluídos ──
+    { id: 'st20', obra_id: 'o02', descricao: 'Forro de gesso do dormitório',        fornecedor: 'Tarcísio Melo',      ambiente_id: 'a06', especialidade_id: 'es05', situacao: 'concluido' },
+    { id: 'st21', obra_id: 'o02', descricao: 'Marcenaria da cozinha',               fornecedor: 'NX Marcenaria',      ambiente_id: 'a08', especialidade_id: 'es01', situacao: 'nao_iniciado' },
+    { id: 'st22', obra_id: 'o02', descricao: 'Bancada de quartzo da cozinha',       fornecedor: 'Mármores Paulista',  ambiente_id: 'a08', especialidade_id: 'es02', situacao: 'nao_iniciado' },
+    { id: 'st23', obra_id: 'o02', descricao: 'Piso de madeira da sala',             fornecedor: 'Casa do Assoalho',   ambiente_id: 'a09', especialidade_id: 'es06', situacao: 'nao_iniciado' },
+    { id: 'st24', obra_id: 'o02', descricao: 'Pontos de elétrica do dormitório',    fornecedor: 'Dorival Assunção',   ambiente_id: 'a06', especialidade_id: 'es07', situacao: 'concluido' },
+    // ── Obra 25 - ATB — 3 serviços, 1 concluído ──
+    { id: 'st30', obra_id: 'o03', descricao: 'Hidráulica da cozinha',               fornecedor: 'Rogério Pastore',    ambiente_id: 'a11', especialidade_id: 'es08', situacao: 'concluido' },
+    { id: 'st31', obra_id: 'o03', descricao: 'Forro de gesso da sala',              fornecedor: 'Tarcísio Melo',      ambiente_id: 'a10', especialidade_id: 'es05', situacao: 'nao_iniciado' },
+    { id: 'st32', obra_id: 'o03', descricao: 'Bancada de granito da cozinha',       fornecedor: 'Mármores Paulista',  ambiente_id: 'a11', especialidade_id: 'es02', situacao: 'nao_iniciado' },
+    // ── Serviço 04 - LSM — 1 serviço, 1 concluído ──
+    { id: 'st40', obra_id: 'o05', descricao: 'Retoque de gesso antes da pintura',   fornecedor: 'Tarcísio Melo',      ambiente_id: 'a17', especialidade_id: 'es05', situacao: 'concluido' },
+    // Obra 31 - MBP não tem serviço de terceiro: ainda não começou.
+  ],
+
+  // ─── DESPESAS DA EMPRESA ──────────────────────────────────────────────────
+  // RN-140: lançamento manual, com categoria. As três categorias vieram do
+  // cliente; a Q-030 segue aberta para as demais.
+  despesas_empresa: [
+    { id: 'de01', categoria: 'ferramentas_e_maquinas',  descricao: 'Martelete rompedor Bosch',              valor_centavos: 289000, data: '2026-07-08' },
+    { id: 'de02', categoria: 'ferramentas_e_maquinas',  descricao: 'Serra mármore e discos diamantados',    valor_centavos: 96000,  data: '2026-07-22' },
+    { id: 'de03', categoria: 'ferramentas_e_maquinas',  descricao: 'Andaime tubular — 6 módulos',           valor_centavos: 148000, data: '2026-08-03' },
+    { id: 'de04', categoria: 'uniforme',                descricao: 'Camisetas e calças — 24 conjuntos',     valor_centavos: 216000, data: '2026-06-18' },
+    { id: 'de05', categoria: 'uniforme',                descricao: 'Botinas de segurança — 18 pares',       valor_centavos: 162000, data: '2026-07-15' },
+    { id: 'de06', categoria: 'marketing_e_trafego_pago', descricao: 'Tráfego pago — julho',                 valor_centavos: 320000, data: '2026-07-31' },
+    { id: 'de07', categoria: 'marketing_e_trafego_pago', descricao: 'Tráfego pago — agosto',                valor_centavos: 320000, data: '2026-08-15' },
+    { id: 'de08', categoria: 'marketing_e_trafego_pago', descricao: 'Produção de fotos e vídeo das obras',  valor_centavos: 180000, data: '2026-06-29' },
+  ],
+
+  // ─── CONTRATOS DE TERCEIRIZADO ────────────────────────────────────────────
+  // Por Obra. O valor do contrato mora aqui, e não no vínculo, porque um mesmo
+  // terceirizado tem contratos diferentes em obras diferentes.
+  contratos_terceirizado: [
+    { id: 'ct01', pessoa_id: 'p09', obra_id: 'o01', escopo: 'Elétrica completa do apartamento',      valor_centavos: 320000, situacao: 'ativo' },
+    { id: 'ct02', pessoa_id: 'p32', obra_id: 'o02', escopo: 'Elétrica do dormitório e banheiro',     valor_centavos: 280000, situacao: 'ativo' },
+    { id: 'ct03', pessoa_id: 'p33', obra_id: 'o02', escopo: 'Forro de gesso do dormitório',          valor_centavos: 190000, situacao: 'concluido' },
+    { id: 'ct04', pessoa_id: 'p34', obra_id: 'o03', escopo: 'Hidráulica da cozinha e do banheiro',   valor_centavos: 240000, situacao: 'ativo' },
+  ],
+
+  // ─── PARCELAS DE CONTRATO ─────────────────────────────────────────────────
+  // Sem vencimento e sem etapa, de propósito: a Q-005 pergunta se a parcela é
+  // por data fixa ou por etapa concluída, e continua aberta. Ver o comentário
+  // em `ParcelaContrato`.
+  parcelas_contrato: [
+    { id: 'pc01', contrato_id: 'ct01', numero: 1, valor_centavos: 160000, situacao: 'paga'     },
+    { id: 'pc02', contrato_id: 'ct01', numero: 2, valor_centavos: 160000, situacao: 'pendente' },
+    { id: 'pc03', contrato_id: 'ct02', numero: 1, valor_centavos: 140000, situacao: 'paga'     },
+    { id: 'pc04', contrato_id: 'ct02', numero: 2, valor_centavos: 140000, situacao: 'pendente' },
+    { id: 'pc05', contrato_id: 'ct03', numero: 1, valor_centavos: 95000,  situacao: 'paga'     },
+    { id: 'pc06', contrato_id: 'ct03', numero: 2, valor_centavos: 95000,  situacao: 'paga'     },
+    { id: 'pc07', contrato_id: 'ct04', numero: 1, valor_centavos: 120000, situacao: 'paga'     },
+    { id: 'pc08', contrato_id: 'ct04', numero: 2, valor_centavos: 120000, situacao: 'pendente' },
+  ],
+
   // ─── ITENS FORA DO ESCOPO ─────────────────────────────────────────────────
   itens_fora_escopo: [],
 };
