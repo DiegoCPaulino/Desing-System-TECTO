@@ -197,14 +197,22 @@ Não existe `CampoLayout`; o Diário usa `AppLayout`.
 
 ### 4.2 Componentes compartilhados
 
-`src/components/` ainda não existe. As 18 páginas e os 2 layouts repetem uma
-constante local `C` com cores. Botões, cartões, badges, avatares, títulos,
-cabeçalhos de tabela, datas e valores monetários também são reconstruídos tela
-a tela.
+`src/components/` passou a existir no P1B visual. O primeiro componente é
+`TituloSecao`, aplicado em Painel, Visão da Obra, Andamento, Planejamento,
+Diário, Minha Obra, Portal Financeiro e Design System. O tratamento usa um bloco
+amarelo de preenchimento antes do texto grafite e substituiu as definições
+locais `SectionLabel`.
 
-Essa repetição é a base do P1B visual. Os seis primeiros componentes previstos
-são `TituloSecao`, `ValorMonetario`, `Avatar`, `ChipVinculo`,
-`CabecalhoTabela` e `DataComDiaSemana`.
+Os cinco componentes seguintes ainda não existem: `ValorMonetario`, `Avatar`,
+`ChipVinculo`, `CabecalhoTabela` e `DataComDiaSemana`. O P1B parou antes de
+`ValorMonetario`: as parcelas, os adicionais e os materiais exibidos em
+`PortalFinanceiro.tsx` são constantes locais formatadas, mas as entidades
+correspondentes não existem no estado. Cumprir o aceite global sem inventar
+dados exige primeiro uma alteração em `src/state/**` pelo Claude Code.
+
+As 18 páginas e os 2 layouts ainda repetem uma constante local `C` com cores.
+Botões, cartões, badges, avatares, cabeçalhos de tabela, datas e valores
+monetários continuam, em sua maioria, reconstruídos tela a tela.
 
 ---
 
