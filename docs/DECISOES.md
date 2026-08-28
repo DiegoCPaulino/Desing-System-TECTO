@@ -50,6 +50,9 @@ não "a marcenaria da suíte".
 por Ambiente.
 **Restrição:** a especialidade é atributo do serviço de terceiro. Não pode criar
 uma segunda tabela espelhando o checklist — isso violaria `INV-06`.
+**Transcrita:** a `RN-125` de `docs/PRODUTO.md` foi reescrita para refletir esta
+decisão, e ganhou a `RN-125b` com a restrição acima. Até essa transcrição, as
+duas fontes diziam coisas opostas sobre o mesmo assunto.
 
 ### `[PRODUTO]` · Serviço de terceiro e custo são o mesmo registro · D2
 **Decisão:** um serviço de terceiro **é** um custo com modalidade financeira; a
@@ -243,6 +246,35 @@ precisa de autorização para mexer no `package.json`.**
 
 ---
 
+### `[TÉCNICA]` · A gestão tem vínculo, com o tipo da `RN-004`
+**Decisão:** `Vinculo.tipo` passa a ter os seis valores da tabela da `RN-004`, e
+Pedro, Fernando, Fernanda, Rafael, Sofia e Ana passam a ter vínculo.
+**Por quê:** a P1A deixou a gestão sem vínculo alegando que o regime era
+pergunta aberta. A `RN-004` decide o **tipo** de cada um; o que segue aberto é o
+**valor** — `Q-001` a `Q-003` para o Gerente e `Q-004` para o Assistente.
+**Consequência:** o Gerente de Obras entra no ciclo `por_obra` do Fechamento,
+com `valor_obra_centavos` vazio e a coluna exibindo "a definir". Um número ali
+afirmaria que o valor não varia com duração nem porte, que é exatamente o que a
+`Q-001` pergunta.
+**Invalida:** o comentário do seed que dizia que a gestão não teria vínculo.
+
+### `[TÉCNICA]` · A fronteira do Cliente é um tipo, não uma convenção
+**Decisão:** `custosVisiveisAoCliente` devolve um tipo que **não tem**
+`custo_centavos` nem margem, e vive em `src/state/visibilidade.ts`, sem
+dependência do store.
+**Por quê:** a `RN-136` proíbe o Cliente de ver custo e margem. Deixar o campo
+no objeto contando que a tela não vá exibi-lo é exatamente como o vazamento
+acontece — e o Portal é a tela que a TECTO mostra aos clientes dela.
+
+### `[TÉCNICA]` · Só "repassado com margem" gera margem
+**Decisão:** `margemDaObra` considera apenas a modalidade `repassado_com_margem`.
+**Por quê:** reembolsável devolve o mesmo valor, e em "direto do Cliente" a TECTO
+não desembolsa nada — somar `cobrado − custo` ali conta a nota inteira como
+lucro. O defeito existiu: a Obra 22 aparecia com R$57.200,00 de margem em vez de
+R$2.800,00. Foi um teste que pegou.
+
+---
+
 ## Aguardando registro
 
 Itens decididos em conversa e ainda não escritos aqui em formato completo. Quem
@@ -253,3 +285,8 @@ encostar neles, complete o registro.
   documentado ou remover
 - Nome fixo "Mariana Costa Lima" dentro do `PortalLayout` — viola a regra de nada
   escrito no código; precisa sair
+- **`docs/DECISOES.md` não está na tabela de precedência do `AGENTS.md` §2.**
+  Pela letra do contrato, uma `RN` vence uma decisão registrada aqui — mesmo
+  quando a decisão declara invalidá-la, como a `D1` fazia com a `RN-125`. Ou
+  este arquivo entra na tabela, ou toda decisão `[PRODUTO]` precisa ser
+  transcrita para o `PRODUTO.md` antes de valer.

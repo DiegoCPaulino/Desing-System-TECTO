@@ -390,7 +390,11 @@ Este é o fluxo mais crítico do sistema operacional. Ele deve funcionar exatame
  
 **Andamento TECTO** — organizado por Ambiente, detalhado por serviço. O Gerente marca cada serviço concluído. Quando todos os serviços de um Ambiente estão marcados, o Ambiente é automaticamente concluído.
  
-**Andamento Geral** — organizado apenas por Ambiente, sem detalhamento de serviço. Cobre marcenaria, marmoraria, vidro, ar-condicionado e demais terceiros. O Gerente cria essas entradas ao longo da Obra e marca o Ambiente como concluído.
+**Andamento Geral** — organizado por **Especialidade e por Ambiente ao mesmo tempo**, derivando os dois recortes do **mesmo conjunto de registros**. Cobre marcenaria, marmoraria, vidro, ar-condicionado e demais terceiros. O Gerente cria essas entradas ao longo da Obra.
+ 
+*A redação anterior desta regra dizia "organizado apenas por Ambiente, sem detalhamento de serviço". Foi substituída pela decisão `D1` de `docs/DECISOES.md`, que já declarava invalidá-la: é assim que a obra acontece, porque o marceneiro entrega a marcenaria inteira, não "a marcenaria da suíte".*
+ 
+**RN-125b** — A Especialidade é **atributo do serviço de terceiro**. Os três percentuais — por especialidade, por ambiente e total da obra — saem de uma agregação sobre o mesmo conjunto de registros. **Não se cria uma segunda tabela espelhando o Checklist**: isso violaria o `INV-06`.
  
 **RN-126** — O percentual do Andamento TECTO é calculado a partir do Checklist de Execução.
  

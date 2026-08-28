@@ -44,7 +44,7 @@ tela de fechamento, embora os dados de fechamento existam no estado.
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | 21 testes do Fechamento em `src/state/fechamento.testes.ts`; não há runner instalado — ver §12 |
+| Testes automatizados | 38 testes em `fechamento.testes.ts` e `portal.testes.ts`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
 | `src/components/` | existe, com `TituloSecao` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
@@ -140,7 +140,7 @@ domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entid
 | Coleção | Interface | Registros no seed |
 |---|---|---:|
 | `pessoas` | `Pessoa` | 34 |
-| `vinculos` | `Vinculo` | 28 |
+| `vinculos` | `Vinculo` | 34 |
 | `obras` | `Obra` | 5 |
 | `vinculos_obra` | `VinculoObra` | 7 |
 | `ambientes` | `Ambiente` | 18 |
@@ -158,10 +158,20 @@ domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entid
 | `especialidades` | `Especialidade` | 9 |
 | `tipos_documento` | `TipoDocumento` | 8 |
 | `midias` | `Midia` | 14 |
+| `recebimentos` | `Recebimento` | 21 |
+| `adicionais_obra` | `AdicionalObra` | 2 |
+| `custos_obra` | `CustoObra` | 11 |
 
-As cinco últimas nasceram na P1A e são **aditivas**: nenhuma tela existente as
-lê ainda. `Diario.fotos` continua sendo a fonte das telas de foto; `midias` é a
-modelagem real, com ambiente.
+As oito últimas são **aditivas**: nenhuma tela existente as lê ainda.
+`Diario.fotos` continua sendo a fonte das telas de foto; `midias` é a modelagem
+real, com ambiente.
+
+As três criadas depois do `PRODUTO.md` chegar ao repositório existem para
+cumprir a `RN-135` — são o que o Cliente tem direito de ver no Portal, e o que
+estava escrito à mão dentro de `PortalFinanceiro.tsx`. A soma dos
+`recebimentos` de cada obra é igual a `valor_contratado + adicionais`, e a soma
+dos pagos é igual a `recebido_centavos`. Há teste conferindo isso nas cinco
+obras.
 
 ### 3.1 Arquivos de estado
 
@@ -169,7 +179,10 @@ modelagem real, com ambiente.
 - `dados-iniciais.ts`: seed e data fixa de referência.
 - `store.ts`: store zustand, mutações e funções puras.
 - `fechamento.ts`: cálculo do Fechamento de ciclo — funções puras.
-- `fechamento.testes.ts`: os 21 testes do módulo acima.
+- `fechamento.testes.ts`: 27 testes do módulo acima.
+- `visibilidade.ts`: fronteira de visibilidade do Cliente (`RN-135`, `RN-136`) e
+  totais derivados da Obra. Funções puras, sem dependência do store.
+- `portal.testes.ts`: 11 testes de visibilidade e de coerência do seed.
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
@@ -552,10 +565,15 @@ de Fechamento dizia R$6.680,00 para a mesma semana.
 
 ### 12.3 Testes
 
-`src/state/fechamento.testes.ts` — 21 testes, 0 falhas. Cobrem saldo devedor
-maior que o ciclo, diária em duas obras, edição de diário de período fechado,
-valor congelado, adicional não recalculado, e as bordas de ciclo inexistente e
-pessoa sem diária.
+**38 testes, 0 falhas**, em dois arquivos.
+
+`fechamento.testes.ts` — 27. Saldo devedor maior que o ciclo, diária em duas
+obras, edição de diário de período fechado, valor congelado, adicional não
+recalculado, os seis tipos de vínculo da `RN-004`, o saldo devedor total da
+`RN-095`, e as bordas de ciclo inexistente e pessoa sem diária.
+
+`portal.testes.ts` — 11. Coerência entre os totais gravados na Obra e as linhas
+que os compõem, nas cinco obras, e a fronteira da `RN-136`.
 
 **Não há runner de teste no repositório.** Instalar um tocaria `package.json`,
 fora dos arquivos permitidos da P1A. Os testes são auto-contidos, sem framework,
