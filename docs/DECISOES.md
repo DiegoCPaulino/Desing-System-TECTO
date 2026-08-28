@@ -97,6 +97,36 @@ externa, e alimenta os Indicadores. **Um nunca é derivado do outro.**
 
 ---
 
+### `[SÓ PROTÓTIPO]` · O elenco de campo tem 23 pessoas, não 21
+**Decisão:** o seed traz as **23** pessoas de campo listadas no `AGENTS.md` §6.
+**Por quê:** o prompt da P1A fala em "21 pessoas de campo" e a lista do
+`AGENTS.md` tem 23 nomes. O `AGENTS.md` vence por precedência, e ele mesmo diz
+que prevalece onde houver cópia.
+**Invalida:** o número 21 no `docs/SPRINT.md` §6.
+
+### `[SÓ PROTÓTIPO]` · Função das 9 pessoas que o elenco não classifica
+**Decisão:** Erasmo Peixoto, Nazareno Correia → Pedreiro · Osmar Cavalcante,
+Anísio Trindade → Azulejista · Osvaldo Ramalho → Pintor · Belarmino Souza,
+Deusdete Farias, Anselmo Freitas, Wanderley Prazeres → Ajudante.
+**Por quê:** `Pessoa.funcao` é campo obrigatório e essas 9 pessoas aparecem no
+`AGENTS.md` §6 sem o rótulo entre parênteses que as outras têm. Sem função elas
+não podem ser semeadas.
+**Vigilância:** é conveniência de seed, não informação vinda do cliente. A
+lacuna 1 do `docs/ABERTO.md` §7 continua aberta — nenhuma `RN` cria o campo
+função. **Confirmar com Fernando antes de virar regra.**
+
+### `[SÓ PROTÓTIPO]` · Obra 25 - ATB passa a "em andamento"
+**Decisão:** a Obra 25 deixa de ser `pausada` e passa a `em_andamento`.
+**Por quê:** o item 3.4 pede que a falta de diário dela vire pendência no
+Painel, e `calcularPendencias` só deriva "diário faltando" para obra em
+andamento. Pausada, a obra nunca geraria a pendência que a cena precisa.
+
+### `[SÓ PROTÓTIPO]` · Ana Carvalho não é gerente de obra
+**Decisão:** a gerência da Obra 25 passa para Rafael Duarte; Ana fica como
+assistente, que é o papel dela.
+**Por quê:** o seed anterior a punha como `gerente`, e o elenco fixo a define
+como Assistente de Gerenciamento. Duas fontes divergindo sobre a mesma pessoa.
+
 ## Decisões que ficam só no protótipo
 
 Estas **não** entram em `docs/PRODUTO.md`. Vão à pauta com Pedro e Fernando.
@@ -158,6 +188,58 @@ nada. No schema real ele é obrigatório desde a primeira migration.
 tela. Nenhuma cena do roteiro depende deles. O Orçamento é o maior item do
 roadmap e a cena que ele sustenta sempre foi condicional.
 **Não é corte.** É fila. Se a escada chegar lá, entram.
+
+---
+
+### `[TÉCNICA]` · Data gravada é a do protótipo, não a do relógio
+**Decisão:** toda mutação do store grava `agoraNoPrototipo()` — data sempre
+`HOJE`, a data de referência da maquete, e só a hora vem do relógio.
+**Por quê:** `new Date().toISOString()` fazia um diário de 20/08/2026 exibir
+"finalizado em 28/08" — a data real da máquina. Quebrava o invariante de data
+coerente do `AGENTS.md` §4 e §6, e quebrava no fim da Cena 6.
+
+### `[TÉCNICA]` · `Fechamento.total_centavos` guarda o valor LÍQUIDO
+**Decisão:** o campo é o valor **a pagar**, depois dos descontos e com piso em
+zero — o mesmo que `executarFechamento` grava.
+**Por quê:** semeado como bruto, o Painel dizia R$7.740,00 e a tela de
+Fechamento dizia R$6.680,00 para a mesma semana. Um campo, um significado.
+
+### `[TÉCNICA]` · O ciclo `por obra` é derivado e não entra no enum
+**Decisão:** `Fechamento.ciclo` continua com três valores. O ciclo `por_obra` é
+derivado dos vínculos de terceirizado, não tem período, e `executarFechamento`
+recusa fechá-lo.
+**Por quê:** um quarto valor no enum deixaria o rótulo do Painel sem tradução.
+E a periodicidade do pagamento por Obra é `Q-001` a `Q-003`, em aberto: a aba
+mostra a forma sem afirmar a regra, como manda a saída 2 do `ABERTO.md` §1.
+
+### `[TÉCNICA]` · Diário travado por UMA pessoa fechada, não por todas
+**Decisão:** `diarioEstaFechado` é verdadeiro quando qualquer pessoa do diário
+está em período fechado.
+**Por quê:** `finalizarDiario` apaga e regrava presenças e diárias de todo mundo
+do diário. Editar um diário com uma só pessoa já fechada reescreveria o
+pagamento dela. Nenhuma função de imutabilidade recebe perfil — a trava vale
+para a Administração.
+
+### `[TÉCNICA]` · Parcela amortizada em parte é PARTIDA em duas
+**Decisão:** quando o ganho do ciclo cobre só parte de uma parcela, ela vira
+duas: a fatia paga fica no ciclo, o restante vira parcela nova no ciclo
+seguinte.
+**Por quê:** reduzir o valor da parcela original apagaria quanto foi amortizado
+e quando. Isto é dinheiro; o rastro importa mais que a economia de um registro.
+
+### `[TÉCNICA]` · Notificação guarda título e descrição congelados
+**Decisão:** `Notificacao` grava o texto no momento do evento, em vez de
+derivá-lo na leitura.
+**Por quê:** notificação é registro de fato passado. Texto derivado mudaria
+junto com o dado de origem, e a notificação passaria a descrever algo que não
+aconteceu.
+
+### `[PROCESSO]` · Testes existem, runner não
+**Decisão:** os testes do Fechamento vivem em `src/state/fechamento.testes.ts`,
+sem framework, e são executados compilando com `tsc` para fora da árvore.
+**Por quê:** instalar um runner toca `package.json`, que estava fora dos
+arquivos permitidos da P1A. **Transformar isso num `npm test` é tarefa própria e
+precisa de autorização para mexer no `package.json`.**
 
 ---
 
