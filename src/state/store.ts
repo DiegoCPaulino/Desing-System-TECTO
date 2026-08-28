@@ -2,6 +2,20 @@ import { create } from 'zustand';
 import type { AppState, Planejamento, Presenca, Diaria, Diario, Obra, TipoPerfil, ItemForaEscopo } from './types';
 import DADOS_INICIAIS, { HOJE } from './dados-iniciais';
 
+/**
+ * Instante "agora" do protótipo: a data é sempre HOJE, a data de referência
+ * fixa da maquete, e só a hora vem do relógio da máquina.
+ *
+ * `new Date().toISOString()` grava a data REAL do computador. Como a maquete
+ * vive em 20/08/2026, isso fazia um diário de 20/08 exibir "finalizado em
+ * 28/08" — quebrando o invariante de data coerente do AGENTS.md §4 e §6 no
+ * meio da Cena 6.
+ */
+function agoraNoPrototipo(): string {
+  const hora = new Date().toTimeString().slice(0, 8);
+  return `${HOJE}T${hora}`;
+}
+
 /** Descreve o novo conteúdo de uma célula do planejamento */
 export type CelulaValor =
   | { tipo: 'alocada'; obra_id: string; adicional_centavos?: number }
@@ -52,7 +66,7 @@ export const useStore = create<Store>(() => ({
   },
 
   marcarItem: ({ item_id, executado, pessoa_id }) => {
-    const agora = new Date().toISOString();
+    const agora = HOJE; // executado_em e data pura no seed, nao timestamp
     useStore.setState((s) => ({
       itens_orcamento: s.itens_orcamento.map((item) =>
         item.id === item_id
@@ -63,7 +77,7 @@ export const useStore = create<Store>(() => ({
   },
 
   marcarTodosItensAmbiente: ({ ambiente_id, executado, pessoa_id }) => {
-    const agora = new Date().toISOString();
+    const agora = HOJE; // idem marcarItem
     useStore.setState((s) => ({
       itens_orcamento: s.itens_orcamento.map((item) =>
         item.ambiente_id === ambiente_id
@@ -75,7 +89,7 @@ export const useStore = create<Store>(() => ({
 
   adicionarItemForaEscopo: ({ obra_id, descricao, quantidade, unidade, criado_por }) => {
     const id = `fe_${Date.now()}`;
-    const agora = new Date().toISOString();
+    const agora = agoraNoPrototipo();
     const novoItem: ItemForaEscopo = { id, obra_id, descricao, quantidade, unidade, criado_em: agora, criado_por, estado: 'rascunho' };
     useStore.setState((s) => ({ itens_fora_escopo: [...s.itens_fora_escopo, novoItem] }));
   },
@@ -126,7 +140,7 @@ export const useStore = create<Store>(() => ({
         base.alterada = true;
         base.alteracao_pendente = true;
         base.alteracao_por = alterado_por;
-        base.alteracao_em = new Date().toISOString();
+        base.alteracao_em = agoraNoPrototipo();
         // o valor anterior nunca é sobrescrito
         base.valor_anterior = anterior?.valor_anterior ?? rotuloAnterior;
       }
@@ -157,7 +171,7 @@ export const useStore = create<Store>(() => ({
 
   finalizarDiario: ({ diario_id, obra_id, data, texto_linhas, fotos, confirmados, removidos_planejados, finalizado_por, houve_execucao, motivo_sem_execucao }) => {
     useStore.setState((s) => {
-      const agora = new Date().toISOString();
+      const agora = agoraNoPrototipo();
 
       const diarioExistente = s.diarios.find((d) => d.id === diario_id);
       const diarioFinalizado: Diario = {

@@ -224,7 +224,7 @@ atual permite percorrer.
 | Fluxo | Estado observado no código atual |
 |---|---|
 | F1 Planejamento → Diário → Presença → Diária → Fechamento | Planejamento, Diário e Presença existem; a interface interna de Fechamento não existe e `/financeiro` mostra `EmBreve` |
-| F2 Divergência planejado × realizado | tratamento existe no Diário; não foi reexecutado ponta a ponta no Pacote 0 |
+| F2 Divergência planejado × realizado | **exercitado ponta a ponta no navegador** na P1A: remoção pede motivo e confirmação explícita, adição avisa "alocado em outra obra" sem dizer qual, e o Painel muda sozinho depois de finalizar. Ver §11 |
 | F3 Checklist → Andamento → Carteira → Portal | telas leem o mesmo estado da Obra 22; é o fluxo visual mais completo |
 | F4 Pendências derivadas | Painel e layout chamam `calcularPendencias`; não há lista de notificações ao clicar no sino |
 | F5 Rateio de diária | há diária sem obra pagadora no seed; não há tela financeira atual para concluir a escolha |
@@ -450,3 +450,44 @@ está fora dos arquivos permitidos da tarefa.
 resolve o sintoma; derivar a folha na renderização, em vez de guardá-la em
 estado, resolve a causa. A segunda é a que o circuit breaker do `AGENTS.md` §4
 descreve.
+
+---
+
+## 11. Fluxo F2 exercitado no navegador
+
+Item 4 da tarefa P1A. Perfil Pedro Almeida, rota `/obras/22-mcl/diario`.
+
+| # | Passo | Resultado |
+|---|---|---|
+| 1 | Abrir o diário de hoje da Obra 22 | abre em **Rascunho** |
+| 2 | Chega pré-preenchido com os planejados | 10 pessoas, todas do elenco fixo |
+| 3 | Remover uma pessoa planejada | folha "Diferente do planejado" abre, nomeia Adilson Prado, oferece 5 motivos e exige Confirmar |
+| 4 | Confirmar | contador vai a "9 de 10", a pessoa passa a exibir "Doente" com Desfazer |
+| 5 | Acrescentar alguém alocado em outra obra | aviso: *"Ele está alocado em outra obra"* — **sem revelar qual**, como o F2 exige |
+| 6 | Finalizar o diário | grava 10 presenças, as diárias e o texto; o diário passa a Finalizado |
+| 7 | Voltar ao Painel | **muda sozinho**: 11 → 20 pessoas em campo, 5 → 7 pendências |
+
+As duas pendências novas do passo 7 são derivadas, não escritas:
+
+- **Rateio pendente: Edmilson Vieira** — ele estava presente na GFR e foi
+  acrescentado na MCL no mesmo dia. `finalizarDiario` detecta a presença na
+  outra obra e grava UMA diária com `obra_que_arca_id` vazio. É a `F5`
+  funcionando.
+- **Decisão de pagamento: Adilson Prado** — vem de `removidos_planejados`.
+
+O registro original do planejamento sobreviveu: a divergência continua sendo
+derivada na exibição e nunca gravada por cima.
+
+### 11.1 Defeito encontrado e corrigido
+
+`finalizarDiario`, `marcarItem`, `marcarTodosItensAmbiente`,
+`adicionarItemForaEscopo` e `gravarCelula` gravavam `new Date().toISOString()`,
+ou seja, a data **real da máquina**. Um diário de 20/08/2026 exibia
+"finalizado em 28/08" — a data em que o teste rodou.
+
+Isso quebra o invariante de data coerente do `AGENTS.md` §4 e §6, e quebrava
+exatamente no fim da Cena 6, que é o momento mais visível da demonstração.
+
+Corrigido em `src/state/store.ts` com `agoraNoPrototipo()`: a data é sempre
+`HOJE`, a data de referência da maquete, e só a hora vem do relógio. Reverificado
+no navegador — passou a exibir "finalizado em 20/08 às 14:15".
