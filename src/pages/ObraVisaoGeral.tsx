@@ -3,6 +3,7 @@ import { Link, useLocation, useParams } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais, obraSlug, obraPorSlug } from '../state/store';
 import EmBreve from './EmBreve';
 import TituloSecao from '../components/TituloSecao';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -69,16 +70,6 @@ function StatusBadge({ label, bg, color }: { label: string; bg: string; color: s
   );
 }
 
-function Avatar({ initials, bg, size = 36 }: { initials: string; bg: string; size?: number }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: size * 0.33, fontWeight: 700, color: C.superficie }}>
-        {initials}
-      </span>
-    </div>
-  );
-}
-
 function ProgressBar({ pct, color }: { pct: number; color: string }) {
   return (
     <div style={{ flex: 1, height: '5px', backgroundColor: C.borda, borderRadius: '999px', overflow: 'hidden' }}>
@@ -127,10 +118,9 @@ export default function ObraVisaoGeral() {
   const ambientes = state.ambientes.filter(a => a.obra_id === obra.id);
   const tectoPct = calcularPctObra(state, obra.id);
   const vinculosObra = state.vinculos_obra.filter(v => v.obra_id === obra.id && !v.fim);
-  const teamMembers = vinculosObra.map((vo, i) => {
+  const teamMembers = vinculosObra.map((vo) => {
     const pessoa = state.pessoas.find(p => p.id === vo.pessoa_id);
-    const bgs = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A'];
-    return { initials: pessoa?.iniciais ?? '?', name: pessoa?.nome ?? '?', role: vo.papel === 'gerente' ? 'Gerente de obras' : 'Assistente', bg: bgs[i % bgs.length] };
+    return { id: vo.pessoa_id, name: pessoa?.nome ?? '?', role: vo.papel === 'gerente' ? 'Gerente de obras' : 'Assistente' };
   });
   const gerenteName = teamMembers.find(t => t.role === 'Gerente de obras')?.name ?? '—';
   const assistanteName = teamMembers.find(t => t.role === 'Assistente')?.name;
@@ -141,9 +131,9 @@ export default function ObraVisaoGeral() {
   const diarioPresencas = diarioFinalizado
     ? state.presencas.filter(p => p.diario_id === diarioFinalizado.id)
     : [];
-  const diarioWorkers = diarioPresencas.map((pr, i) => {
+  const diarioWorkers = diarioPresencas.map((pr) => {
     const pessoa = state.pessoas.find(p => p.id === pr.pessoa_id);
-    return { initials: pessoa?.iniciais ?? '?', name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?', bg: ['#7D7D7D','#9A9A9A','#5A5A5A','#363636'][i % 4] };
+    return { id: pr.pessoa_id, name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?' };
   });
 
   const tabsDisponiveis = isPequenoServico ? ALL_TABS.filter(t => t !== 'Diários') : ALL_TABS;
@@ -398,9 +388,9 @@ export default function ObraVisaoGeral() {
             </div>
             )}
             <div style={{ display: 'flex', gap: '24px', marginBottom: '24px', flexWrap: 'wrap' }}>
-              {diarioWorkers.map(({ initials, name, role, bg }) => (
-                <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <Avatar initials={initials} bg={bg} size={34} />
+              {diarioWorkers.map(({ id, name, role }) => (
+                <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Avatar pessoaId={id} nome={name} tamanho={34} />
                   <div>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, lineHeight: '17px' }}>{name}</p>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.neutro, lineHeight: '15px', marginTop: '1px' }}>{role}</p>
@@ -424,9 +414,9 @@ export default function ObraVisaoGeral() {
           <Card>
             <CardHeader>Equipe na obra</CardHeader>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {teamMembers.map(({ initials, name, role, bg }) => (
-                <div key={name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '16px 10px', borderRadius: '10px', border: `1px solid ${C.borda}`, textAlign: 'center' as const }}>
-                  <Avatar initials={initials} bg={bg} size={40} />
+              {teamMembers.map(({ id, name, role }) => (
+                <div key={id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', padding: '16px 10px', borderRadius: '10px', border: `1px solid ${C.borda}`, textAlign: 'center' as const }}>
+                  <Avatar pessoaId={id} nome={name} tamanho={40} />
                   <div>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, lineHeight: '17px' }}>{name}</p>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.neutro, marginTop: '2px', lineHeight: '15px' }}>{role}</p>

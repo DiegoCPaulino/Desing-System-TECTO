@@ -1,6 +1,7 @@
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../state/store';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -99,11 +100,7 @@ export default function PortalLayout() {
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite }}>
               Mariana Costa Lima
             </span>
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: C.grafite, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 700, color: C.superficie }}>
-                MC
-              </span>
-            </div>
+            <Avatar pessoaId="cliente-o01" nome="Mariana Costa Lima" tamanho={36} />
             <button
               onClick={handleLogout}
               title="Sair"

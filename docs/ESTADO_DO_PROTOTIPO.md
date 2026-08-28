@@ -3,8 +3,8 @@
 Fotografia do que existe no repositório. Este arquivo descreve o código atual;
 não substitui regra de negócio, decisão de produto nem pergunta em aberto.
 
-**Atualizado em:** 28/08/2026, após a tarefa P1A.
-**Base da auditoria:** branch `agente/code`, depois do commit do item 6 da P1A.
+**Atualizado em:** 28/08/2026, após as tarefas P1A e P1B visual.
+**Base da auditoria:** branch `agente/codex`, depois do commit `2f012f5`.
 **Método:** leitura de rotas, telas, layouts, tipos, store e seed; compilação e
 build; verificação em navegador nos perfis Pedro Almeida, Rafael Duarte e
 Mariana Costa Lima, em 390, 800 e 1440 px.
@@ -33,10 +33,9 @@ O protótipo já demonstra uma parte relevante da operação:
 - portal do cliente com obra, diário e financeiro;
 - guarda de rota por perfil e vínculo de obra.
 
-Ainda não é uma demonstração ponta a ponta completa. Financeiro interno,
-Fechamento de Ciclo, Indicadores, Orçamentos, Financeiro/Documentos da obra e
-Ficha da Pessoa continuam em `EmBreve`. A rota `/financeiro` não expõe hoje uma
-tela de fechamento, embora os dados de fechamento existam no estado.
+Ainda não é uma demonstração ponta a ponta completa. Indicadores, Orçamentos,
+Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
+`/financeiro` já expõe a tela de Fechamento de ciclo criada na P1A.
 
 ### Saúde técnica em 28/08/2026
 
@@ -46,7 +45,7 @@ tela de fechamento, embora os dados de fechamento existam no estado.
 | `npm run build` | passa |
 | Testes automatizados | 38 testes em `fechamento.testes.ts` e `portal.testes.ts`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
-| `src/components/` | existe, com `TituloSecao` |
+| `src/components/` | quatro componentes: `TituloSecao`, `Avatar`, `CabecalhoTabela` e `DataComDiaSemana` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
 | Navegador em 800 px | renderiza, com truncamentos visuais |
 | Navegador em 390 px | aplicação interna e Portal têm falhas estruturais de responsividade |
@@ -226,22 +225,26 @@ Não existe `CampoLayout`; o Diário usa `AppLayout`.
 
 ### 4.2 Componentes compartilhados
 
-`src/components/` passou a existir no P1B visual. O primeiro componente é
-`TituloSecao`, aplicado em Painel, Visão da Obra, Andamento, Planejamento,
-Diário, Minha Obra, Portal Financeiro e Design System. O tratamento usa um bloco
-amarelo de preenchimento antes do texto grafite e substituiu as definições
-locais `SectionLabel`.
+`src/components/` contém exatamente os quatro componentes visuais aprovados
+para esta etapa:
 
-Os cinco componentes seguintes ainda não existem: `ValorMonetario`, `Avatar`,
-`ChipVinculo`, `CabecalhoTabela` e `DataComDiaSemana`. O P1B parou antes de
-`ValorMonetario`: as parcelas, os adicionais e os materiais exibidos em
-`PortalFinanceiro.tsx` são constantes locais formatadas, mas as entidades
-correspondentes não existem no estado. Cumprir o aceite global sem inventar
-dados exige primeiro uma alteração em `src/state/**` pelo Claude Code.
+- `TituloSecao`: bloco amarelo de preenchimento e texto grafite, aplicado nas
+  seções das telas do app e do Portal;
+- `Avatar`: retrato SVG ilustrado e determinístico a partir de `pessoaId`,
+  aplicado em Painel, Equipe, Diário, Planejamento, Obra, Login e Portal;
+- `CabecalhoTabela`: Inter Semibold, caixa alta e `letter-spacing: 0.08em`,
+  aplicado nos cabeçalhos de tabela e grade, exceto em `Fechamento.tsx` por
+  determinação expressa da tarefa;
+- `DataComDiaSemana`: deriva data e dia da semana do ISO e oferece os modos
+  padrão, destaque e grade compacta.
 
-As 18 páginas e os 2 layouts ainda repetem uma constante local `C` com cores.
-Botões, cartões, badges, avatares, cabeçalhos de tabela, datas e valores
-monetários continuam, em sua maioria, reconstruídos tela a tela.
+`/design-system` usa as quatro implementações reais e documenta todas as suas
+variações públicas. `ValorMonetario` e `ChipVinculo` continuam fora do escopo:
+dependem de entidades que ainda não existem no estado.
+
+As 19 páginas e os 2 layouts ainda repetem uma constante local `C` com cores.
+Botões, cartões, badges e valores monetários continuam, em sua maioria,
+reconstruídos tela a tela.
 
 ---
 
@@ -252,7 +255,7 @@ atual permite percorrer.
 
 | Fluxo | Estado observado no código atual |
 |---|---|
-| F1 Planejamento → Diário → Presença → Diária → Fechamento | Planejamento, Diário e Presença existem; a interface interna de Fechamento não existe e `/financeiro` mostra `EmBreve` |
+| F1 Planejamento → Diário → Presença → Diária → Fechamento | todas as etapas têm interface; a tela de Fechamento e o módulo puro de cálculo foram adicionados na P1A |
 | F2 Divergência planejado × realizado | **exercitado ponta a ponta no navegador** na P1A: remoção pede motivo e confirmação explícita, adição avisa "alocado em outra obra" sem dizer qual, e o Painel muda sozinho depois de finalizar. Ver §11 |
 | F3 Checklist → Andamento → Carteira → Portal | telas leem o mesmo estado da Obra 22; é o fluxo visual mais completo |
 | F4 Pendências derivadas | Painel e layout chamam `calcularPendencias`; não há lista de notificações ao clicar no sino |
@@ -364,10 +367,11 @@ mediu 375 px de área cliente e 482 px de conteúdo, com rolagem horizontal. Em
 
 ### 7.3 Imagens
 
-Login, carteira, obra, diários e Portal dependem de URLs do Unsplash. Na
-verificação do Pacote 0, a imagem principal do Portal não carregou e exibiu o
-texto alternativo sobre o gradiente. Não há ativo local nem fallback visual que
-torne a demonstração independente de rede.
+O Login não depende mais de imagem externa: a metade esquerda é uma composição
+SVG local de planta baixa, grafite e amarelo. Carteira, obra, diários e Portal
+ainda dependem de URLs do Unsplash. Na verificação do Pacote 0, a imagem
+principal do Portal não carregou e exibiu o texto alternativo sobre o gradiente;
+essas telas ainda não têm fallback local.
 
 ---
 
@@ -396,18 +400,16 @@ há ressalva explícita.
 
 ## 9. Próxima ordem segura
 
-1. Claude Code corrige seed, vínculos entre presenças e diários e lacunas
-   necessárias aos fluxos de cálculo, sem trabalho simultâneo na mesma árvore.
-2. Codex executa o P1B visual em componentes pequenos e commits isolados.
-3. Aplicar os componentes tela a tela, começando pelas telas do roteiro.
-4. Resolver imagem/fallback local do Login e do Portal.
-5. Corrigir cliques mortos que já tenham função/rota pronta.
-6. Fazer a responsividade estrutural em 390, 800 e 1440 px.
-7. Reexecutar os sete fluxos críticos e os três perfis após os merges.
+1. O Mestre integra as branches P1A e P1B sem trabalho simultâneo na mesma
+   árvore.
+2. Claude Code fecha as lacunas de estado necessárias a `ValorMonetario` e
+   `ChipVinculo` antes de qualquer extração visual desses dados.
+3. Resolver imagem/fallback local da carteira, obra, diários e Portal.
+4. Corrigir cliques mortos que já tenham função ou rota pronta.
+5. Fazer a responsividade estrutural em 390, 800 e 1440 px.
+6. Reexecutar os sete fluxos críticos e os três perfis após os merges.
 
-Enquanto o Claude Code estiver indisponível, o Codex pode avançar nos itens 2 a
-6 apenas quando não precisar inventar dado, cálculo, entidade ou permissão. O
-diretório `src/state/**` e o seed permanecem fora do seu escopo.
+O diretório `src/state/**` e o seed permanecem fora do escopo do Codex.
 
 ---
 

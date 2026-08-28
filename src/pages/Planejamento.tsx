@@ -18,6 +18,9 @@ import {
 } from '../state/store';
 import type { Planejamento as Cel } from '../state/types';
 import TituloSecao from '../components/TituloSecao';
+import Avatar from '../components/Avatar';
+import CabecalhoTabela from '../components/CabecalhoTabela';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -35,7 +38,6 @@ const C = {
   informativo: '#215FD7',
 } as const;
 
-const DIAS_LABEL = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const MOTIVOS = ['Doente', 'Dispensado pela empresa', 'Falta', 'Folga', 'Férias', 'Afastado', 'Obra parada'];
 
@@ -306,16 +308,11 @@ export default function Planejamento() {
         {/* Cabeçalho da grade */}
         <div style={gridRow(true)}>
           <div style={{ ...nameCell, borderBottom: `1px solid ${C.borda}` }}>
-            <TituloSecao>Pessoa</TituloSecao>
+            <CabecalhoTabela elemento="span">Pessoa</CabecalhoTabela>
           </div>
-          {dias.map((d, i) => (
+          {dias.map(d => (
             <div key={d} style={{ ...dayHeadCell, borderBottom: `1px solid ${C.borda}` }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase', color: C.tintaFraca }}>
-                {DIAS_LABEL[i]}
-              </span>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 700, color: C.grafite }}>
-                {diaNumero(d)}
-              </span>
+              <DataComDiaSemana data={d} modo="grade" />
             </div>
           ))}
         </div>
@@ -331,9 +328,7 @@ export default function Planejamento() {
           return (
             <div key={pid} style={{ ...gridRow(false), borderTop: idx === 0 ? 'none' : `1px solid ${C.borda}` }}>
               <div style={nameCell}>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: C.grafite, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700, color: C.superficie }}>{pessoa.iniciais}</span>
-                </div>
+                <Avatar pessoaId={pessoa.id} nome={pessoa.nome} tamanho={30} />
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pessoa.nome}</p>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.tintaFraca, margin: '1px 0 0' }}>{pessoa.funcao}</p>

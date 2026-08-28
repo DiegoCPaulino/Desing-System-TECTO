@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore, calcularPctObra, getGerenteDaObra, getPessoaIniciais, formatarReais, obraSlug } from '../state/store';
+import { useStore, calcularPctObra, getGerenteDaObra, formatarReais, obraSlug } from '../state/store';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -47,8 +48,6 @@ const OBRA_PHOTOS: Record<string, string> = {
   o04: 'https://images.unsplash.com/photo-1523413363574-c30aa1c2a516?w=640&h=360&fit=crop&auto=format',
   o05: 'https://images.unsplash.com/photo-1634586648651-f1fb9ec10d90?w=640&h=360&fit=crop&auto=format',
 };
-
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A'];
 
 function StatusBadge({ label, bg, color }: { label: string; bg: string; color: string }) {
   return (
@@ -166,7 +165,6 @@ export default function CarteiraDObras() {
           {filtered.map(({ obra, pct, gerente }) => {
             const statusStyle = STATUS_STYLES[obra.estado] ?? STATUS_STYLES.em_andamento;
             const statusLabel = ESTADO_PT[obra.estado] ?? obra.estado;
-            const gerenteIniciais = gerente ? gerente.iniciais : '—';
             const gerenteNome = gerente ? gerente.nome : '—';
             const photo = OBRA_PHOTOS[obra.id];
             const isSmall = obra.tipo === 'pequeno_servico';
@@ -208,9 +206,11 @@ export default function CarteiraDObras() {
 
                   {/* Manager */}
                   <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${C.borda}`, display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: AVATAR_BGS[0], display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '10px', fontWeight: 700, color: '#FFFFFF' }}>{gerenteIniciais}</span>
-                    </div>
+                    {gerente ? (
+                      <Avatar pessoaId={gerente.id} nome={gerente.nome} tamanho={30} />
+                    ) : (
+                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: C.borda, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: C.neutro }}>—</div>
+                    )}
                     <div>
                       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, lineHeight: '17px' }}>{gerenteNome}</p>
                       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.neutro, lineHeight: '15px' }}>Gerente de obras</p>

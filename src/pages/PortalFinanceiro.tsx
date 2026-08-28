@@ -1,6 +1,7 @@
 import React from 'react';
 import { useStore, formatarReais } from '../state/store';
 import TituloSecao from '../components/TituloSecao';
+import CabecalhoTabela from '../components/CabecalhoTabela';
 
 const C = {
   acento: '#FFC213',
@@ -128,9 +129,9 @@ export default function PortalFinanceiro() {
           {/* Table header */}
           <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr 160px 200px 120px', gap: '0', padding: '0 28px 12px', borderBottom: `1px solid ${C.borda}` }}>
             {['Parcela', 'Vencimento', 'Valor', 'Situação', ''].map((h, i) => (
-              <span key={i} style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: C.neutro }}>
+              <CabecalhoTabela key={i} elemento="span" style={{ color: C.neutro }}>
                 {h}
-              </span>
+              </CabecalhoTabela>
             ))}
           </div>
 

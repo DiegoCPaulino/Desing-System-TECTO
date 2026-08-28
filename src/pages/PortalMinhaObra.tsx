@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
+import Avatar from '../components/Avatar';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 const C = {
   acento: '#FFC213',
@@ -16,18 +18,6 @@ const C = {
   positivo: '#2E9E5B',
   positivoFundo: '#EDFAF3',
 } as const;
-
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A', '#4A4A4A'];
-
-function Avatar({ initials, bg, size = 36 }: { initials: string; bg: string; size?: number }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: size * 0.33, fontWeight: 700, color: C.superficie }}>
-        {initials}
-      </span>
-    </div>
-  );
-}
 
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
@@ -84,9 +74,9 @@ export default function PortalMinhaObra() {
 
   // People working today (presencas on HOJE for obra o01)
   const presencasHoje = state.presencas.filter(p => p.obra_id === 'o01' && p.data === HOJE);
-  const pessoasHoje = [...new Set(presencasHoje.map(p => p.pessoa_id))].map((pid, i) => {
+  const pessoasHoje = [...new Set(presencasHoje.map(p => p.pessoa_id))].map((pid) => {
     const pessoa = state.pessoas.find(p => p.id === pid);
-    return { initials: pessoa?.iniciais ?? '?', name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?', bg: AVATAR_BGS[i % AVATAR_BGS.length] };
+    return { id: pid, name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?' };
   });
 
   const toggleAmbiente = (id: string) => {
@@ -96,18 +86,6 @@ export default function PortalMinhaObra() {
       else next.add(id);
       return next;
     });
-  };
-
-  const formatDate = (data: string) => {
-    const [y, m, d] = data.split('-');
-    const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-    return `${Number(d)} de ${months[Number(m) - 1]} de ${y}`;
-  };
-
-  const formatDateShort = (data: string) => {
-    const [, m, d] = data.split('-');
-    const months = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
-    return `${d} DE ${months[Number(m) - 1]}`;
   };
 
   return (
@@ -275,9 +253,7 @@ export default function PortalMinhaObra() {
         <Card>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', gap: '16px' }}>
             <TituloSecao margemInferior={20}>O que aconteceu hoje</TituloSecao>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: C.neutro, flexShrink: 0, marginTop: '-2px' }}>
-              {formatDateShort(diarioData)}
-            </span>
+            <DataComDiaSemana data={diarioData} style={{ justifyContent: 'flex-end', marginTop: '-2px' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
@@ -311,9 +287,9 @@ export default function PortalMinhaObra() {
         <Card>
           <TituloSecao margemInferior={20}>Quem está na sua obra</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {pessoasHoje.map(({ initials, name, role, bg }) => (
-              <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#FAFAFA', borderRadius: '10px', padding: '12px 14px' }}>
-                <Avatar initials={initials} bg={bg} size={38} />
+            {pessoasHoje.map(({ id, name, role }) => (
+              <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#FAFAFA', borderRadius: '10px', padding: '12px 14px' }}>
+                <Avatar pessoaId={id} nome={name} tamanho={38} />
                 <div>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, lineHeight: '18px' }}>{name}</p>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.neutro, marginTop: '2px' }}>{role}</p>
