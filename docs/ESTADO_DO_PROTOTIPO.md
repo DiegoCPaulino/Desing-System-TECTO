@@ -1,99 +1,143 @@
-# Estado do protótipo — inventário do repositório
+# Estado do protótipo — inventário auditado
 
-Inventário lido do código, não de memória nem de documento anterior.
+Fotografia do que existe no repositório. Este arquivo descreve o código atual;
+não substitui regra de negócio, decisão de produto nem pergunta em aberto.
 
-**Gerado em:** 28/08/2026, na limpeza estrutural (itens 1 a 5).
-**Método:** leitura direta de `src/routes.ts`, `src/state/types.ts`,
-`src/state/store.ts` e `src/state/dados-iniciais.ts`. A contagem de registros do
-seed foi executada em tempo de execução sobre os dados, não estimada por linha.
+**Atualizado em:** 28/08/2026, após o Pacote 0 de estabilização.
+**Base da auditoria:** branch `agente/codex`, depois do commit `1e2f933`.
+**Método:** leitura de rotas, telas, layouts, tipos, store e seed; compilação e
+build; verificação em navegador nos perfis Pedro Almeida, Rafael Duarte e
+Mariana Costa Lima, em 390, 800 e 1440 px.
 
-Quando este arquivo divergir do código, o código está certo. Atualize-o na mesma
-tarefa em que mudar rota, entidade ou tela.
+Quando este inventário divergir do código, o código mostra o comportamento que
+será executado. A divergência ainda precisa ser reportada contra a fonte de
+maior precedência, não resolvida por suposição.
 
 ---
 
-## 1. Rotas declaradas
+## 1. Resumo executivo
 
-Todas as rotas vivem em [src/routes.ts](../src/routes.ts), em um único
-`createBrowserRouter`. Não há rota declarada em nenhum outro arquivo.
+O TECTO é hoje uma **maquete navegável** em React, Vite e TypeScript. Não há
+back-end, autenticação real, persistência, API nem isolamento por empresa. A
+sessão e os dados vivem em memória no zustand; recarregar a aplicação ou usar
+“Restaurar dados iniciais” devolve o seed.
 
-### 1.1 Autenticação — sem layout, sem guarda
+O protótipo já demonstra uma parte relevante da operação:
 
-| Rota | Componente | Perfis |
-|---|---|---|
-| `/entrar` | `Login` | — (pública) |
-| `/entrar/primeiro-acesso` | `PrimeiroAcesso` | — (pública) |
+- quatro perfis de entrada simulados;
+- carteira e visão de obra;
+- planejamento semanal;
+- diário de obra com presença e divergência;
+- checklist, andamento, fotos e histórico de diários;
+- painel derivado do estado;
+- portal do cliente com obra, diário e financeiro;
+- guarda de rota por perfil e vínculo de obra.
 
-### 1.2 Aplicação interna — dentro de `AppLayout` › `GuardaPerfil`
+Ainda não é uma demonstração ponta a ponta completa. Financeiro interno,
+Fechamento de Ciclo, Indicadores, Orçamentos, Financeiro/Documentos da obra e
+Ficha da Pessoa continuam em `EmBreve`. A rota `/financeiro` não expõe hoje uma
+tela de fechamento, embora os dados de fechamento existam no estado.
+
+### Saúde técnica em 28/08/2026
+
+| Verificação | Estado atual |
+|---|---|
+| `npx tsc --noEmit` | passa sem erros |
+| `npm run build` | passa |
+| Testes automatizados | não existem |
+| Script de lint | não existe |
+| `src/components/` | não existe |
+| Navegador em 1440 px | telas auditadas renderizam sem erro de console |
+| Navegador em 800 px | renderiza, com truncamentos visuais |
+| Navegador em 390 px | aplicação interna e Portal têm falhas estruturais de responsividade |
+
+O build ainda avisa sobre recursos do `vite.config.ts` incompatíveis com o
+futuro carregador nativo do Vite e sobre o bundle JavaScript acima de 500 kB.
+Esses avisos não impedem o build atual.
+
+---
+
+## 2. Rotas declaradas
+
+Todas as rotas estão em [src/routes.ts](../src/routes.ts), em um único
+`createBrowserRouter`.
+
+### 2.1 Autenticação — públicas
+
+| Rota | Componente |
+|---|---|
+| `/entrar` | `Login` |
+| `/entrar/primeiro-acesso` | `PrimeiroAcesso` |
+
+### 2.2 Aplicação interna — `AppLayout` e `GuardaPerfil`
 
 `TODOS_INTERNOS` = `administracao`, `financeiro`, `gerente_obras`.
 `ADMIN_FINANCEIRO` = `administracao`, `financeiro`.
-`obraScoped` significa que, para o Gerente de Obras, `GuardaPerfil` também checa
-`gerenteTemAcessoAObra` contra `vinculos_obra`.
+
+Em rotas `obraScoped`, o Gerente de Obras também precisa ter um vínculo ativo em
+`vinculos_obra`. Falta de sessão leva a `/entrar`; falta de permissão mostra
+`SemAcesso`.
 
 | Rota | Componente | Perfis | obraScoped |
 |---|---|---|---|
-| `/` (index) | `PainelDoDia` | TODOS_INTERNOS | não |
-| `/obras` | `CarteiraDObras` | TODOS_INTERNOS | não |
-| `/obras/:obraId` | `ObraVisaoGeral` | TODOS_INTERNOS | sim |
-| `/obras/:obraId/diario` | `DiarioObra` | TODOS_INTERNOS | sim |
-| `/obras/:obraId/diarios` | `ObraDiarios` | TODOS_INTERNOS | sim |
-| `/obras/:obraId/checklist` | `ObraChecklist` | TODOS_INTERNOS | sim |
-| `/obras/:obraId/andamento` | `ObraAndamento` | TODOS_INTERNOS | sim |
-| `/obras/:obraId/fotos` | `ObraFotos` | TODOS_INTERNOS | sim |
-| `/obras/:obraId/financeiro` | **`EmBreve`** | ADMIN_FINANCEIRO | sim |
-| `/obras/:obraId/documentos` | **`EmBreve`** | TODOS_INTERNOS | sim |
-| `/planejamento` | `Planejamento` | TODOS_INTERNOS | não |
-| `/equipe` | `Equipe` | TODOS_INTERNOS | não |
-| `/equipe/:pessoaId` | **`EmBreve`** | TODOS_INTERNOS | não |
-| `/orcamentos` | **`EmBreve`** | ADMIN_FINANCEIRO | não |
-| `/financeiro` | **`EmBreve`** | ADMIN_FINANCEIRO | não |
-| `/indicadores` | **`EmBreve`** | ADMIN_FINANCEIRO | não |
-| `*` (não encontrada) | **`EmBreve`** | TODOS_INTERNOS | não |
+| `/` | `PainelDoDia` | internos | não |
+| `/obras` | `CarteiraDObras` | internos | não |
+| `/obras/:obraId` | `ObraVisaoGeral` | internos | sim |
+| `/obras/:obraId/diario` | `DiarioObra` | internos | sim |
+| `/obras/:obraId/diarios` | `ObraDiarios` | internos | sim |
+| `/obras/:obraId/checklist` | `ObraChecklist` | internos | sim |
+| `/obras/:obraId/andamento` | `ObraAndamento` | internos | sim |
+| `/obras/:obraId/fotos` | `ObraFotos` | internos | sim |
+| `/obras/:obraId/financeiro` | **`EmBreve`** | Administração e Financeiro | sim |
+| `/obras/:obraId/documentos` | **`EmBreve`** | internos | sim |
+| `/planejamento` | `Planejamento` | internos | não |
+| `/equipe` | `Equipe` | internos | não |
+| `/equipe/:pessoaId` | **`EmBreve`** | internos | não |
+| `/orcamentos` | **`EmBreve`** | Administração e Financeiro | não |
+| `/financeiro` | **`EmBreve`** | Administração e Financeiro | não |
+| `/indicadores` | **`EmBreve`** | Administração e Financeiro | não |
+| `*` | **`EmBreve`** | internos | não |
 
-### 1.3 Design system — sem layout, sem guarda
+O Cliente que entra por `/` é encaminhado a `/portal` por um loader. Nas outras
+rotas internas, ele recebe `SemAcesso`.
+
+### 2.3 Portal do cliente — `GuardaPerfil` e `PortalLayout`
+
+`SO_CLIENTE` = `cliente`.
 
 | Rota | Componente | Perfis |
 |---|---|---|
-| `/design-system` | `DesignSystemPage` | — (nenhuma guarda) |
+| `/portal` | `PortalMinhaObra` | Cliente |
+| `/portal/diario` | `PortalDiario` | Cliente |
+| `/portal/financeiro` | `PortalFinanceiro` | Cliente |
 
-### 1.4 Portal do cliente — dentro de `PortalLayout`
+As três folhas declaram `handle.perfis`. A mesma `GuardaPerfil` protege as
+árvores interna e do Portal; os layouts só tratam ausência de sessão. Esse ponto
+substitui as antigas divergências D1, D2 e D3 deste documento, que já não
+representavam o código.
 
-| Rota | Componente | Perfis declarados |
+### 2.4 Design system
+
+| Rota | Componente | Perfis |
 |---|---|---|
-| `/portal` (index) | `PortalMinhaObra` | nenhum |
-| `/portal/diario` | `PortalDiario` | nenhum |
-| `/portal/financeiro` | `PortalFinanceiro` | nenhum |
+| `/design-system` | `DesignSystemPage` | pública, sem guarda |
 
-As três rotas do portal **não** passam por `GuardaPerfil` e não declaram
-`handle.perfis`. Ver a divergência D1 na seção 6.
+Manter essa rota pública ou protegê-la ainda precisa de decisão explícita.
+
+### 2.5 Rotas em `EmBreve`
+
+Sete rotas caem em `EmBreve`: Financeiro e Documentos da obra, Ficha da Pessoa,
+Orçamentos, Financeiro/Fechamento, Indicadores e a rota interna não encontrada.
 
 ---
 
-## 2. Rotas que caem em `EmBreve`
+## 3. Estado em memória
 
-Sete rotas renderizam [src/pages/EmBreve.tsx](../src/pages/EmBreve.tsx):
+`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 14 coleções de
+domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entidade.
 
-1. `/obras/:obraId/financeiro`
-2. `/obras/:obraId/documentos`
-3. `/equipe/:pessoaId`
-4. `/orcamentos`
-5. `/financeiro` — Fechamento de Ciclo, ainda por construir
-6. `/indicadores` — ainda por construir
-7. `*` — qualquer rota interna não declarada
-
-`EmBreve` também é importado diretamente por `ObraVisaoGeral`, para as abas
-Financeiro e Documentos dentro da tela de obra.
-
----
-
-## 3. Entidades do estado
-
-Definidas em [src/state/types.ts](../src/state/types.ts), na interface
-`AppState`. As 14 chaves abaixo são o estado inteiro — não há outra fonte.
-
-| Entidade | Interface | Registros no seed |
-|---|---|---|
+| Coleção | Interface | Registros no seed |
+|---|---|---:|
 | `pessoas` | `Pessoa` | 30 |
 | `vinculos` | `Vinculo` | 17 |
 | `obras` | `Obra` | 5 |
@@ -109,140 +153,222 @@ Definidas em [src/state/types.ts](../src/state/types.ts), na interface
 | `fechamentos` | `Fechamento` | 28 |
 | `lancamentos` | `Lancamento` | 2 |
 
-Duas entidades existem no código mas não constam da lista de "Estado
-compartilhado" do CLAUDE.md: **`itens_fora_escopo`** e **`semanas`**.
+### 3.1 Arquivos de estado
 
-Além do `AppState`, o store guarda `perfil_ativo: TipoPerfil | null`, que não é
-entidade de domínio e sim sessão da maquete.
+- `types.ts`: tipos das entidades e `AppState`.
+- `dados-iniciais.ts`: seed e data fixa de referência.
+- `store.ts`: store zustand, mutações e funções puras.
 
-`TipoPerfil` = `administracao` · `financeiro` · `gerente_obras` · `cliente`.
+As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
+`marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
+`publicarSemana`, `salvarAlteracoes` e `finalizarDiario`.
 
----
+As principais funções puras disponíveis incluem formatação monetária, cálculo
+de andamento por ambiente e obra, indicadores, pendências, acesso do gerente,
+presenças, valor de diária, estado/resumo da semana e leitura da grade de
+planejamento.
 
-## 4. Arquivos de `src/state/`
+### 3.2 Data de referência
 
-Três arquivos, 1.295 linhas.
+- hoje: quinta-feira, `20/08/2026`;
+- ontem: quarta-feira, `19/08/2026`;
+- semana corrente: `17/08/2026` a `22/08/2026`;
+- próxima semana: início em `24/08/2026`.
 
-### `types.ts` — 170 linhas
-
-Só tipos. As 14 interfaces de entidade, mais `TipoPerfil` e `AppState`. Sem
-lógica.
-
-### `store.ts` — 533 linhas
-
-Store zustand (`useStore`) e todas as funções puras de cálculo.
-
-**Ações que escrevem no estado:** `setPerfil` · `resetarDados` · `marcarItem` ·
-`marcarTodosItensAmbiente` · `adicionarItemForaEscopo` · `gravarCelula` ·
-`publicarSemana` · `salvarAlteracoes` · `finalizarDiario`.
-
-**Funções puras exportadas:** `formatarReais` · `calcularPctAmbiente` ·
-`calcularPctObra` · `getPessoaNome` · `getPessoaIniciais` · `obraSlug` ·
-`obraPorSlug` · `gerenteTemAcessoAObra` · `getGerenteDaObra` ·
-`presencasNaData` · `calcularIndicadores` · `calcularPendencias` · `tipoCelula` ·
-`valorDiaria` · `semanaEstado` · `semanaTemAlteracoesPendentes` · `rotuloCelula` ·
-`getCelula` · `obrasNaoConcluidas` · `pessoasDaGrade` · `diasDaSemana` ·
-`resumoSemana` · `pessoasNaSemana`.
-
-**Também exporta:** os tipos `CelulaValor` e `TipoCelula`, e a constante
-`GERENTE_ID = 'p04'` (Rafael Duarte).
-
-### `dados-iniciais.ts` — 592 linhas
-
-O seed. `export default DADOS: AppState`, mais as constantes de data
-`HOJE = '2026-08-20'` · `ONTEM = '2026-08-19'` ·
-`SEMANA_INICIO = '2026-08-17'` · `SEMANA_2_INICIO = '2026-08-24'`.
-
-Boa parte dos registros é gerada por `.map()` e `Array.from()` sobre listas de
-ids, e não escrita registro a registro — por isso contar linhas subestima o
-volume real.
+As datas fixas batem com os dias da semana. O relógio real do computador não
+altera a maquete.
 
 ---
 
-## 5. Componentes, telas e layouts
+## 4. Estrutura visual atual
 
-### `src/components/` — **não existe**
+### 4.1 Páginas e layouts
 
-Não há diretório de componentes neste repositório. Não há componente
-compartilhado de botão, cartão, badge, tabela nem de valor monetário. Cada tela
-redeclara o que precisa, inclusive a paleta: a constante local `const C = {...}`
-com os tokens de cor está repetida nos **20** arquivos de tela e layout — as 18
-páginas e os 2 layouts, sem exceção.
+Existem 18 páginas e 2 layouts:
 
-O único componente que uma tela importa de outra é `EmBreve`, usado por
-`ObraVisaoGeral`. Fora isso, as telas só compartilham `src/state/`.
+- aplicação interna: Painel, Carteira, Visão da Obra, Diário, Diários,
+  Checklist, Andamento, Fotos, Planejamento e Equipe;
+- autenticação: Login e Primeiro Acesso;
+- cliente: Minha Obra, Diário e Financeiro;
+- apoio: Design System, Sem Acesso e Em Breve;
+- layouts: `AppLayout` e `PortalLayout`.
 
-Consequência prática: uma mudança de token de cor não tem hoje um único ponto de
-edição; são 20 arquivos.
+Não existe `CampoLayout`; o Diário usa `AppLayout`.
 
-### `src/pages/` — 18 telas
+### 4.2 Componentes compartilhados
 
-| Arquivo | Linhas |
+`src/components/` ainda não existe. As 18 páginas e os 2 layouts repetem uma
+constante local `C` com cores. Botões, cartões, badges, avatares, títulos,
+cabeçalhos de tabela, datas e valores monetários também são reconstruídos tela
+a tela.
+
+Essa repetição é a base do P1B visual. Os seis primeiros componentes previstos
+são `TituloSecao`, `ValorMonetario`, `Avatar`, `ChipVinculo`,
+`CabecalhoTabela` e `DataComDiaSemana`.
+
+---
+
+## 5. Estado dos fluxos críticos
+
+Esta tabela separa o que o contrato diz que precisa funcionar do que a interface
+atual permite percorrer.
+
+| Fluxo | Estado observado no código atual |
 |---|---|
-| `CarteiraDObras.tsx` | 227 |
-| `DesignSystemPage.tsx` | 555 |
-| `DiarioObra.tsx` | 1062 |
-| `EmBreve.tsx` | 76 |
-| `Equipe.tsx` | 156 |
-| `Login.tsx` | 260 |
-| `ObraAndamento.tsx` | 250 |
-| `ObraChecklist.tsx` | 419 |
-| `ObraDiarios.tsx` | 441 |
-| `ObraFotos.tsx` | 306 |
-| `ObraVisaoGeral.tsx` | 486 |
-| `PainelDoDia.tsx` | 413 |
-| `Planejamento.tsx` | 668 |
-| `PortalDiario.tsx` | 288 |
-| `PortalFinanceiro.tsx` | 248 |
-| `PortalMinhaObra.tsx` | 335 |
-| `PrimeiroAcesso.tsx` | 213 |
-| `SemAcesso.tsx` | 50 |
+| F1 Planejamento → Diário → Presença → Diária → Fechamento | Planejamento, Diário e Presença existem; a interface interna de Fechamento não existe e `/financeiro` mostra `EmBreve` |
+| F2 Divergência planejado × realizado | tratamento existe no Diário; não foi reexecutado ponta a ponta no Pacote 0 |
+| F3 Checklist → Andamento → Carteira → Portal | telas leem o mesmo estado da Obra 22; é o fluxo visual mais completo |
+| F4 Pendências derivadas | Painel e layout chamam `calcularPendencias`; não há lista de notificações ao clicar no sino |
+| F5 Rateio de diária | há diária sem obra pagadora no seed; não há tela financeira atual para concluir a escolha |
+| F6 Imutabilidade pelo Fechamento | há fechamentos no estado; sem interface atual, não foi possível homologar no navegador |
+| F7 Permissão por perfil | `GuardaPerfil` centralizada e rotas declarativas; smoke test passou para Administração, Gerente e Cliente |
 
-### `src/layouts/` — 2 layouts
-
-- `AppLayout.tsx` — 232 linhas. Barra lateral e topo da aplicação interna.
-- `PortalLayout.tsx` — 141 linhas. Topo horizontal do portal, sem barra lateral.
-
-Não existe `CampoLayout`. Foi removido, e o Diário de Obra hoje é tela normal
-dentro de `AppLayout`.
-
-### Raiz de `src/`
-
-`App.tsx` (6) · `main.tsx` (10) · `routes.ts` (104) · `index.css` ·
-`vite-env.d.ts`. Nenhuma tela solta na raiz.
+Há, portanto, uma divergência objetiva entre “fluxos críticos funcionam” no
+contrato operacional e a ausência das telas Financeiro/Fechamento na árvore de
+rotas atual. Ela precisa ser tratada pelo agente responsável por `src/state/**`
+e pelas telas de cálculo, sem o Codex inventar a interface ou as funções.
 
 ---
 
-## 6. Divergências entre documentação e código
+## 6. Divergências e riscos ainda abertos
 
-Registradas como observação. Nenhuma foi corrigida na limpeza estrutural, porque
-corrigir qualquer uma delas mudaria comportamento.
+### 6.1 Fontes de verdade
 
-**D1 — O portal não tem guarda de perfil.** As rotas `/portal*` não passam por
-`GuardaPerfil` e não declaram `handle.perfis`. `PortalLayout` só checa se há
-alguém logado (`if (!perfil) return <Navigate to="/entrar" />`); não checa se o
-perfil é `cliente`. Na prática, um usuário de Administração que navegue até
-`/portal` vê o portal do cliente. O AGENTS.md §2 diz que rota sem perfil
-declarado é negada por padrão — isso hoje vale para a árvore interna, não para o
-portal.
+**A1 — `docs/PRODUTO.md` não existe.** O `AGENTS.md` aponta para INV-01 a INV-10
+e RN-XXX nesse arquivo, mas ele não está no repositório nem aparece no histórico
+Git disponível. Qualquer tarefa que exija interpretar ou criar regra de negócio
+fica sem a fonte de maior precedência e deve parar.
 
-**D2 — Há uma segunda camada de permissão em `AppLayout`.** Além de
-`GuardaPerfil`, `AppLayout` faz `if (perfil === 'cliente') return <SemAcesso />`.
-O AGENTS.md §2 pede guarda "em um lugar só, nunca duas camadas checando a mesma
-coisa".
+**A2 — `docs/ESTADO.md` também não existe.** O mapa do `AGENTS.md` cita esse
+nome; o inventário real é este `ESTADO_DO_PROTOTIPO.md`.
 
-**D3 — Cliente em `/` vê `SemAcesso`, não é levado ao portal.** O AGENTS.md §4
-descreve a exceção "Cliente acessando `/` vai para `/portal`". O código não faz
-esse redirecionamento.
+### 6.2 Seed e consistência de dados — responsabilidade do Claude Code
 
-**D4 — `/design-system` é público.** Não tem guarda nem layout: abre sem login,
-em qualquer perfil.
+**S1 — O elenco do seed não é o elenco fixo.** De `p11` a `p30`, o seed usa
+nomes como André Ferreira, Bruno Santana e Lucas Melo, enquanto o contrato fixa
+Adilson Prado, Edmilson Vieira, Valdir Chagas, Israel Fontes e os demais nomes.
+Também existem seis inativos adicionais, embora o elenco fixe apenas Wagner
+Lopes como inativo.
 
-**D5 — `/equipe` é acessível ao Gerente de Obras.** `handle.perfis` é
-`TODOS_INTERNOS`. O CLAUDE.md descreve a barra lateral do Gerente com apenas
-Painel, Obras e Planejamento; o AGENTS.md §4 lista `/equipe` entre os acessos
-dele. Barra lateral e acesso à rota são coisas diferentes, e só a barra lateral
-omite o item.
+**S2 — A semana corrente não cobre as 21 pessoas de campo esperadas.** O Painel
+mostra 13 pessoas em campo hoje. Valdir Chagas e Israel Fontes não existem no
+seed, portanto as cenas planejadas para saldo devedor e rateio deles não podem
+ocorrer como documentadas.
 
-**D6 — Duas entidades fora do vocabulário documentado.** `itens_fora_escopo` e
-`semanas` existem no `AppState` e não constam da lista de entidades do CLAUDE.md.
+**S3 — O rateio pendente está em Marcos Bittencourt, não em Israel Fontes.** A
+diária de Marcos em 19/08 tem `obra_que_arca_id` vazio após presença em duas
+obras.
+
+**S4 — O diário de hoje da Obra 22 já está finalizado.** `d02`, de 20/08, tem
+estado `finalizado`; o roteiro de demonstração descreve esse diário como
+rascunho.
+
+**S5 — Oito presenças de hoje apontam para diários de ontem.** `pr30` a `pr34`
+usam `d03`, de 19/08, e `pr40` a `pr42` usam `d05`, também de 19/08. A data da
+presença é 20/08. Esse é um risco direto para Diário, indicadores e diárias.
+
+**S6 — Só a Obra 22 tem ambientes e itens de orçamento.** As outras quatro obras
+não têm estrutura para Checklist/Andamento equivalente.
+
+### 6.3 Dados fixos nas telas
+
+**T1 — O Portal é fixo na Obra 22.** `PortalMinhaObra`, `PortalDiario` e
+`PortalFinanceiro` consultam diretamente `o01`; `PortalLayout` escreve “Mariana
+Costa Lima”. Não existe associação entre sessão Cliente e obra.
+
+**T2 — Parte do Financeiro do Portal está fora do estado.** Parcelas,
+adicionais e materiais/notas são arrays constantes com valores já formatados
+dentro de `PortalFinanceiro`. Apenas os totais superiores vêm da obra.
+
+**T3 — A visão da obra pode mostrar o diário finalizado mais antigo.**
+`ObraVisaoGeral` usa `.find()` sem ordenação; no seed atual encontra `d01`
+(19/08) antes de `d02` (20/08).
+
+**T4 — “Ver como o cliente vê” não funciona para Administração.** O link leva a
+`/portal`, mas a guarda corretamente aceita apenas Cliente, então Pedro recebe
+`SemAcesso`. O roteiro pede essa transição e ainda não define troca de perfil.
+
+### 6.4 Interações incompletas
+
+- botões de pendência do Painel (`Revisar`, `Definir`, `Ver`) não têm ação;
+- sino e avatar do topo parecem clicáveis, mas não abrem nada;
+- `+ Nova obra` não tem ação;
+- busca global do topo não executa busca;
+- “Comprovante” e “Ver nota” no Portal Financeiro não têm ação;
+- várias rotas intencionalmente terminam em `EmBreve`.
+
+Esses elementos devem ser resolvidos ou retirados do caminho da demonstração.
+Os que dependem de novas entidades ou funções permanecem bloqueados para o
+Codex.
+
+### 6.5 Efeito derivado no Diário
+
+O timer de gravação usa `useEffect` para sincronizar um intervalo externo, o que
+é adequado. Outro `useEffect` recria o conteúdo da sheet a partir de
+`sheetEstado`, `workers` e `pessoasMap`. Como `pessoasMap` é reconstruído a cada
+render e está nas dependências, esse trecho merece revisão por possível ciclo de
+renderização. Não foi alterado no Pacote 0.
+
+---
+
+## 7. Responsividade e ativos externos
+
+### 7.1 Aplicação interna
+
+`AppLayout` mantém uma sidebar fixa de 248 px e não tem navegação móvel. Em
+390 px, ela ocupa a maior parte do viewport e deixa Planejamento e Checklist
+praticamente inacessíveis. Em 800 px as telas abrem, mas filtros e conteúdos
+largos começam a truncar. Em 1440 px, as telas auditadas ficam estáveis.
+
+### 7.2 Portal
+
+Em 390 px, o cabeçalho sobrepõe logo, navegação, nome e avatar. O documento
+mediu 375 px de área cliente e 482 px de conteúdo, com rolagem horizontal. Em
+800 e 1440 px o layout principal cabe no viewport.
+
+### 7.3 Imagens
+
+Login, carteira, obra, diários e Portal dependem de URLs do Unsplash. Na
+verificação do Pacote 0, a imagem principal do Portal não carregou e exibiu o
+texto alternativo sobre o gradiente. Não há ativo local nem fallback visual que
+torne a demonstração independente de rede.
+
+---
+
+## 8. Verificação do Pacote 0
+
+### Técnica
+
+- `npx tsc --noEmit`: passou;
+- `npm run build`: passou com os avisos descritos na seção 1;
+- `git diff --check`: passou;
+- console do navegador: nenhuma mensagem de nível `error` durante a matriz.
+
+### Navegador
+
+| Perfil | 390 px | 800 px | 1440 px |
+|---|---|---|---|
+| Pedro Almeida | Planejamento e Checklist carregam, mas a sidebar inviabiliza o uso | carregam; filtros do Checklist truncam | carregam e formulário “fora do escopo” mantém estado desabilitado correto |
+| Rafael Duarte | Planejamento e Checklist da Obra 22 carregam, com a mesma falha móvel | carregam | carregam |
+| Mariana Costa Lima | Portal carrega com sobreposição e overflow horizontal | carrega | carrega |
+
+O resultado “carrega” significa que a rota e o conteúdo foram exercitados no
+navegador sem exceção. Não significa que o layout foi aprovado visualmente onde
+há ressalva explícita.
+
+---
+
+## 9. Próxima ordem segura
+
+1. Claude Code corrige seed, vínculos entre presenças e diários e lacunas
+   necessárias aos fluxos de cálculo, sem trabalho simultâneo na mesma árvore.
+2. Codex executa o P1B visual em componentes pequenos e commits isolados.
+3. Aplicar os componentes tela a tela, começando pelas telas do roteiro.
+4. Resolver imagem/fallback local do Login e do Portal.
+5. Corrigir cliques mortos que já tenham função/rota pronta.
+6. Fazer a responsividade estrutural em 390, 800 e 1440 px.
+7. Reexecutar os sete fluxos críticos e os três perfis após os merges.
+
+Enquanto o Claude Code estiver indisponível, o Codex pode avançar nos itens 2 a
+6 apenas quando não precisar inventar dado, cálculo, entidade ou permissão. O
+diretório `src/state/**` e o seed permanecem fora do seu escopo.
