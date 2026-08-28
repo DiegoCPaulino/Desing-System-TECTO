@@ -562,11 +562,29 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
           <tbody>
             {ciclo.pessoas.map((pid) => {
               const vinculo = state.vinculos.find((v) => v.pessoa_id === pid && !v.fim);
-              const obras = [
-                ...new Set(state.presencas.filter((p) => p.pessoa_id === pid).map((p) => p.obra_id)),
-              ]
+              // A obra a que o pagamento se refere tem duas origens, e a fonte
+              // certa depende de quem é a pessoa.
+              //
+              // Quem tem `vinculos_obra` — Gerente e Assistente — se liga à
+              // obra por ali, e só por ali: o Rafael foi PLANEJADO um dia na
+              // GFR sem gerenciá-la, e listar essa obra confundiria um dia de
+              // trabalho com um contrato de gestão.
+              //
+              // O terceirizado não tem vínculo de obra até a entidade
+              // `contratos_terceirizado` existir, então vale onde ele esteve
+              // ou está alocado.
+              const obraIds = new Set<string>();
+              const gerenciadas = state.vinculos_obra.filter((v) => v.pessoa_id === pid && !v.fim);
+              if (gerenciadas.length) {
+                for (const v of gerenciadas) obraIds.add(v.obra_id);
+              } else {
+                for (const p of state.presencas) if (p.pessoa_id === pid) obraIds.add(p.obra_id);
+                for (const p of state.planejamento) if (p.pessoa_id === pid && p.obra_id) obraIds.add(p.obra_id);
+              }
+              const obras = [...obraIds]
                 .map((oid) => state.obras.find((o) => o.id === oid)?.codigo)
-                .filter(Boolean);
+                .filter(Boolean)
+                .sort();
               // O Gerente de Obras recebe valor fixo por Obra (RN-004), mas o
               // valor não está definido — Q-001. Exibir R$ 0,00 aqui diria que
               // ele não recebe nada, que é uma afirmação diferente de "ainda
