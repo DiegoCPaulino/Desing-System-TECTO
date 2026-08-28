@@ -18,6 +18,7 @@ import {
 } from '../state/store';
 import type { Planejamento as Cel } from '../state/types';
 import TituloSecao from '../components/TituloSecao';
+import Avatar from '../components/Avatar';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -331,9 +332,7 @@ export default function Planejamento() {
           return (
             <div key={pid} style={{ ...gridRow(false), borderTop: idx === 0 ? 'none' : `1px solid ${C.borda}` }}>
               <div style={nameCell}>
-                <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: C.grafite, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 700, color: C.superficie }}>{pessoa.iniciais}</span>
-                </div>
+                <Avatar pessoaId={pessoa.id} nome={pessoa.nome} tamanho={30} />
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pessoa.nome}</p>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.tintaFraca, margin: '1px 0 0' }}>{pessoa.funcao}</p>

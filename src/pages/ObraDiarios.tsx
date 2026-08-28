@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useStore, getPessoaNome, obraSlug, obraPorSlug } from '../state/store';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -64,8 +65,6 @@ function IconCamera() {
 function IconSearch() {
   return <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="6.5" cy="6.5" r="4.5" /><path d="M13.5 13.5l-3-3" /></svg>;
 }
-
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A', '#B0B0B0'];
 
 export default function ObraDiarios() {
   const state = useStore();
@@ -287,16 +286,13 @@ export default function ObraDiarios() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <div style={{ display: 'flex' }}>
                         {presencas.slice(0, 3).map((p, i) => (
-                          <div key={p.id} style={{
-                            width: '26px', height: '26px', borderRadius: '50%',
-                            backgroundColor: AVATAR_BGS[i % AVATAR_BGS.length],
-                            border: '2px solid white', marginLeft: i > 0 ? '-8px' : '0',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                          }}>
-                            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '8px', fontWeight: 700, color: '#FFFFFF' }}>
-                              {getPessoaNome(state, p.pessoa_id).split(' ').map(n => n[0]).slice(0, 2).join('')}
-                            </span>
-                          </div>
+                          <Avatar
+                            key={p.id}
+                            pessoaId={p.pessoa_id}
+                            nome={getPessoaNome(state, p.pessoa_id)}
+                            tamanho={26}
+                            style={{ border: '2px solid white', marginLeft: i > 0 ? '-8px' : '0' }}
+                          />
                         ))}
                         {presencas.length > 3 && (
                           <div style={{
@@ -393,19 +389,11 @@ export default function ObraDiarios() {
                         Equipe presente
                       </p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                        {presencas.map((p, i) => {
+                        {presencas.map((p) => {
                           const pessoa = state.pessoas.find(pe => pe.id === p.pessoa_id);
                           return (
                             <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                              <div style={{
-                                width: '30px', height: '30px', borderRadius: '50%',
-                                backgroundColor: AVATAR_BGS[i % AVATAR_BGS.length],
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                              }}>
-                                <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '10px', fontWeight: 700, color: '#FFFFFF' }}>
-                                  {pessoa?.iniciais ?? '?'}
-                                </span>
-                              </div>
+                              <Avatar pessoaId={p.pessoa_id} nome={pessoa?.nome ?? p.pessoa_id} tamanho={30} />
                               <div>
                                 <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite }}>
                                   {pessoa?.nome ?? p.pessoa_id}

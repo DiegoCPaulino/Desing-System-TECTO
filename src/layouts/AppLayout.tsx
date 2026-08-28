@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore, calcularPendencias } from '../state/store';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -146,11 +147,11 @@ export default function AppLayout() {
 
           {/* User footer */}
           <div style={{ padding: '16px 20px', borderTop: `1px solid ${C.borda}`, display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-            <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: C.grafite, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 700, color: C.superficie }}>
-                {pessoa?.iniciais ?? (isAdmin ? 'PA' : 'RD')}
-              </span>
-            </div>
+            <Avatar
+              pessoaId={pessoa?.id ?? pessoaId}
+              nome={pessoa?.nome ?? (isAdmin ? 'Pedro Almeida' : 'Rafael Duarte')}
+              tamanho={36}
+            />
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {pessoa?.nome ?? (isAdmin ? 'Pedro Almeida' : 'Rafael Duarte')}
@@ -212,11 +213,12 @@ export default function AppLayout() {
               )}
             </div>
 
-            <div style={{ width: '38px', height: '38px', borderRadius: '50%', backgroundColor: C.grafite, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 700, color: C.superficie }}>
-                {pessoa?.iniciais ?? (isAdmin ? 'PA' : 'RD')}
-              </span>
-            </div>
+            <Avatar
+              pessoaId={pessoa?.id ?? pessoaId}
+              nome={pessoa?.nome ?? (isAdmin ? 'Pedro Almeida' : 'Rafael Duarte')}
+              tamanho={38}
+              style={{ cursor: 'pointer' }}
+            />
           </div>
 
           {/* Page content */}

@@ -1,7 +1,8 @@
 import React from 'react';
-import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGerenteDaObra, getPessoaIniciais } from '../state/store';
+import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGerenteDaObra } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -15,12 +16,6 @@ const C = {
   atencao: '#E8833A',
   neutro: '#9A9A9A',
 } as const;
-
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A'];
-
-function avatarBg(index: number) {
-  return AVATAR_BGS[index % AVATAR_BGS.length];
-}
 
 function IconWarning() {
   return <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M7.5 1.5 1 13h13L7.5 1.5Z"/><path d="M7.5 6.5v3M7.5 11v.5"/></svg>;
@@ -142,10 +137,10 @@ export default function PainelDoDia() {
     const diarioLabel = diarioHoje
       ? (diarioHoje.estado === 'finalizado' ? 'Finalizado' : 'Rascunho')
       : 'Pendente';
-    const avatars = peopleIds.slice(0, 3).map((pid, i) => ({
-      iniciais: getPessoaIniciais(state, pid),
-      bg: avatarBg(i),
-    }));
+    const avatars = peopleIds.slice(0, 3).map((pid) => {
+      const pessoa = state.pessoas.find(p => p.id === pid);
+      return { id: pid, nome: pessoa?.nome ?? pid };
+    });
     const extra = Math.max(0, peopleIds.length - 3);
     return { obra, avatars, extra, gerente, diarioLabel };
   });
@@ -296,14 +291,18 @@ export default function PainelDoDia() {
                       <td style={{ padding: '14px 20px', verticalAlign: 'middle' as const }}>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                           {avatars.map((a, j) => (
-                            <div key={j} style={{
-                              width: '28px', height: '28px', borderRadius: '50%', backgroundColor: a.bg,
-                              border: `2px solid ${C.superficie}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              marginLeft: j === 0 ? 0 : '-9px', position: 'relative', zIndex: avatars.length - j + 1,
-                              fontFamily: 'Inter, sans-serif', fontSize: '10px', fontWeight: 700, color: C.superficie,
-                            }}>
-                              {a.iniciais}
-                            </div>
+                            <Avatar
+                              key={a.id}
+                              pessoaId={a.id}
+                              nome={a.nome}
+                              tamanho={28}
+                              style={{
+                                border: `2px solid ${C.superficie}`,
+                                marginLeft: j === 0 ? 0 : '-9px',
+                                position: 'relative',
+                                zIndex: avatars.length - j + 1,
+                              }}
+                            />
                           ))}
                           {extra > 0 && (
                             <div style={{

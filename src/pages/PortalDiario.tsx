@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../state/store';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -13,8 +14,6 @@ const C = {
   positivo: '#2E9E5B',
 } as const;
 
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A', '#4A4A4A'];
-
 const DIA_SEMANA: Record<string, string> = {
   '2026-08-20': 'quinta-feira',
   '2026-08-19': 'quarta-feira',
@@ -22,16 +21,6 @@ const DIA_SEMANA: Record<string, string> = {
   '2026-08-17': 'segunda-feira',
   '2026-08-14': 'sexta-feira',
 };
-
-function Avatar({ initials, bg, size = 32 }: { initials: string; bg: string; size?: number }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: size * 0.34, fontWeight: 700, color: '#fff' }}>
-        {initials}
-      </span>
-    </div>
-  );
-}
 
 function isSectionHeader(line: string): boolean {
   const trimmed = line.trim();
@@ -174,9 +163,9 @@ export default function PortalDiario() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
           {diariosFiltrados.map((diario, idx) => {
             const presencasEntry = state.presencas.filter(p => p.diario_id === diario.id);
-            const pessoas = [...new Set(presencasEntry.map(p => p.pessoa_id))].map((pid, i) => {
+            const pessoas = [...new Set(presencasEntry.map(p => p.pessoa_id))].map((pid) => {
               const pessoa = state.pessoas.find(p => p.id === pid);
-              return { initials: pessoa?.iniciais ?? '?', name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?', bg: AVATAR_BGS[i % AVATAR_BGS.length] };
+              return { id: pid, name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?' };
             });
 
             const semExecucao = diario.houve_execucao === false;
@@ -255,9 +244,9 @@ export default function PortalDiario() {
                       {/* People chips */}
                       {pessoas.length > 0 && (
                         <div style={{ padding: '16px 24px', borderTop: `1px solid ${C.borda}`, display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                          {pessoas.map(({ initials, name, role, bg }) => (
-                            <div key={name} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#F5F5F3', borderRadius: '999px', padding: '6px 14px 6px 8px' }}>
-                              <Avatar initials={initials} bg={bg} size={28} />
+                          {pessoas.map(({ id, name, role }) => (
+                            <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#F5F5F3', borderRadius: '999px', padding: '6px 14px 6px 8px' }}>
+                              <Avatar pessoaId={id} nome={name} tamanho={28} />
                               <div>
                                 <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite }}>{name}</span>
                                 <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.neutro, marginLeft: '6px' }}>{role}</span>

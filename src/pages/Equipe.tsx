@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../state/store';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -13,8 +14,6 @@ const C = {
   informativo: '#215FD7',
   informativoFundo: '#E7F1FF',
 } as const;
-
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A'];
 
 type FilterKey = 'todos' | 'funcionario_proprio' | 'terceirizado' | 'gerencia' | 'administracao';
 
@@ -49,11 +48,11 @@ export default function Equipe() {
   const [activeFilter, setActiveFilter] = useState<FilterKey>('todos');
   const [search, setSearch] = useState('');
 
-  const pessoas = state.pessoas.filter(p => p.ativo).map((pessoa, idx) => {
+  const pessoas = state.pessoas.filter(p => p.ativo).map((pessoa) => {
     const vinculo = state.vinculos.find(v => v.pessoa_id === pessoa.id);
     const tipo = vinculo?.tipo ?? 'funcionario_proprio';
     const category = getCategoryKey(pessoa.id, tipo);
-    return { pessoa, tipo, category, avatarBg: AVATAR_BGS[idx % AVATAR_BGS.length] };
+    return { pessoa, tipo, category };
   });
 
   const filtered = pessoas.filter(({ pessoa, category }) => {
@@ -118,7 +117,7 @@ export default function Equipe() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-          {filtered.map(({ pessoa, category, avatarBg }) => {
+          {filtered.map(({ pessoa, category }) => {
             const catStyle = CATEGORY_STYLES[category];
             return (
               <div key={pessoa.id} style={{
@@ -126,9 +125,7 @@ export default function Equipe() {
                 padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center',
                 gap: '12px', textAlign: 'center',
               }}>
-                <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '17px', fontWeight: 700, color: '#FFFFFF' }}>{pessoa.iniciais}</span>
-                </div>
+                <Avatar pessoaId={pessoa.id} nome={pessoa.nome} tamanho={52} />
                 <div>
                   <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 600, color: C.tinta, letterSpacing: '-0.01em', lineHeight: '20px' }}>
                     {pessoa.nome}

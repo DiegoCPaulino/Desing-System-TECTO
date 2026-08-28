@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useStore, obraPorSlug, GERENTE_ID } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
+import Avatar from '../components/Avatar';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
@@ -82,9 +83,6 @@ const FOTOS_EXTRA = [
 const MOTIVOS_REMOCAO = ['Doente', 'Dispensado pela empresa', 'Falta', 'Folga', 'Outro'];
 const MOTIVOS_SEM_EXECUCAO = ['Clima', 'Falta de material', 'Obra parada', 'Feriado', 'Outro'];
 
-const AVATAR_BGS = ['#363636', '#5A5A5A', '#7D7D7D', '#9A9A9A', '#4A4A4A', '#6A6A6A'];
-function avatarBg(idx: number) { return AVATAR_BGS[idx % AVATAR_BGS.length]; }
-
 // ─── Small helpers ────────────────────────────────────────────────────────────
 
 function formatarFinalizadoEm(iso: string): string {
@@ -100,16 +98,6 @@ function formatarTimer(seg: number): string {
 }
 
 // ─── UI sub-components ────────────────────────────────────────────────────────
-
-function Avatar({ iniciais, bg, size = 34 }: { iniciais: string; bg: string; size?: number }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: size * 0.32, fontWeight: 700, color: '#FFFFFF' }}>
-        {iniciais}
-      </span>
-    </div>
-  );
-}
 
 function PillSelector({ value, onChange, disabled }: { value: 'dia_todo' | 'manha' | 'tarde'; onChange: (v: 'dia_todo' | 'manha' | 'tarde') => void; disabled?: boolean }) {
   const opts: Array<{ v: 'dia_todo' | 'manha' | 'tarde'; l: string }> = [
@@ -309,7 +297,7 @@ function BuscaWorkerSheet({
   onSelecionar,
   onFechar,
 }: {
-  disponíveis: { id: string; nome: string; iniciais: string; funcao: string; idx: number }[];
+  disponíveis: { id: string; nome: string; funcao: string }[];
   buscarTexto: string;
   onBuscar: (v: string) => void;
   onSelecionar: (id: string) => void;
@@ -346,13 +334,13 @@ function BuscaWorkerSheet({
             Nenhuma pessoa encontrada
           </p>
         ) : (
-          filtrados.map(({ id, nome, iniciais, funcao, idx }) => (
+          filtrados.map(({ id, nome, funcao }) => (
             <button
               key={id}
               onClick={() => onSelecionar(id)}
               style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '10px 0', border: 'none', backgroundColor: 'transparent', cursor: 'pointer', borderBottom: `1px solid ${C.borda}`, textAlign: 'left' as const }}
             >
-              <Avatar iniciais={iniciais} bg={avatarBg(idx)} size={36} />
+              <Avatar pessoaId={id} nome={nome} tamanho={36} />
               <div>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: C.grafite }}>{nome}</p>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.tintaFraca }}>{funcao}</p>
@@ -667,7 +655,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
       const ativosIds = new Set(workers.filter((w) => !w.removido).map((w) => w.pessoa_id));
       const disponíveis = s.pessoas
         .filter((p) => p.ativo && !ativosIds.has(p.id))
-        .map((p, idx) => ({ id: p.id, nome: p.nome, iniciais: p.iniciais, funcao: p.funcao, idx }));
+        .map((p) => ({ id: p.id, nome: p.nome, funcao: p.funcao }));
       showSheet(
         <BuscaWorkerSheet
           disponíveis={disponíveis}
@@ -749,7 +737,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
                   const periodoLabel = pr.periodo === 'dia_todo' ? 'Dia todo' : pr.periodo === 'manha' ? 'Manhã' : 'Tarde';
                   return (
                     <div key={pr.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: i < presencasFinais.length - 1 ? `1px solid ${C.borda}` : 'none' }}>
-                      <Avatar iniciais={p.iniciais} bg={avatarBg(i)} />
+                      <Avatar pessoaId={p.id} nome={p.nome} />
                       <div style={{ flex: 1 }}>
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: C.grafite }}>{p.nome}</p>
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.tintaFraca }}>{p.funcao}</p>
@@ -890,7 +878,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
                       transition: 'opacity 0.2s',
                     }}
                   >
-                    <Avatar iniciais={p.iniciais} bg={avatarBg(i)} />
+                    <Avatar pessoaId={p.id} nome={p.nome} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 600, color: C.grafite, whiteSpace: 'nowrap' as const, overflow: 'hidden', textOverflow: 'ellipsis' }}>{p.nome}</p>
                       <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.tintaFraca, marginTop: '1px' }}>

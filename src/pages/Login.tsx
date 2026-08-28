@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../state/store';
 import type { TipoPerfil } from '../state/types';
+import Avatar from '../components/Avatar';
 
 const C = {
   acento: '#FFC213',
@@ -14,24 +15,17 @@ const C = {
   neutro: '#9A9A9A',
 } as const;
 
-const AVATAR_BGS: Record<string, string> = {
-  PA: '#363636',
-  FS: '#7D7D7D',
-  RD: '#5A5A5A',
-  MC: '#9A9A9A',
-};
-
 const DEMO_USERS: Array<{
-  initials: string;
+  pessoaId: string;
   nome: string;
   perfil: string;
   tipo: TipoPerfil;
   destino: string;
 }> = [
-  { initials: 'PA', nome: 'Pedro Almeida', perfil: 'Administração', tipo: 'administracao', destino: '/' },
-  { initials: 'FS', nome: 'Fernanda Sousa', perfil: 'Financeiro', tipo: 'financeiro', destino: '/' },
-  { initials: 'RD', nome: 'Rafael Duarte', perfil: 'Gerente de Obras', tipo: 'gerente_obras', destino: '/' },
-  { initials: 'MC', nome: 'Mariana Costa Lima', perfil: 'Cliente', tipo: 'cliente', destino: '/portal' },
+  { pessoaId: 'p01', nome: 'Pedro Almeida', perfil: 'Administração', tipo: 'administracao', destino: '/' },
+  { pessoaId: 'p03', nome: 'Fernanda Sousa', perfil: 'Financeiro', tipo: 'financeiro', destino: '/' },
+  { pessoaId: 'p04', nome: 'Rafael Duarte', perfil: 'Gerente de Obras', tipo: 'gerente_obras', destino: '/' },
+  { pessoaId: 'cliente-o01', nome: 'Mariana Costa Lima', perfil: 'Cliente', tipo: 'cliente', destino: '/portal' },
 ];
 
 function IconEye({ open }: { open: boolean }) {
@@ -226,11 +220,7 @@ export default function Login() {
                     e.currentTarget.style.background = 'none';
                   }}
                 >
-                  <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: AVATAR_BGS[u.initials] ?? '#7D7D7D', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 700, color: '#FFF' }}>
-                      {u.initials}
-                    </span>
-                  </div>
+                  <Avatar pessoaId={u.pessoaId} nome={u.nome} tamanho={36} />
                   <div>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, lineHeight: '18px' }}>
                       {u.nome}
