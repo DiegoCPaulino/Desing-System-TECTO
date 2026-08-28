@@ -311,11 +311,10 @@ Codex.
 
 ### 6.5 Efeito derivado no Diário
 
-O timer de gravação usa `useEffect` para sincronizar um intervalo externo, o que
-é adequado. Outro `useEffect` recria o conteúdo da sheet a partir de
-`sheetEstado`, `workers` e `pessoasMap`. Como `pessoasMap` é reconstruído a cada
-render e está nas dependências, esse trecho merece revisão por possível ciclo de
-renderização. Não foi alterado no Pacote 0.
+A suspeita levantada no Pacote 0 foi **confirmada no navegador** e está detalhada
+na §10. O ciclo de renderização não é possível: é certo, e dispara na ação
+central da Cena 6. Ver §10 — esta seção não repete o diagnóstico para as duas
+não divergirem.
 
 ---
 
@@ -380,3 +379,74 @@ há ressalva explícita.
 Enquanto o Claude Code estiver indisponível, o Codex pode avançar nos itens 2 a
 6 apenas quando não precisar inventar dado, cálculo, entidade ou permissão. O
 diretório `src/state/**` e o seed permanecem fora do seu escopo.
+
+---
+
+## 10. Auditoria de `useEffect`
+
+Produzida no item 1 da tarefa P1A. **Nada foi corrigido** — a correção é decisão
+do Mestre, e o arquivo envolvido pertence ao outro agente.
+
+**Método:** `grep` por `useEffect`, `useLayoutEffect` e `useInsertionEffect` em
+`src/` inteiro. Três ocorrências, todas em um único arquivo. Nenhuma outra tela
+herdou o padrão do gerador.
+
+**Critério:** (a) sincroniza com o mundo externo — legítimo · (b) grava no estado
+algo que poderia ser calculado na renderização — defeito.
+
+| Arquivo | Linha | O que faz | Veredito |
+|---|---|---|---|
+| `src/pages/DiarioObra.tsx` | 1 | Importação de `useEffect` | não é efeito |
+| `src/pages/DiarioObra.tsx` | 499 | Timer de gravação: `setInterval` incrementando os segundos, com `clearInterval` no retorno | **(a) legítimo** |
+| `src/pages/DiarioObra.tsx` | 641 | Recria o conteúdo da sheet e grava em `sheetContent` | **(b) defeito — confirmado no navegador** |
+
+### 10.1 Linha 499 — legítimo
+
+Depende de `gravacaoEstado`, primitivo único. O tempo de relógio não é derivável
+na renderização, e a limpeza do intervalo está correta. Usa a forma funcional
+`setSegundosGravacao((n) => n + 1)`, então não precisa do valor nas dependências.
+Nada a fazer.
+
+### 10.2 Linha 641 — defeito, com ciclo de renderização confirmado
+
+O efeito grava em `sheetContent` (via `showSheet` → `setSheetContent`) um valor
+inteiramente derivável de `sheetEstado`, `workers`, `pessoasMap` e `buscarTexto`.
+É o padrão (b) em forma pura.
+
+O ciclo acontece assim:
+
+1. `pessoasMap` é declarado em `src/pages/DiarioObra.tsx:469` como
+   `Object.fromEntries(...)`, sem `useMemo` — **referência nova a cada render**.
+2. `pessoasMap` está na lista de dependências (`src/pages/DiarioObra.tsx:681`),
+   então o efeito roda **em todo render**.
+3. Cada execução chama `showSheet(<Componente … />)`. JSX cria um objeto novo,
+   que nunca é `Object.is`-igual ao anterior, então o React não descarta a
+   atualização.
+4. Novo estado → novo render → passo 1.
+
+O ciclo fica **dormente enquanto `sheetEstado` é nulo**, porque aí o efeito chama
+`hideSheet()` e `setSheetContent(null)` — e `null === null` faz o React parar.
+Ele acorda no instante em que qualquer folha abre.
+
+**Verificação executada** — Pedro Almeida, `/obras/18-gfr/diario` (obra sem
+diário em 20/08, portanto formulário editável), remoção de uma pessoa planejada:
+
+- console: `Maximum update depth exceeded`, repetido, a cada abertura de folha;
+- a folha **renderiza mesmo assim** — o React interrompe em 50 iterações e o
+  conteúdo aparece;
+- a ação **completa corretamente**: o contador foi de "5 de 5 confirmados" para
+  "4 de 5", e a pessoa passou a exibir "Falta" com opção de desfazer.
+
+**Severidade.** Não quebra a demonstração e não é visível para quem assiste. É
+degradação silenciosa: renderização em excesso a cada interação com qualquer
+folha, e console inundado. Encaixa na definição de erro silencioso do
+`AGENTS.md` §5 — aparece para quem abre o console, não para quem olha a tela.
+
+**Por que não foi corrigido.** Duas razões independentes: o item 1 da P1A manda
+classificar e não corrigir, e a correção é em `src/pages/DiarioObra.tsx`, que
+está fora dos arquivos permitidos da tarefa.
+
+**Correção sugerida, quando for despachada:** envolver `pessoasMap` em `useMemo`
+resolve o sintoma; derivar a folha na renderização, em vez de guardá-la em
+estado, resolve a causa. A segunda é a que o circuit breaker do `AGENTS.md` §4
+descreve.
