@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate, Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../state/store';
 
 const C = {
@@ -31,10 +31,9 @@ function IconLogout() {
 export default function PortalLayout() {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const perfil = useStore(s => s.perfil_ativo);
+  // Sem checagem de perfil aqui: GuardaPerfil, acima deste layout, já garantiu
+  // que só o Cliente chega até o portal.
   const setPerfil = useStore(s => s.setPerfil);
-
-  if (!perfil) return <Navigate to="/entrar" replace />;
 
   const handleLogout = () => {
     setPerfil(null);
