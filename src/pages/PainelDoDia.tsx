@@ -1,6 +1,6 @@
 import React from 'react';
-import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGerenteDaObra, getPessoaIniciais } from './state/store';
-import { HOJE } from './state/dados-iniciais';
+import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGerenteDaObra, getPessoaIniciais } from '../state/store';
+import { HOJE } from '../state/dados-iniciais';
 
 const C = {
   acento: '#FFC213',

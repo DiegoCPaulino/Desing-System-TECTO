@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais, obraSlug, obraPorSlug } from './state/store';
-import EmBreve from './pages/EmBreve';
+import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais, obraSlug, obraPorSlug } from '../state/store';
+import EmBreve from './EmBreve';
 
 const C = {
   acento: '#FFC213',
