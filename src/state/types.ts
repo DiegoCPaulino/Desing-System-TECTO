@@ -167,6 +167,17 @@ export interface Lancamento {
   parcelas: number;
   parcelas_pagas: number;
   data: string;
+
+  // ── Só em lançamentos de tipo `estorno` ──
+  /**
+   * Qual lançamento este estorno anula. O original **nunca é alterado nem
+   * apagado** (`INV-08`): o estorno é um registro novo que aponta para ele.
+   */
+  estorna_lancamento_id?: string;
+  /** Obrigatório no estorno. Correção sem motivo registrado não é auditável. */
+  motivo?: string;
+  /** Quem mandou estornar. */
+  autor_id?: string;
 }
 
 // Parcela de um Lançamento. A pessoa vem do lançamento de origem; o ciclo em
@@ -178,7 +189,16 @@ export interface Parcela {
   lancamento_id: string;
   numero: number;
   valor_centavos: number;
-  situacao: 'paga' | 'pendente';
+  /**
+   * `estornada` é estado terminal: a parcela estava pendente quando o
+   * lançamento de origem foi estornado, e deixa de ser cobrada.
+   *
+   * Marcar assim **não** é o `UPDATE` destrutivo que o `INV-08` proíbe. O
+   * número e o valor continuam intactos e a linha continua no extrato — é uma
+   * transição de estado, do mesmo tipo que `pendente → paga`. Apagar a linha
+   * é que seria destrutivo.
+   */
+  situacao: 'paga' | 'pendente' | 'estornada';
   ciclo_periodo_fim: string;
 }
 

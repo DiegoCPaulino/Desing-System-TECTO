@@ -128,7 +128,7 @@ export function proximoFimDeCiclo(tipo: TipoCiclo, periodo_fim: string): string 
 // ═══════════════════════════════════════════════════════════════════════════
 
 export interface LinhaExtrato {
-  tipo: 'diaria' | 'adicional' | 'adiantamento' | 'emprestimo';
+  tipo: 'diaria' | 'adicional' | 'adiantamento' | 'emprestimo' | 'estorno';
   data?: string;
   descricao: string;
   /** Positivo credita, negativo desconta. Sempre em centavos inteiros. */
@@ -142,6 +142,13 @@ export interface ExtratoFechamento {
   linhas: LinhaExtrato[];
   bruto_centavos: number;
   descontos_centavos: number;
+  /**
+   * Estornos que caem neste ciclo. É dinheiro que a empresa DEVE à pessoa —
+   * sentido oposto ao do desconto — e por isso vive num campo próprio em vez
+   * de entrar como desconto negativo. Valor negativo em campo de desconto é
+   * como se erra a conta sem perceber.
+   */
+  creditos_centavos: number;
   a_pagar_centavos: number;
   /** Quanto do desconto não coube neste ciclo e rola para o seguinte. */
   saldo_a_rolar_centavos: number;
@@ -165,8 +172,20 @@ export function saldoDevedorDaPessoa(state: AppState, pessoa_id: string): number
   const lancamentosDaPessoa = new Set(
     state.lancamentos.filter((l) => l.pessoa_id === pessoa_id).map((l) => l.id)
   );
+  // Só DÍVIDA: parcela de estorno é crédito a favor da pessoa, e parcela
+  // `estornada` deixou de ser cobrada. Nenhuma das duas é saldo devedor.
+  const deDivida = new Set(
+    state.lancamentos
+      .filter((l) => l.pessoa_id === pessoa_id && l.tipo !== 'estorno')
+      .map((l) => l.id)
+  );
   return state.parcelas
-    .filter((p) => lancamentosDaPessoa.has(p.lancamento_id) && p.situacao === 'pendente')
+    .filter(
+      (p) =>
+        lancamentosDaPessoa.has(p.lancamento_id) &&
+        deDivida.has(p.lancamento_id) &&
+        p.situacao === 'pendente'
+    )
     .reduce((soma, p) => soma + p.valor_centavos, 0);
 }
 
@@ -228,6 +247,7 @@ export function calcularFechamentoDaPessoa(
     linhas: [],
     bruto_centavos: 0,
     descontos_centavos: 0,
+    creditos_centavos: 0,
     a_pagar_centavos: 0,
     saldo_a_rolar_centavos: 0,
     saldo_devedor_total_centavos: saldoDevedorDaPessoa(state, pessoa_id),
@@ -263,11 +283,25 @@ export function calcularFechamentoDaPessoa(
     }
   }
 
-  // 3 e 4 — descontos
+  // 3, 4 e 5 — descontos e créditos
   let descontos = 0;
+  let creditos = 0;
   for (const p of parcelasDoCiclo(state, pessoa_id, ciclo.periodo_fim)) {
     const lancamento = state.lancamentos.find((l) => l.id === p.lancamento_id);
     if (!lancamento) continue;
+
+    // Estorno anda no sentido contrário: credita a pessoa em vez de descontar.
+    if (lancamento.tipo === 'estorno') {
+      linhas.push({
+        tipo: 'estorno',
+        data: lancamento.data,
+        descricao: `Estorno — ${lancamento.motivo ?? 'sem motivo registrado'}`,
+        valor_centavos: p.valor_centavos,
+        referencia_id: p.id,
+      });
+      creditos += p.valor_centavos;
+      continue;
+    }
 
     const ehAdiantamento = lancamento.tipo === 'adiantamento';
     linhas.push({
@@ -282,9 +316,12 @@ export function calcularFechamentoDaPessoa(
     descontos += p.valor_centavos;
   }
 
-  // 5 — o pagamento nunca é negativo
-  const a_pagar = Math.max(0, bruto - descontos);
-  const saldo_a_rolar = Math.max(0, descontos - bruto);
+  // 6 — o pagamento nunca é negativo.
+  // O crédito do estorno soma ao que o ciclo rendeu antes de descontar: é
+  // dinheiro que a pessoa tem a receber, então aumenta o que ela leva e
+  // aumenta o que sobra para amortizar dívida.
+  const a_pagar = Math.max(0, bruto + creditos - descontos);
+  const saldo_a_rolar = Math.max(0, descontos - bruto - creditos);
 
   return {
     pessoa_id,
@@ -292,6 +329,7 @@ export function calcularFechamentoDaPessoa(
     linhas,
     bruto_centavos: bruto,
     descontos_centavos: descontos,
+    creditos_centavos: creditos,
     a_pagar_centavos: a_pagar,
     saldo_a_rolar_centavos: saldo_a_rolar,
     saldo_devedor_total_centavos: saldoDevedorDaPessoa(state, pessoa_id),
@@ -581,16 +619,24 @@ export function executarFechamento(
     const alvo = pedido === undefined ? proposto : Math.max(0, Math.min(pedido, proposto));
 
     // Amortiza as parcelas, na ordem em que entraram no extrato, com o que o
-    // ciclo rendeu, limitado ao alvo. Sobra vira parcela no ciclo seguinte.
-    let disponivel = Math.min(extrato.bruto_centavos, alvo);
-    const aPagar = extrato.bruto_centavos - disponivel;
+    // ciclo rendeu MAIS os créditos de estorno, limitado ao alvo. Sobra vira
+    // parcela no ciclo seguinte.
+    const rendimento = extrato.bruto_centavos + extrato.creditos_centavos;
+    let disponivel = Math.min(rendimento, alvo);
+    const aPagar = rendimento - disponivel;
     const idsNoExtrato = new Set(
       extrato.linhas
         .filter((l) => l.tipo === 'adiantamento' || l.tipo === 'emprestimo')
         .map((l) => l.referencia_id)
     );
+    // As parcelas de estorno não são amortizadas: elas são pagas à pessoa
+    // neste ciclo, e por isso apenas mudam de `pendente` para `paga`.
+    const idsDeEstorno = new Set(
+      extrato.linhas.filter((l) => l.tipo === 'estorno').map((l) => l.referencia_id)
+    );
 
     parcelas = parcelas.flatMap((p) => {
+      if (idsDeEstorno.has(p.id)) return [{ ...p, situacao: 'paga' as const }];
       if (!idsNoExtrato.has(p.id)) return [p];
 
       if (disponivel >= p.valor_centavos) {

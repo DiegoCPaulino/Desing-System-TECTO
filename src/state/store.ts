@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { AppState, Planejamento, Presenca, Diaria, Diario, Obra, TipoPerfil, ItemForaEscopo } from './types';
 import DADOS_INICIAIS, { HOJE } from './dados-iniciais';
 import { definirObraQueArca, executarFechamento } from './fechamento';
+import { estornarLancamento } from './estorno';
 
 /**
  * Instante "agora" do protótipo: a data é sempre HOJE, a data de referência
@@ -64,6 +65,11 @@ type Store = AppState & {
     ciclo_id: string;
     fechado_por: string;
     ajustes?: Record<string, number>;
+  }) => string | undefined;
+  estornarLancamentoDaPessoa: (args: {
+    lancamento_id: string;
+    motivo: string;
+    autor_id: string;
   }) => string | undefined;
 };
 
@@ -258,6 +264,19 @@ export const useStore = create<Store>(() => ({
     const resultado = executarFechamento(useStore.getState(), ciclo_id, fechado_por, ajustes);
     if (!resultado.ok) return resultado.erro;
     useStore.setState({ fechamentos: resultado.fechamentos!, parcelas: resultado.parcelas! });
+    return undefined;
+  },
+
+  estornarLancamentoDaPessoa: ({ lancamento_id, motivo, autor_id }) => {
+    const resultado = estornarLancamento(
+      useStore.getState(),
+      lancamento_id,
+      motivo,
+      autor_id,
+      HOJE
+    );
+    if (!resultado.ok) return resultado.erro;
+    useStore.setState({ lancamentos: resultado.lancamentos!, parcelas: resultado.parcelas! });
     return undefined;
   },
 }));
