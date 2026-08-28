@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useStore } from '../state/store';
 import Avatar from '../components/Avatar';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 const C = {
   acento: '#FFC213',
@@ -13,14 +14,6 @@ const C = {
   neutro: '#9A9A9A',
   positivo: '#2E9E5B',
 } as const;
-
-const DIA_SEMANA: Record<string, string> = {
-  '2026-08-20': 'quinta-feira',
-  '2026-08-19': 'quarta-feira',
-  '2026-08-18': 'terça-feira',
-  '2026-08-17': 'segunda-feira',
-  '2026-08-14': 'sexta-feira',
-};
 
 function isSectionHeader(line: string): boolean {
   const trimmed = line.trim();
@@ -114,12 +107,6 @@ export default function PortalDiario() {
     ? allDiarios.filter(d => d.fotos.length > 0)
     : allDiarios;
 
-  const formatDateFull = (data: string) => {
-    const [y, m, d] = data.split('-');
-    const months = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-    return `${Number(d)} de ${months[Number(m) - 1]}`;
-  };
-
   return (
     <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px', fontFamily: 'Inter, sans-serif' }}>
 
@@ -184,12 +171,7 @@ export default function PortalDiario() {
                 <div style={{ flex: 1, backgroundColor: C.superficie, borderRadius: '16px', border: `1px solid ${C.borda}`, overflow: 'hidden' }}>
                   {/* Card header */}
                   <div style={{ padding: '20px 24px 16px', borderBottom: semExecucao ? 'none' : `1px solid ${C.borda}` }}>
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.01em' }}>
-                      {formatDateFull(diario.data)}
-                    </span>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, marginLeft: '10px' }}>
-                      {DIA_SEMANA[diario.data] ?? ''}
-                    </span>
+                    <DataComDiaSemana data={diario.data} modo="destaque" />
                   </div>
 
                   {semExecucao ? (

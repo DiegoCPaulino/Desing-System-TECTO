@@ -4,6 +4,7 @@ import { useStore, calcularPctObra, calcularPctAmbiente } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 const C = {
   acento: '#FFC213',
@@ -85,18 +86,6 @@ export default function PortalMinhaObra() {
       else next.add(id);
       return next;
     });
-  };
-
-  const formatDate = (data: string) => {
-    const [y, m, d] = data.split('-');
-    const months = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-    return `${Number(d)} de ${months[Number(m) - 1]} de ${y}`;
-  };
-
-  const formatDateShort = (data: string) => {
-    const [, m, d] = data.split('-');
-    const months = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
-    return `${d} DE ${months[Number(m) - 1]}`;
   };
 
   return (
@@ -264,9 +253,7 @@ export default function PortalMinhaObra() {
         <Card>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', gap: '16px' }}>
             <TituloSecao margemInferior={20}>O que aconteceu hoje</TituloSecao>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, letterSpacing: '0.07em', textTransform: 'uppercase', color: C.neutro, flexShrink: 0, marginTop: '-2px' }}>
-              {formatDateShort(diarioData)}
-            </span>
+            <DataComDiaSemana data={diarioData} style={{ justifyContent: 'flex-end', marginTop: '-2px' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>

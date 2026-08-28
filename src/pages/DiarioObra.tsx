@@ -4,6 +4,7 @@ import { useStore, obraPorSlug, GERENTE_ID } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
@@ -413,14 +414,6 @@ function WaveGravacao({ segundos }: { segundos: number }) {
 
 // ─── Main component ────────────────────────────────────────────────────────────
 
-const DIAS_SEMANA = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
-
-function formatarDataBR(iso: string): string {
-  const d = new Date(iso + 'T12:00:00');
-  return `${DIAS_SEMANA[d.getDay()]}, ${d.getDate()} de ${MESES[d.getMonth()]}`;
-}
-
 export default function DiarioObra() {
   const { obraId } = useParams<{ obraId: string }>();
   const state = useStore();
@@ -674,8 +667,9 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
         <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, color: C.tinta, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
           Diário de hoje
         </h1>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.tintaFraca, margin: 0 }}>
-          {obraCodigo} · {formatarDataBR(HOJE)}
+        <p style={{ margin: 0, display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', gap: '6px' }}>
+          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.tintaFraca }}>{obraCodigo} ·</span>
+          <DataComDiaSemana data={HOJE} />
         </p>
       </div>
       <span style={{

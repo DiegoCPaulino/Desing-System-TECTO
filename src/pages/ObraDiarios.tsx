@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useStore, getPessoaNome, obraSlug, obraPorSlug } from '../state/store';
 import Avatar from '../components/Avatar';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 const C = {
   acento: '#FFC213',
@@ -33,12 +34,6 @@ function formatarDataCompleta(data: string): string {
 function formatarDataNumero(data: string): string {
   const [, m, d] = data.split('-');
   return `${d}/${m}`;
-}
-
-function diaDaSemana(data: string): string {
-  const dias = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
-  const dt = new Date(data + 'T12:00:00');
-  return dias[dt.getDay()];
 }
 
 function isSectionHeader(line: string): boolean {
@@ -229,12 +224,7 @@ export default function ObraDiarios() {
                 {/* Main content */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: 600, color: C.tinta }}>
-                      {formatarDataCompleta(diario.data)}
-                    </span>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca }}>
-                      {diaDaSemana(diario.data)}
-                    </span>
+                    <DataComDiaSemana data={diario.data} />
                     {fechado && (
                       <span style={{ color: C.neutro, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                         <IconLock />

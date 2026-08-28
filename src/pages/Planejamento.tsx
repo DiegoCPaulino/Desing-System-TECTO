@@ -20,6 +20,7 @@ import type { Planejamento as Cel } from '../state/types';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
+import DataComDiaSemana from '../components/DataComDiaSemana';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -37,7 +38,6 @@ const C = {
   informativo: '#215FD7',
 } as const;
 
-const DIAS_LABEL = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const MOTIVOS = ['Doente', 'Dispensado pela empresa', 'Falta', 'Folga', 'Férias', 'Afastado', 'Obra parada'];
 
@@ -310,14 +310,9 @@ export default function Planejamento() {
           <div style={{ ...nameCell, borderBottom: `1px solid ${C.borda}` }}>
             <CabecalhoTabela elemento="span">Pessoa</CabecalhoTabela>
           </div>
-          {dias.map((d, i) => (
+          {dias.map(d => (
             <div key={d} style={{ ...dayHeadCell, borderBottom: `1px solid ${C.borda}` }}>
-              <CabecalhoTabela elemento="span">
-                {DIAS_LABEL[i]}
-              </CabecalhoTabela>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '15px', fontWeight: 700, color: C.grafite }}>
-                {diaNumero(d)}
-              </span>
+              <DataComDiaSemana data={d} modo="grade" />
             </div>
           ))}
         </div>
