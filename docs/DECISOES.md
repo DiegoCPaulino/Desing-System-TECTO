@@ -355,6 +355,36 @@ criaria duas verdades sobre o mesmo papel — e a `RN-133b` foi escrita assim.
 
 ---
 
+### `[SÓ PROTÓTIPO]` · O custo da empresa por dia existe, em dois campos
+**Decisão:** `Vinculo.custo_empresa_diaria_centavos` é o cadastro;
+`Diaria.custo_empresa_centavos` é o valor **congelado no fato**. Os Indicadores
+leem o congelado.
+**Por quê:** é o segundo campo do "padrão de dois campos" que a decisão sobre
+encargos já previa e que nunca tinha sido construído. São dois porque o `INV-03`
+manda congelar: com o custo só no cadastro, mudar a folha hoje reescreveria a
+margem do mês passado.
+**Vigilância:** os valores semeados são **plausíveis, não reais**. Vieram de
+mim, não da contabilidade. **Confirmar a tabela com Pedro antes da
+demonstração** — é um número que ele vai reconhecer como certo ou errado na
+hora.
+
+### `[TÉCNICA]` · Receita é devolvida nas duas bases · `Q-033`
+**Decisão:** os Indicadores devolvem `receita_contratada` e `receita_recebida`,
+e a margem calculada sobre as duas. Nenhuma é eleita.
+**Por quê:** a `Q-033` pergunta se receita é o contratado ou o recebido, e
+continua aberta. Em agosto as duas bases dão R$48.260,00 e R$11.900,00 — a
+diferença é grande demais para ser escolhida por conveniência de implementação.
+**Consequência:** a tela da T8 é obrigada a rotular qual base está exibindo.
+
+### `[TÉCNICA]` · Só "repassado com margem" entra na margem da obra
+**Decisão:** reembolsável e direto do Cliente não movem a margem.
+**Por quê:** reembolsável entra e sai — a TECTO paga e o Cliente devolve o mesmo
+valor; contar o custo sem contar a devolução afundaria a margem sem motivo. Em
+direto do Cliente a TECTO não desembolsa nada. É a mesma regra já aplicada em
+`margemDaObra`, agora com recorte de período.
+
+---
+
 ## Aguardando registro
 
 Itens decididos em conversa e ainda não escritos aqui em formato completo. Quem

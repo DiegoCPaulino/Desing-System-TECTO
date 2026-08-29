@@ -43,7 +43,7 @@ Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | 80 testes em cinco arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
+| Testes automatizados | 99 testes em seis arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
 | `src/components/` | quatro componentes: `TituloSecao`, `Avatar`, `CabecalhoTabela` e `DataComDiaSemana` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
@@ -198,6 +198,8 @@ obras.
 - `midia.ts`: mídia por Ambiente (`RN-081`).
 - `documentos.ts`: documentos por especialidade e notas por tipo (`RN-128`,
   `RN-133b`).
+- `indicadores.ts`: receita, custo, margem e despesas por período.
+- `indicadores.testes.ts`: 19 testes.
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
