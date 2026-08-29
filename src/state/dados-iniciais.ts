@@ -1095,6 +1095,33 @@ const DADOS: AppState = {
     { id: 'pc08', contrato_id: 'ct04', numero: 2, valor_centavos: 120000, situacao: 'pendente' },
   ],
 
+  // ─── DOCUMENTOS ───────────────────────────────────────────────────────────
+  // Projetos e contratos. Nota fiscal NÃO entra aqui: ela vive em custos_obra,
+  // porque a nota é sempre a nota de alguma coisa.
+  documentos: [
+    // Obra 22 - MCL
+    { id: 'doc01', obra_id: 'o01', nome: 'Planta baixa — layout aprovado',        tipo_documento_id: 'td02', url: '#',  data: '2026-04-10', enviado_por: 'p04' },
+    { id: 'doc02', obra_id: 'o01', nome: 'Projeto elétrico',                      tipo_documento_id: 'td02', especialidade_id: 'es07', url: '#', data: '2026-04-18', enviado_por: 'p04' },
+    { id: 'doc03', obra_id: 'o01', nome: 'Projeto hidráulico',                    tipo_documento_id: 'td02', especialidade_id: 'es08', url: '#', data: '2026-04-18', enviado_por: 'p04' },
+    { id: 'doc04', obra_id: 'o01', nome: 'Detalhamento de marcenaria',            tipo_documento_id: 'td02', especialidade_id: 'es01', url: '#', data: '2026-06-02', enviado_por: 'p06' },
+    { id: 'doc05', obra_id: 'o01', nome: 'Contrato — elétrica, Cleber Matos',     tipo_documento_id: 'td03', especialidade_id: 'es07', url: '#', data: '2026-05-01', enviado_por: 'p01' },
+    { id: 'doc06', obra_id: 'o01', nome: 'Contrato — marcenaria, NX',             tipo_documento_id: 'td03', especialidade_id: 'es01', url: '#', data: '2026-06-05', enviado_por: 'p01' },
+    { id: 'doc07', obra_id: 'o01', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-04-14', enviado_por: 'p01' },
+    // Obra 18 - GFR
+    { id: 'doc10', obra_id: 'o02', nome: 'Planta baixa — layout aprovado',        tipo_documento_id: 'td02', url: '#', data: '2026-04-28', enviado_por: 'p05' },
+    { id: 'doc11', obra_id: 'o02', nome: 'Projeto elétrico',                      tipo_documento_id: 'td02', especialidade_id: 'es07', url: '#', data: '2026-05-06', enviado_por: 'p05' },
+    { id: 'doc12', obra_id: 'o02', nome: 'Contrato — gesso, Tarcísio Melo',       tipo_documento_id: 'td03', especialidade_id: 'es05', url: '#', data: '2026-06-15', enviado_por: 'p01' },
+    { id: 'doc13', obra_id: 'o02', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-05-02', enviado_por: 'p01' },
+    // Obra 25 - ATB
+    { id: 'doc20', obra_id: 'o03', nome: 'Planta baixa — layout aprovado',        tipo_documento_id: 'td02', url: '#', data: '2026-06-04', enviado_por: 'p04' },
+    { id: 'doc21', obra_id: 'o03', nome: 'Projeto hidráulico',                    tipo_documento_id: 'td02', especialidade_id: 'es08', url: '#', data: '2026-06-12', enviado_por: 'p04' },
+    { id: 'doc22', obra_id: 'o03', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-06-10', enviado_por: 'p01' },
+    // Obra 31 - MBP — aguardando início, só o contrato
+    { id: 'doc30', obra_id: 'o04', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-08-01', enviado_por: 'p01' },
+    // Serviço 04 - LSM
+    { id: 'doc40', obra_id: 'o05', nome: 'Contrato de pequeno serviço',           tipo_documento_id: 'td03', url: '#', data: '2026-07-14', enviado_por: 'p01' },
+  ],
+
   // ─── USUÁRIOS ─────────────────────────────────────────────────────────────
   // A camada de credencial do INV-01. Os quatro que aparecem no Login de
   // demonstração. O e-mail existe para a tela de acesso ter o que exibir; não

@@ -415,6 +415,29 @@ export interface Midia {
   data: string;
 }
 
+/**
+ * Documento da obra — projeto e contrato.
+ *
+ * **Nota fiscal não entra aqui.** Ela já vive em `custos_obra`, pelo campo
+ * `tipo_documento_id`, porque a nota é sempre a nota DE alguma coisa: separá-la
+ * do custo criaria duas verdades sobre o mesmo papel. `Documento` é o que
+ * existe por si — a planta, o memorial, o contrato assinado.
+ *
+ * `especialidade_id` é o que a T6 filtra: "projetos e contratos por
+ * especialidade". Fica opcional porque nem todo documento pertence a uma —
+ * uma planta baixa geral não é de marcenaria nem de elétrica.
+ */
+export interface Documento {
+  id: string;
+  obra_id: string;
+  nome: string;
+  tipo_documento_id: string;
+  especialidade_id?: string;
+  url: string;
+  data: string;
+  enviado_por?: string;
+}
+
 export type TipoPerfil = 'administracao' | 'financeiro' | 'gerente_obras' | 'cliente';
 
 /**
@@ -486,4 +509,5 @@ export interface AppState {
   contratos_terceirizado: ContratoTerceirizado[];
   parcelas_contrato: ParcelaContrato[];
   usuarios: Usuario[];
+  documentos: Documento[];
 }

@@ -1,9 +1,10 @@
 import { create } from 'zustand';
-import type { AppState, Planejamento, Presenca, Diaria, Diario, Obra, TipoPerfil, ItemForaEscopo } from './types';
+import type { AppState, Planejamento, Presenca, Diaria, Diario, Midia, Obra, TipoPerfil, ItemForaEscopo } from './types';
 import DADOS_INICIAIS, { HOJE } from './dados-iniciais';
 import { definirObraQueArca, executarFechamento } from './fechamento';
 import { estornarLancamento } from './estorno';
 import { marcarComoLidas } from './notificacoes';
+import { criarMidia } from './midia';
 
 /**
  * Instante "agora" do protótipo: a data é sempre HOJE, a data de referência
@@ -58,6 +59,12 @@ type Store = AppState & {
     data: string;
     texto_linhas: string[];
     fotos: string[];
+    /**
+     * Mídia com ambiente. Quando vem preenchida, ela é a fonte: `fotos` passa
+     * a ser derivada dela, e registros em `midias` são criados. Assim as duas
+     * representações não têm como divergir.
+     */
+    midias?: Array<{ url: string; tipo: 'foto' | 'video'; ambiente_id: string }>;
     confirmados: Array<{ pessoa_id: string; periodo: 'dia_todo' | 'manha' | 'tarde' }>;
     removidos_planejados: Array<{ pessoa_id: string; motivo: string }>;
     finalizado_por: string;
@@ -85,6 +92,14 @@ type Store = AppState & {
    * Sem `ids`, marca todas — é o "abrir o painel zera o contador".
    */
   marcarNotificacoesComoLidas: (args?: { ids?: string[] }) => void;
+  /** Devolve a mensagem de erro, ou `undefined` quando deu certo. */
+  adicionarMidiaNaObra: (args: {
+    obra_id: string;
+    ambiente_id: string;
+    url: string;
+    tipo: 'foto' | 'video';
+    diario_id?: string;
+  }) => string | undefined;
 };
 
 export const useStore = create<Store>(() => ({
@@ -220,9 +235,27 @@ export const useStore = create<Store>(() => ({
     }));
   },
 
-  finalizarDiario: ({ diario_id, obra_id, data, texto_linhas, fotos, confirmados, removidos_planejados, finalizado_por, houve_execucao, motivo_sem_execucao }) => {
+  finalizarDiario: ({ diario_id, obra_id, data, texto_linhas, fotos, midias, confirmados, removidos_planejados, finalizado_por, houve_execucao, motivo_sem_execucao }) => {
     useStore.setState((s) => {
       const agora = agoraNoPrototipo();
+
+      // Mídia com ambiente é a fonte quando vem: `fotos` sai dela, e os
+      // registros de `midias` são criados junto. Sem isso, o álbum por
+      // ambiente e as fotos do diário contariam histórias diferentes.
+      const urlsDasMidias = midias?.map((m) => m.url);
+      const novasMidias: Midia[] = (midias ?? []).map((m, i) => ({
+        id: `md_${diario_id}_${i + 1}`,
+        obra_id,
+        diario_id,
+        ambiente_id: m.ambiente_id,
+        url: m.url,
+        tipo: m.tipo,
+        data,
+      }));
+      const midiasAtualizadas = [
+        ...s.midias.filter((m) => m.diario_id !== diario_id),
+        ...novasMidias,
+      ];
 
       const diarioExistente = s.diarios.find((d) => d.id === diario_id);
       const diarioFinalizado: Diario = {
@@ -231,7 +264,7 @@ export const useStore = create<Store>(() => ({
         data,
         estado: 'finalizado',
         texto: texto_linhas,
-        fotos,
+        fotos: urlsDasMidias ?? fotos,
         finalizado_por,
         finalizado_em: agora,
         removidos_planejados,
@@ -280,6 +313,7 @@ export const useStore = create<Store>(() => ({
         diarios: updatedDiarios,
         presencas: [...outrasPresencas, ...novasPresencas],
         diarias: [...outrasDialias, ...novasDiarias],
+        midias: midias ? midiasAtualizadas : s.midias,
       };
     });
   },
@@ -297,6 +331,20 @@ export const useStore = create<Store>(() => ({
     const resultado = executarFechamento(useStore.getState(), ciclo_id, fechado_por, ajustes);
     if (!resultado.ok) return resultado.erro;
     useStore.setState({ fechamentos: resultado.fechamentos!, parcelas: resultado.parcelas! });
+    return undefined;
+  },
+
+  adicionarMidiaNaObra: ({ obra_id, ambiente_id, url, tipo, diario_id }) => {
+    const r = criarMidia(useStore.getState(), {
+      obra_id,
+      ambiente_id,
+      url,
+      tipo,
+      diario_id,
+      data: HOJE,
+    });
+    if (!r.ok) return r.erro;
+    useStore.setState({ midias: r.midias! });
     return undefined;
   },
 
