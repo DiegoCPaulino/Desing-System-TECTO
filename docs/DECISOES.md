@@ -284,6 +284,116 @@ R$2.800,00. Foi um teste que pegou.
 
 ---
 
+### `[TÉCNICA]` · O estorno devolve o que foi PAGO, não o valor do lançamento
+**Decisão:** o crédito de um estorno é a soma das parcelas `paga` do lançamento
+original. As parcelas `pendente` passam a `estornada` e deixam de ser cobradas.
+**Por quê:** anular um lançamento é colocar a pessoa de volta onde ela estava.
+Um empréstimo de R$1.200,00 com duas parcelas pagas tirou R$600,00 dela — é isso
+que ela tem a receber, não os R$1.200,00 que nunca saíram inteiros.
+
+### `[TÉCNICA]` · `estornada` é transição de estado, não `UPDATE` destrutivo
+**Decisão:** `Parcela.situacao` ganhou o valor `estornada`.
+**Por quê:** o `INV-08` proíbe `UPDATE` destrutivo em registro financeiro.
+Marcar a parcela não destrói nada — número e valor continuam intactos, a linha
+continua no extrato. É do mesmo tipo que `pendente → paga`. Apagar a linha é que
+seria destrutivo.
+
+### `[TÉCNICA]` · Crédito de estorno tem campo próprio, não desconto negativo
+**Decisão:** o extrato do Fechamento ganhou `creditos_centavos`, separado de
+`descontos_centavos`. `a_pagar = max(0, bruto + creditos − descontos)`.
+**Por quê:** crédito e desconto andam em sentidos opostos. Valor negativo em
+campo de desconto é como se erra a conta sem perceber.
+
+### `[SÓ PROTÓTIPO]` · Parcela de contrato de terceirizado sem gatilho
+**Decisão:** `ParcelaContrato` tem `numero`, `valor_centavos` e `situacao`, e
+**não** tem `vencimento` nem `etapa`/`confirmado_por`.
+**Por quê:** a `Q-005` pergunta se a cobrança é por data fixa ou por etapa
+concluída, e quem confirma a etapa. Qualquer um dos dois campos afirmaria a
+resposta. É a saída 2 do `docs/ABERTO.md` §1 — a estrutura sem a regra.
+**Vigilância:** quando a `Q-005` for respondida, o campo que faltar entra aqui.
+
+### `[TÉCNICA]` · O pseudo-ambiente "Obra inteira" não existe em `ambientes`
+**Decisão:** serviço de terceiro sem ambiente único fica com `ambiente_id`
+ausente, e a agregação do Andamento o rotula "Obra inteira".
+**Por quê:** criar a linha em `ambientes` faria o Checklist e o Andamento TECTO
+exibirem um ambiente vazio, em telas que pertencem ao outro agente. Pseudo
+quer dizer que não é um ambiente de verdade.
+
+### `[TÉCNICA]` · O total do Andamento sai do conjunto, não da soma das fatias
+**Decisão:** `pct_total` é calculado sobre todos os registros da obra.
+**Por quê:** somar ou mediar fatias arredondadas dá um número ligeiramente
+diferente, e é o total que precisa bater com o do Portal.
+
+---
+
+### `[SÓ PROTÓTIPO]` · Notificação é endereçada por perfil · responde `Q-027`
+**Decisão:** `Notificacao` tem `destinatario_perfis` e `lida_por`, ambos listas
+de perfil. A central de notificações existe, e cada perfil vê e marca só o que
+é dele.
+**Por quê:** a `Q-027` perguntava quem recebe o quê. Com um `lida` booleano, o
+Pedro abrir o painel zeraria o contador do Rafael, que nunca viu o aviso.
+**Vigilância:** no sistema real o destinatário é o **Usuário**, não o perfil,
+porque é o Usuário que tem credencial (`INV-01`). A maquete tem um Usuário por
+perfil, e modelar por Usuário aqui só acrescentaria indireção. **Confirmar com
+Pedro antes de virar `RN`.**
+**Invalida:** o campo `lida` de `Notificacao`.
+
+### `[SÓ PROTÓTIPO]` · O Cliente ainda não é uma Pessoa
+**Decisão:** a camada `Usuario` do `INV-01` passou a existir. Para os três
+perfis internos ela aponta para uma `Pessoa`; para o Cliente aponta para a
+`Obra`.
+**Por quê:** o glossário define Usuário como "credencial ligada a uma Pessoa",
+o que faz do Cliente uma Pessoa. Mas `Obra.cliente` é um nome em texto, e
+acrescentar os cinco clientes a `pessoas` faria o Painel exibir "38 com vínculo
+ativo" quando só 33 têm vínculo — numa tela que pertence ao outro agente.
+**Pendência:** transformar o Cliente em Pessoa, com `Obra.cliente_pessoa_id`, e
+corrigir a contagem do Painel. É uma tarefa só, e das duas pontas.
+
+### `[TÉCNICA]` · Mídia com ambiente é a fonte quando existe
+**Decisão:** `finalizarDiario` aceita `midias` com ambiente; quando vem,
+`Diario.fotos` é derivada dela e os registros de `midias` são criados junto.
+**Por quê:** as duas representações da mesma foto não podem contar histórias
+diferentes. Enquanto as telas lerem `Diario.fotos`, ela continua existindo — mas
+deixa de ser escrita à mão.
+
+### `[TÉCNICA]` · Nota fiscal não é `Documento`
+**Decisão:** `Documento` cobre projeto e contrato. A nota continua em
+`custos_obra`, pelo `tipo_documento_id`.
+**Por quê:** a nota é sempre a nota **de** alguma coisa. Separá-la do custo
+criaria duas verdades sobre o mesmo papel — e a `RN-133b` foi escrita assim.
+
+---
+
+### `[SÓ PROTÓTIPO]` · O custo da empresa por dia existe, em dois campos
+**Decisão:** `Vinculo.custo_empresa_diaria_centavos` é o cadastro;
+`Diaria.custo_empresa_centavos` é o valor **congelado no fato**. Os Indicadores
+leem o congelado.
+**Por quê:** é o segundo campo do "padrão de dois campos" que a decisão sobre
+encargos já previa e que nunca tinha sido construído. São dois porque o `INV-03`
+manda congelar: com o custo só no cadastro, mudar a folha hoje reescreveria a
+margem do mês passado.
+**Vigilância:** os valores semeados são **plausíveis, não reais**. Vieram de
+mim, não da contabilidade. **Confirmar a tabela com Pedro antes da
+demonstração** — é um número que ele vai reconhecer como certo ou errado na
+hora.
+
+### `[TÉCNICA]` · Receita é devolvida nas duas bases · `Q-033`
+**Decisão:** os Indicadores devolvem `receita_contratada` e `receita_recebida`,
+e a margem calculada sobre as duas. Nenhuma é eleita.
+**Por quê:** a `Q-033` pergunta se receita é o contratado ou o recebido, e
+continua aberta. Em agosto as duas bases dão R$48.260,00 e R$11.900,00 — a
+diferença é grande demais para ser escolhida por conveniência de implementação.
+**Consequência:** a tela da T8 é obrigada a rotular qual base está exibindo.
+
+### `[TÉCNICA]` · Só "repassado com margem" entra na margem da obra
+**Decisão:** reembolsável e direto do Cliente não movem a margem.
+**Por quê:** reembolsável entra e sai — a TECTO paga e o Cliente devolve o mesmo
+valor; contar o custo sem contar a devolução afundaria a margem sem motivo. Em
+direto do Cliente a TECTO não desembolsa nada. É a mesma regra já aplicada em
+`margemDaObra`, agora com recorte de período.
+
+---
+
 ## Aguardando registro
 
 Itens decididos em conversa e ainda não escritos aqui em formato completo. Quem
@@ -292,8 +402,8 @@ encostar neles, complete o registro.
 - Comportamento do Checklist quando um Orçamento Adicional é aprovado (`A12`)
 - Destino do harness de SSR criado durante o P0.5: manter como script
   documentado ou remover
-- Nome fixo "Mariana Costa Lima" dentro do `PortalLayout` — viola a regra de nada
-  escrito no código; precisa sair
+- ~~Nome fixo "Mariana Costa Lima" dentro do `PortalLayout`~~ — **destravado**. A
+  camada `Usuario` e `nomeDoUsuarioAtivo` existem; a remoção em si é do Codex
 - **`docs/DECISOES.md` não está na tabela de precedência do `AGENTS.md` §2.**
   Pela letra do contrato, uma `RN` vence uma decisão registrada aqui — mesmo
   quando a decisão declara invalidá-la, como a `D1` fazia com a `RN-125`. Ou

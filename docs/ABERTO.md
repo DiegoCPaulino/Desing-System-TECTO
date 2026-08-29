@@ -110,11 +110,10 @@ durante a prototipação. Precisam virar `RN`.
    com Vínculo ativo apareça no Planejamento da semana, mas Administração e
    Financeiro não vão a obra. Falta o recorte explícito.
 
-3. **Classificação de mídia por Ambiente.** Nenhuma `RN` trata disso, e o
-   protótipo já depende do campo.
+3. ~~**Classificação de mídia por Ambiente.**~~ **FECHADA** — virou a `RN-081`.
 
-4. **Taxonomia de especialidade e tipo de documento.** Nenhuma `RN` a define, e
-   ela é pré-requisito de quatro telas.
+4. ~~**Taxonomia de especialidade e tipo de documento.**~~ **FECHADA** — virou a
+   `RN-128` para Especialidade e a `RN-133b` para Tipo de Documento.
 
 5. **Contrato de terceirizado por Obra.** A `RN-004` menciona "contrato com
    parcelas" sem definir se é por Obra ou por Vínculo.

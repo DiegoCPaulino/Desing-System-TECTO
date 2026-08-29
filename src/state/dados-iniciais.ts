@@ -11,6 +11,26 @@ export const SEMANA_2_INICIO = '2026-08-24'; // segunda-feira (próxima semana)
 // duas descrevem a mesma foto, e divergir aqui criaria duas verdades.
 const FOTO = (id: string) => `https://images.unsplash.com/${id}?w=280&h=280&fit=crop&auto=format`;
 
+/**
+ * CUSTO DA EMPRESA POR DIA, por pessoa. Números da contabilidade externa,
+ * lançados à mão — é o segundo campo do "padrão de dois campos" da decisão
+ * sobre encargos.
+ *
+ * NÃO É O LÍQUIDO VEZES UM PERCENTUAL, e não pode virar isso. Repare que a
+ * razão entre os dois muda de pessoa para pessoa: são dois fatos separados,
+ * um acordado com a pessoa e outro apurado pela contabilidade.
+ *
+ * [SÓ PROTÓTIPO] — valores plausíveis, aguardando os números reais do Pedro.
+ * Só funcionário próprio tem: terceirizado emite nota e não gera encargo, e o
+ * regime da gestão é Q-001 a Q-004.
+ */
+const CUSTO_EMPRESA_DIARIA: Record<string, number> = {
+  p07: 41000, p08: 30500, p11: 41000, p12: 40500, p13: 39800, p14: 38200,
+  p15: 37900, p16: 36400, p17: 36400, p18: 33500, p19: 33200, p20: 30500,
+  p21: 30100, p22: 30500, p23: 41200, p24: 30300, p25: 38000, p26: 36600,
+  p27: 30400, p28: 30200, p29: 41000, p30: 30600, p31: 38300,
+};
+
 // Segunda a sábado da semana corrente. Hoje é QUINTA, 20/08: os dias 21 e 22
 // ainda não aconteceram, e por isso não têm diário, presença nem diária.
 const S1 = ['2026-08-17', '2026-08-18', '2026-08-19', '2026-08-20', '2026-08-21', '2026-08-22'];
@@ -89,41 +109,46 @@ const DADOS: AppState = {
     { id: 'v06', pessoa_id: 'p06', tipo: 'assistente_gerenciamento', inicio: '2025-08-01' },
 
     // ── Ciclo SEMANAL — fecha 22/08 ──
-    { id: 'v07', pessoa_id: 'p07', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-03-01' },
-    { id: 'v08', pessoa_id: 'p08', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-03-01' },
-    { id: 'v11', pessoa_id: 'p11', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-01-01' },
-    { id: 'v12', pessoa_id: 'p12', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-01-01' },
-    { id: 'v13', pessoa_id: 'p13', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 24000, inicio: '2025-01-01' },
-    { id: 'v14', pessoa_id: 'p14', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, inicio: '2025-01-01' },
-    { id: 'v15', pessoa_id: 'p15', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, inicio: '2025-01-01' },
-    { id: 'v16', pessoa_id: 'p16', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, inicio: '2025-01-01' },
-    { id: 'v17', pessoa_id: 'p17', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, inicio: '2025-01-01' },
-    { id: 'v18', pessoa_id: 'p18', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, inicio: '2025-01-01' },
-    { id: 'v19', pessoa_id: 'p19', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, inicio: '2025-01-01' },
-    { id: 'v20', pessoa_id: 'p20', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-01-01' },
-    { id: 'v21', pessoa_id: 'p21', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-01-01' },
-    { id: 'v22', pessoa_id: 'p22', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-01-01' },
+    { id: 'v07', pessoa_id: 'p07', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p07'], inicio: '2025-03-01' },
+    { id: 'v08', pessoa_id: 'p08', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p08'], inicio: '2025-03-01' },
+    { id: 'v11', pessoa_id: 'p11', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p11'], inicio: '2025-01-01' },
+    { id: 'v12', pessoa_id: 'p12', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p12'], inicio: '2025-01-01' },
+    { id: 'v13', pessoa_id: 'p13', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 24000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p13'], inicio: '2025-01-01' },
+    { id: 'v14', pessoa_id: 'p14', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p14'], inicio: '2025-01-01' },
+    { id: 'v15', pessoa_id: 'p15', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p15'], inicio: '2025-01-01' },
+    { id: 'v16', pessoa_id: 'p16', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p16'], inicio: '2025-01-01' },
+    { id: 'v17', pessoa_id: 'p17', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p17'], inicio: '2025-01-01' },
+    { id: 'v18', pessoa_id: 'p18', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p18'], inicio: '2025-01-01' },
+    { id: 'v19', pessoa_id: 'p19', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p19'], inicio: '2025-01-01' },
+    { id: 'v20', pessoa_id: 'p20', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p20'], inicio: '2025-01-01' },
+    { id: 'v21', pessoa_id: 'p21', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p21'], inicio: '2025-01-01' },
+    { id: 'v22', pessoa_id: 'p22', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p22'], inicio: '2025-01-01' },
     // ── Ciclo QUINZENAL — fecha 29/08 ──
-    { id: 'v23', pessoa_id: 'p23', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 25000, inicio: '2025-02-01' },
-    { id: 'v24', pessoa_id: 'p24', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, inicio: '2025-02-01' },
-    { id: 'v25', pessoa_id: 'p25', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 23000, inicio: '2025-02-01' },
-    { id: 'v26', pessoa_id: 'p26', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 22000, inicio: '2025-02-01' },
-    { id: 'v27', pessoa_id: 'p27', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, inicio: '2025-02-01' },
-    { id: 'v28', pessoa_id: 'p28', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, inicio: '2025-02-01' },
+    { id: 'v23', pessoa_id: 'p23', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p23'], inicio: '2025-02-01' },
+    { id: 'v24', pessoa_id: 'p24', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p24'], inicio: '2025-02-01' },
+    { id: 'v25', pessoa_id: 'p25', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p25'], inicio: '2025-02-01' },
+    { id: 'v26', pessoa_id: 'p26', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p26'], inicio: '2025-02-01' },
+    { id: 'v27', pessoa_id: 'p27', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p27'], inicio: '2025-02-01' },
+    { id: 'v28', pessoa_id: 'p28', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p28'], inicio: '2025-02-01' },
     // ── Ciclo MENSAL — fecha 31/08 ──
-    { id: 'v29', pessoa_id: 'p29', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 25000, inicio: '2024-11-01' },
-    { id: 'v30', pessoa_id: 'p30', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 18000, inicio: '2024-11-01' },
-    { id: 'v31', pessoa_id: 'p31', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 23000, inicio: '2024-11-01' },
+    { id: 'v29', pessoa_id: 'p29', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p29'], inicio: '2024-11-01' },
+    { id: 'v30', pessoa_id: 'p30', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p30'], inicio: '2024-11-01' },
+    { id: 'v31', pessoa_id: 'p31', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p31'], inicio: '2024-11-01' },
     // ── TERCEIRIZADOS — ciclo por obra ──
     { id: 'v09', pessoa_id: 'p09', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 320000, inicio: '2026-05-01' },
     { id: 'v32', pessoa_id: 'p32', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 280000, inicio: '2026-06-01' },
     { id: 'v33', pessoa_id: 'p33', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 190000, inicio: '2026-06-15' },
     { id: 'v34', pessoa_id: 'p34', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 240000, inicio: '2026-07-01' },
     // Wagner Lopes (p10) teve vínculo encerrado ao ser desativado em 12/06.
-    { id: 'v10', pessoa_id: 'p10', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, inicio: '2025-01-01', fim: '2026-06-12' },
+    { id: 'v10', pessoa_id: 'p10', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p10'], inicio: '2025-01-01', fim: '2026-06-12' },
   ],
 
   // ─── OBRAS ────────────────────────────────────────────────────────────────
+  // `andamento_geral_pct` é o total devolvido por `calcularAndamentoGeral`.
+  // O campo continua existindo porque três telas o leem — Carteira, Visão da
+  // Obra e Portal — e elas pertencem ao outro agente. Semear o valor derivado
+  // é o que mantém os três números iguais até que essas telas passem a chamar
+  // a função. Há teste conferindo a igualdade nas cinco obras.
   obras: [
     {
       id: 'o01',
@@ -137,7 +162,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 14832000,
       adicionais_centavos: 1248000,
       recebido_centavos: 9648000,
-      andamento_geral_pct: 54,
+      andamento_geral_pct: 49,
     },
     {
       id: 'o02',
@@ -151,7 +176,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 9800000,
       adicionais_centavos: 0,
       recebido_centavos: 4900000,
-      andamento_geral_pct: 41,
+      andamento_geral_pct: 40,
     },
     {
       id: 'o03',
@@ -167,7 +192,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 7400000,
       adicionais_centavos: 0,
       recebido_centavos: 1700000,
-      andamento_geral_pct: 23,
+      andamento_geral_pct: 26,
     },
     {
       id: 'o04',
@@ -195,7 +220,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 2800000,
       adicionais_centavos: 0,
       recebido_centavos: 2380000,
-      andamento_geral_pct: 85,
+      andamento_geral_pct: 89,
     },
   ],
 
@@ -751,6 +776,9 @@ const DADOS: AppState = {
       (pessoas as [string, number][]).map(([pid, valor]) => ({
         id: `di_${d.slice(5).replace('-', '')}_${obra}_${pid}`,
         pessoa_id: pid,
+        // Congelado no fato, como o líquido. Ausente para quem não tem custo
+        // informado — e aí os Indicadores avisam em vez de supor.
+        custo_empresa_centavos: CUSTO_EMPRESA_DIARIA[pid],
         data: d,
         obra_que_arca_id: obra,
         valor_centavos: valor,
@@ -759,7 +787,7 @@ const DADOS: AppState = {
     ),
     // Israel Fontes em 19/08: duas presenças, UMA diária, sem obra que arca.
     // O Financeiro escolhe qual obra paga; a outra fica com custo zero.
-    { id: 'di_1908_rateio_p19', pessoa_id: 'p19', data: ONTEM, obra_que_arca_id: undefined, valor_centavos: 20000, adicional_centavos: 0 },
+    { id: 'di_1908_rateio_p19', pessoa_id: 'p19', data: ONTEM, obra_que_arca_id: undefined, valor_centavos: 20000, adicional_centavos: 0, custo_empresa_centavos: CUSTO_EMPRESA_DIARIA['p19'] },
   ],
   // ─── FECHAMENTOS ──────────────────────────────────────────────────────────
   // Ciclo semanal: 18 pessoas, fecha 22/08
@@ -852,6 +880,9 @@ const DADOS: AppState = {
   // descreve evento inventado. 6 notificações, 4 não lidas.
   // ─── NOTIFICAÇÕES ─────────────────────────────────────────────────────────
   // Cada uma aponta para um registro que existe de fato neste seed, e cada uma
+  // vai para quem AGE sobre o fato: rateio para o Financeiro (RN-087), diário
+  // faltando para o Gerente que precisa preenchê-lo, decisão de pagamento para
+  // a Administração. Nenhuma vai para o Cliente.
   // corresponde a uma das cinco pendências que o Painel deriva hoje, mais os
   // dois diários finalizados. 7 notificações, 5 não lidas.
   notificacoes: [
@@ -859,43 +890,43 @@ const DADOS: AppState = {
       id: 'nt01', tipo: 'divergencia', origem_tipo: 'diario', origem_id: 'd01',
       titulo: 'Divergência: Rafael Duarte',
       descricao: 'Planejado em Obra 18 - GFR, presente em Obra 22 - MCL em 19/08/2026',
-      data: '2026-08-19T18:32:00', lida: false,
+      data: '2026-08-19T18:32:00', destinatario_perfis: ['administracao', 'financeiro'], lida_por: [],
     },
     {
       id: 'nt02', tipo: 'rateio_pendente', origem_tipo: 'diaria', origem_id: 'di_1908_rateio_p19',
       titulo: 'Rateio pendente: Israel Fontes',
       descricao: 'Diária de 19/08/2026 sem obra definida — esteve em duas obras',
-      data: '2026-08-19T18:40:00', lida: false,
+      data: '2026-08-19T18:40:00', destinatario_perfis: ['financeiro', 'administracao'], lida_por: [],
     },
     {
       id: 'nt03', tipo: 'diario_pendente', origem_tipo: 'obra', origem_id: 'o03',
       titulo: 'Diário faltando: Obra 25 - ATB',
       descricao: 'Nenhum diário finalizado em 19/08/2026 ou 20/08/2026',
-      data: '2026-08-20T08:00:00', lida: false,
+      data: '2026-08-20T08:00:00', destinatario_perfis: ['gerente_obras', 'administracao'], lida_por: [],
     },
     {
       id: 'nt04', tipo: 'ausencia_sem_decisao', origem_tipo: 'diario', origem_id: 'd06',
       titulo: 'Decisão de pagamento: Jonas Ribeiro',
       descricao: 'Doente — dia 20/08/2026. A Administração decide se o dia é pago.',
-      data: '2026-08-20T16:15:00', lida: false,
+      data: '2026-08-20T16:15:00', destinatario_perfis: ['administracao'], lida_por: [],
     },
     {
       id: 'nt05', tipo: 'fechamento_proximo', origem_tipo: 'fechamento', origem_id: 'fc_sem_p07',
       titulo: 'Fechamento semanal em 22/08/2026',
       descricao: '14 pessoas aguardando fechamento do ciclo semanal',
-      data: '2026-08-20T08:00:00', lida: false,
+      data: '2026-08-20T08:00:00', destinatario_perfis: ['financeiro', 'administracao'], lida_por: [],
     },
     {
       id: 'nt06', tipo: 'diario_finalizado', origem_tipo: 'diario', origem_id: 'd04',
       titulo: 'Diário finalizado: Obra 18 - GFR',
       descricao: 'Sofia Monteiro finalizou o diário de 20/08/2026',
-      data: '2026-08-20T17:20:00', lida: true,
+      data: '2026-08-20T17:20:00', destinatario_perfis: ['administracao'], lida_por: ['administracao'],
     },
     {
       id: 'nt07', tipo: 'diario_finalizado', origem_tipo: 'diario', origem_id: 'd_18',
       titulo: 'Diário finalizado: Obra 22 - MCL',
       descricao: 'Rafael Duarte finalizou o diário de 18/08/2026',
-      data: '2026-08-18T17:50:00', lida: true,
+      data: '2026-08-18T17:50:00', destinatario_perfis: ['administracao'], lida_por: ['administracao'],
     },
   ],
   // ─── ESPECIALIDADES ───────────────────────────────────────────────────────
@@ -1013,6 +1044,118 @@ const DADOS: AppState = {
     // Obra 25 - ATB
     { id: 'co20', obra_id: 'o03', fornecedor: 'Rogério Pastore',   descricao: 'Pontos de hidráulica da cozinha',               modalidade: 'repassado_com_margem', valor_cobrado_centavos: 162000, custo_centavos: 108000, data: '2026-07-10', tipo_documento_id: 'td05' },
     { id: 'co21', obra_id: 'o03', fornecedor: 'Caçambas Moema',    descricao: 'Retirada de entulho — 3 caçambas',              modalidade: 'reembolsavel',         valor_cobrado_centavos: 96000,  custo_centavos: 96000,  data: '2026-06-20', tipo_documento_id: 'td08', nota_numero: '3312' },
+  ],
+
+  // ─── SERVIÇOS DE TERCEIROS ────────────────────────────────────────────────
+  // A matéria-prima do eixo Especialidade do Andamento Geral (RN-125b).
+  // Serviço sem ambiente único fica com `ambiente_id` ausente e é agregado no
+  // pseudo-ambiente "Obra inteira".
+  servicos_terceiros: [
+    // ── Obra 22 - MCL — 11 serviços, 5 concluídos ──
+    { id: 'st01', obra_id: 'o01', descricao: 'Armários planejados da suíte',        fornecedor: 'NX Marcenaria',      ambiente_id: 'a01', especialidade_id: 'es01', situacao: 'concluido' },
+    { id: 'st02', obra_id: 'o01', descricao: 'Armários planejados da cozinha',      fornecedor: 'NX Marcenaria',      ambiente_id: 'a03', especialidade_id: 'es01', situacao: 'em_andamento' },
+    { id: 'st03', obra_id: 'o01', descricao: 'Bancada de mármore da cozinha',       fornecedor: 'Mármores Paulista',  ambiente_id: 'a03', especialidade_id: 'es02', situacao: 'concluido' },
+    { id: 'st04', obra_id: 'o01', descricao: 'Bancada de mármore do banheiro',      fornecedor: 'Mármores Paulista',  ambiente_id: 'a02', especialidade_id: 'es02', situacao: 'concluido' },
+    { id: 'st05', obra_id: 'o01', descricao: 'Box de vidro temperado',              fornecedor: 'Vidraçaria Santos',  ambiente_id: 'a02', especialidade_id: 'es03', situacao: 'nao_iniciado' },
+    { id: 'st06', obra_id: 'o01', descricao: 'Espelhos sob medida',                 fornecedor: 'Vidraçaria Santos',  ambiente_id: 'a05', especialidade_id: 'es03', situacao: 'nao_iniciado' },
+    // Sem ambiente único — vão para o pseudo-ambiente "Obra inteira"
+    { id: 'st07', obra_id: 'o01', descricao: 'Split em três ambientes',             fornecedor: 'Eletromed',                              especialidade_id: 'es04', situacao: 'em_andamento' },
+    { id: 'st08', obra_id: 'o01', descricao: 'Forro de gesso do apartamento',       fornecedor: 'Tarcísio Melo',                          especialidade_id: 'es05', situacao: 'concluido' },
+    { id: 'st09', obra_id: 'o01', descricao: 'Rodapés e soleiras',                  fornecedor: 'Mármores Paulista',                      especialidade_id: 'es02', situacao: 'nao_iniciado' },
+    { id: 'st10', obra_id: 'o01', descricao: 'Piso de madeira dos dormitórios',     fornecedor: 'Casa do Assoalho',   ambiente_id: 'a01', especialidade_id: 'es06', situacao: 'concluido' },
+    { id: 'st11', obra_id: 'o01', descricao: 'Automação de iluminação',             fornecedor: 'Cleber Matos',                           especialidade_id: 'es07', situacao: 'nao_iniciado' },
+    // ── Obra 18 - GFR — 5 serviços, 2 concluídos ──
+    { id: 'st20', obra_id: 'o02', descricao: 'Forro de gesso do dormitório',        fornecedor: 'Tarcísio Melo',      ambiente_id: 'a06', especialidade_id: 'es05', situacao: 'concluido' },
+    { id: 'st21', obra_id: 'o02', descricao: 'Marcenaria da cozinha',               fornecedor: 'NX Marcenaria',      ambiente_id: 'a08', especialidade_id: 'es01', situacao: 'nao_iniciado' },
+    { id: 'st22', obra_id: 'o02', descricao: 'Bancada de quartzo da cozinha',       fornecedor: 'Mármores Paulista',  ambiente_id: 'a08', especialidade_id: 'es02', situacao: 'nao_iniciado' },
+    { id: 'st23', obra_id: 'o02', descricao: 'Piso de madeira da sala',             fornecedor: 'Casa do Assoalho',   ambiente_id: 'a09', especialidade_id: 'es06', situacao: 'nao_iniciado' },
+    { id: 'st24', obra_id: 'o02', descricao: 'Pontos de elétrica do dormitório',    fornecedor: 'Dorival Assunção',   ambiente_id: 'a06', especialidade_id: 'es07', situacao: 'concluido' },
+    // ── Obra 25 - ATB — 3 serviços, 1 concluído ──
+    { id: 'st30', obra_id: 'o03', descricao: 'Hidráulica da cozinha',               fornecedor: 'Rogério Pastore',    ambiente_id: 'a11', especialidade_id: 'es08', situacao: 'concluido' },
+    { id: 'st31', obra_id: 'o03', descricao: 'Forro de gesso da sala',              fornecedor: 'Tarcísio Melo',      ambiente_id: 'a10', especialidade_id: 'es05', situacao: 'nao_iniciado' },
+    { id: 'st32', obra_id: 'o03', descricao: 'Bancada de granito da cozinha',       fornecedor: 'Mármores Paulista',  ambiente_id: 'a11', especialidade_id: 'es02', situacao: 'nao_iniciado' },
+    // ── Serviço 04 - LSM — 1 serviço, 1 concluído ──
+    { id: 'st40', obra_id: 'o05', descricao: 'Retoque de gesso antes da pintura',   fornecedor: 'Tarcísio Melo',      ambiente_id: 'a17', especialidade_id: 'es05', situacao: 'concluido' },
+    // Obra 31 - MBP não tem serviço de terceiro: ainda não começou.
+  ],
+
+  // ─── DESPESAS DA EMPRESA ──────────────────────────────────────────────────
+  // RN-140: lançamento manual, com categoria. As três categorias vieram do
+  // cliente; a Q-030 segue aberta para as demais.
+  despesas_empresa: [
+    { id: 'de01', categoria: 'ferramentas_e_maquinas',  descricao: 'Martelete rompedor Bosch',              valor_centavos: 289000, data: '2026-07-08' },
+    { id: 'de02', categoria: 'ferramentas_e_maquinas',  descricao: 'Serra mármore e discos diamantados',    valor_centavos: 96000,  data: '2026-07-22' },
+    { id: 'de03', categoria: 'ferramentas_e_maquinas',  descricao: 'Andaime tubular — 6 módulos',           valor_centavos: 148000, data: '2026-08-03' },
+    { id: 'de04', categoria: 'uniforme',                descricao: 'Camisetas e calças — 24 conjuntos',     valor_centavos: 216000, data: '2026-06-18' },
+    { id: 'de05', categoria: 'uniforme',                descricao: 'Botinas de segurança — 18 pares',       valor_centavos: 162000, data: '2026-07-15' },
+    { id: 'de06', categoria: 'marketing_e_trafego_pago', descricao: 'Tráfego pago — julho',                 valor_centavos: 320000, data: '2026-07-31' },
+    { id: 'de07', categoria: 'marketing_e_trafego_pago', descricao: 'Tráfego pago — agosto',                valor_centavos: 320000, data: '2026-08-15' },
+    { id: 'de08', categoria: 'marketing_e_trafego_pago', descricao: 'Produção de fotos e vídeo das obras',  valor_centavos: 180000, data: '2026-06-29' },
+  ],
+
+  // ─── CONTRATOS DE TERCEIRIZADO ────────────────────────────────────────────
+  // Por Obra. O valor do contrato mora aqui, e não no vínculo, porque um mesmo
+  // terceirizado tem contratos diferentes em obras diferentes.
+  contratos_terceirizado: [
+    { id: 'ct01', pessoa_id: 'p09', obra_id: 'o01', escopo: 'Elétrica completa do apartamento',      valor_centavos: 320000, situacao: 'ativo' },
+    { id: 'ct02', pessoa_id: 'p32', obra_id: 'o02', escopo: 'Elétrica do dormitório e banheiro',     valor_centavos: 280000, situacao: 'ativo' },
+    { id: 'ct03', pessoa_id: 'p33', obra_id: 'o02', escopo: 'Forro de gesso do dormitório',          valor_centavos: 190000, situacao: 'concluido' },
+    { id: 'ct04', pessoa_id: 'p34', obra_id: 'o03', escopo: 'Hidráulica da cozinha e do banheiro',   valor_centavos: 240000, situacao: 'ativo' },
+  ],
+
+  // ─── PARCELAS DE CONTRATO ─────────────────────────────────────────────────
+  // Sem vencimento e sem etapa, de propósito: a Q-005 pergunta se a parcela é
+  // por data fixa ou por etapa concluída, e continua aberta. Ver o comentário
+  // em `ParcelaContrato`.
+  parcelas_contrato: [
+    { id: 'pc01', contrato_id: 'ct01', numero: 1, valor_centavos: 160000, situacao: 'paga'     },
+    { id: 'pc02', contrato_id: 'ct01', numero: 2, valor_centavos: 160000, situacao: 'pendente' },
+    { id: 'pc03', contrato_id: 'ct02', numero: 1, valor_centavos: 140000, situacao: 'paga'     },
+    { id: 'pc04', contrato_id: 'ct02', numero: 2, valor_centavos: 140000, situacao: 'pendente' },
+    { id: 'pc05', contrato_id: 'ct03', numero: 1, valor_centavos: 95000,  situacao: 'paga'     },
+    { id: 'pc06', contrato_id: 'ct03', numero: 2, valor_centavos: 95000,  situacao: 'paga'     },
+    { id: 'pc07', contrato_id: 'ct04', numero: 1, valor_centavos: 120000, situacao: 'paga'     },
+    { id: 'pc08', contrato_id: 'ct04', numero: 2, valor_centavos: 120000, situacao: 'pendente' },
+  ],
+
+  // ─── DOCUMENTOS ───────────────────────────────────────────────────────────
+  // Projetos e contratos. Nota fiscal NÃO entra aqui: ela vive em custos_obra,
+  // porque a nota é sempre a nota de alguma coisa.
+  documentos: [
+    // Obra 22 - MCL
+    { id: 'doc01', obra_id: 'o01', nome: 'Planta baixa — layout aprovado',        tipo_documento_id: 'td02', url: '#',  data: '2026-04-10', enviado_por: 'p04' },
+    { id: 'doc02', obra_id: 'o01', nome: 'Projeto elétrico',                      tipo_documento_id: 'td02', especialidade_id: 'es07', url: '#', data: '2026-04-18', enviado_por: 'p04' },
+    { id: 'doc03', obra_id: 'o01', nome: 'Projeto hidráulico',                    tipo_documento_id: 'td02', especialidade_id: 'es08', url: '#', data: '2026-04-18', enviado_por: 'p04' },
+    { id: 'doc04', obra_id: 'o01', nome: 'Detalhamento de marcenaria',            tipo_documento_id: 'td02', especialidade_id: 'es01', url: '#', data: '2026-06-02', enviado_por: 'p06' },
+    { id: 'doc05', obra_id: 'o01', nome: 'Contrato — elétrica, Cleber Matos',     tipo_documento_id: 'td03', especialidade_id: 'es07', url: '#', data: '2026-05-01', enviado_por: 'p01' },
+    { id: 'doc06', obra_id: 'o01', nome: 'Contrato — marcenaria, NX',             tipo_documento_id: 'td03', especialidade_id: 'es01', url: '#', data: '2026-06-05', enviado_por: 'p01' },
+    { id: 'doc07', obra_id: 'o01', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-04-14', enviado_por: 'p01' },
+    // Obra 18 - GFR
+    { id: 'doc10', obra_id: 'o02', nome: 'Planta baixa — layout aprovado',        tipo_documento_id: 'td02', url: '#', data: '2026-04-28', enviado_por: 'p05' },
+    { id: 'doc11', obra_id: 'o02', nome: 'Projeto elétrico',                      tipo_documento_id: 'td02', especialidade_id: 'es07', url: '#', data: '2026-05-06', enviado_por: 'p05' },
+    { id: 'doc12', obra_id: 'o02', nome: 'Contrato — gesso, Tarcísio Melo',       tipo_documento_id: 'td03', especialidade_id: 'es05', url: '#', data: '2026-06-15', enviado_por: 'p01' },
+    { id: 'doc13', obra_id: 'o02', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-05-02', enviado_por: 'p01' },
+    // Obra 25 - ATB
+    { id: 'doc20', obra_id: 'o03', nome: 'Planta baixa — layout aprovado',        tipo_documento_id: 'td02', url: '#', data: '2026-06-04', enviado_por: 'p04' },
+    { id: 'doc21', obra_id: 'o03', nome: 'Projeto hidráulico',                    tipo_documento_id: 'td02', especialidade_id: 'es08', url: '#', data: '2026-06-12', enviado_por: 'p04' },
+    { id: 'doc22', obra_id: 'o03', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-06-10', enviado_por: 'p01' },
+    // Obra 31 - MBP — aguardando início, só o contrato
+    { id: 'doc30', obra_id: 'o04', nome: 'Contrato de reforma assinado',          tipo_documento_id: 'td03', url: '#', data: '2026-08-01', enviado_por: 'p01' },
+    // Serviço 04 - LSM
+    { id: 'doc40', obra_id: 'o05', nome: 'Contrato de pequeno serviço',           tipo_documento_id: 'td03', url: '#', data: '2026-07-14', enviado_por: 'p01' },
+  ],
+
+  // ─── USUÁRIOS ─────────────────────────────────────────────────────────────
+  // A camada de credencial do INV-01. Os quatro que aparecem no Login de
+  // demonstração. O e-mail existe para a tela de acesso ter o que exibir; não
+  // há autenticação real na maquete.
+  usuarios: [
+    { id: 'u01', perfil: 'administracao', nome_exibicao: 'Pedro Almeida',       email: 'pedro@tecto.com.br',    pessoa_id: 'p01', ativo: true },
+    { id: 'u02', perfil: 'financeiro',    nome_exibicao: 'Fernanda Sousa',      email: 'fernanda@tecto.com.br', pessoa_id: 'p03', ativo: true },
+    { id: 'u03', perfil: 'gerente_obras', nome_exibicao: 'Rafael Duarte',       email: 'rafael@tecto.com.br',   pessoa_id: 'p04', ativo: true },
+    // RN-138: exatamente um login por Cliente. Este aponta para a Obra, e o
+    // nome dele vem de `Obra.cliente` — ver a nota em `Usuario`.
+    { id: 'u04', perfil: 'cliente',       nome_exibicao: 'Mariana Costa Lima',  email: 'mariana.lima@email.com', obra_id: 'o01', ativo: true },
   ],
 
   // ─── ITENS FORA DO ESCOPO ─────────────────────────────────────────────────
