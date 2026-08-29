@@ -418,6 +418,46 @@ comportamento atual é preservado.
 perdido em arredondamento é dinheiro que não existe em lugar nenhum, e o
 `INV-10` existe para impedir exatamente esse tipo de perda.
 
+### `[PRODUTO]` · O total da obra é o contrato **mais** os adicionais
+**Decisão:** o bloco de recebimentos do Financeiro da obra rotula a soma das
+parcelas como **"Contrato mais adicionais"**, e mostra embaixo a base e o valor
+dos adicionais em separado.
+**Por quê:** a tela nasceu dizendo "contrato de R$ 148.320,00" no cabeçalho e
+"contratado R$ 160.800,00" no bloco. Os dois números estavam certos — a
+diferença são os dois adicionais aprovados — mas nenhum rótulo dizia isso, e
+número que se contradiz na mesma tela derruba a confiança em todos os outros. O
+Portal do Cliente **já resolvia assim** (*"inclui R$ 12.480,00 em serviços
+adicionais aprovados"*); a tela interna é que estava fora de passo.
+
+### `[TÉCNICA]` · Quem escolhe o ciclo de um lançamento é o estado
+**Decisão:** `novoLancamentoParaPessoa`, em `src/state/pessoa.ts`, devolve o
+`NovoLancamento` já com `primeiro_ciclo_fim` preenchido com o **primeiro ciclo
+aberto da pessoa**, e devolve `undefined` quando não há nenhum. O formulário
+nunca escolhe o ciclo.
+**Por quê:** a `RN-073` manda a correção cair no ciclo seguinte e o Fechamento
+trava período fechado. Se a tela escolhesse, escolheria errado uma hora — e este
+é o tipo de erro que não aparece na tela e aparece semanas depois no bolso de
+alguém. Recusar quando não há ciclo é melhor que inventar um período.
+
+### `[TÉCNICA]` · A barra de abas da Obra virou componente
+**Decisão:** `src/components/AbasDaObra.tsx`, com `mostrarTitulo` opcional.
+Aplicado às seis telas de aba.
+**Por quê:** só `ObraVisaoGeral` desenhava as abas. As telas de aba próprias
+nasciam sem migalha e sem abas — quem clicava em Fotos ficava sem caminho de
+volta. `mostrarTitulo={false}` permitiu acrescentar a navegação às quatro telas
+antigas **inserindo uma linha e removendo nada**, o que mantém o commit
+reversível sozinho.
+
+### `[TÉCNICA]` · Documento e nota vivem em lugares diferentes
+**Decisão:** `/obras/:id/documentos` mostra projetos e contratos, filtrados por
+especialidade. **Nota fiscal não aparece lá** — ela é sempre a nota de um custo,
+mora em `custos_obra` e aparece no Financeiro da obra, filtrada por tipo de nota.
+As duas telas dizem isso por escrito, uma apontando para a outra.
+**Por quê:** `documentos.ts` já separava as duas listagens, mas a separação é
+contraintuitiva para quem olha a interface — "nota fiscal é documento". Sem a
+frase, a primeira reação de quem não acha a nota em Documentos é achar que ela
+sumiu.
+
 ---
 
 ## Aguardando registro

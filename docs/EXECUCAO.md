@@ -113,12 +113,12 @@ a invariante que governa a ordem toda.
 | P0.5 | Guarda de permissão em camada única | 0 | Code | 1, 8 | **Confirmar aceite** |
 | **T1** | Estado semeado · Cena 6 · Fechamento | 1, 2 | Code | 2, 5, 6, 7, 8 | Próxima |
 | **T2** | Sistema visual compartilhado | 1 | Codex | todas | Próxima |
-| **T3** | Estorno · Andamento por especialidade · entidades | 3, 4 | Code | 7 | |
-| **T4** | Acabamento: vazios, confirmações, notificações | 3 | Codex | 2 | |
-| **T5** | Cálculo dos Indicadores · despesas da empresa | 5 | Code | 9 | |
-| **T6** | Financeiro da obra · Ficha · Documentos | 4 | Codex | — | |
-| **T7** | Funções de criação | 6 | Code | 3 | |
-| **T8** | Tela de Indicadores | 5 | Codex | 9 | |
+| **T3** | Estorno · Andamento por especialidade · entidades | 3, 4 | Code | 7 | **Feita** · `f25d388` |
+| **T4** | Acabamento: vazios, confirmações, notificações | 3 | Codex | 2 | **Feita** |
+| **T5** | Cálculo dos Indicadores · despesas da empresa | 5 | Code | 9 | **Feita** · `d75cd12` |
+| **T6** | Financeiro da obra · Ficha · Documentos | 4 | ~~Codex~~ **Code** | — | **Feita** · `b07a4fc`–`5a1b820` |
+| **T7** | Funções de criação | 6 | Code | 3 | **Feita** · `bb3731c` |
+| **T8** | Tela de Indicadores | 5 | ~~Codex~~ **Code** | 9 | **Feita** |
 | **T9** | Motor de orçamento | 7 | Code | 4 | |
 | **T10** | Formulários de criação | 6 | Codex | 3 | |
 | **T11** | Degrau 8 — os cinco de risco alto | 8 | Code | — | |
@@ -129,6 +129,13 @@ a invariante que governa a ordem toda.
 
 **As três últimas não são opcionais.** Reserve tempo para elas mesmo que isso
 signifique não subir mais um degrau.
+
+> **29/08/2026 — a fronteira entre os agentes caiu.** O Codex esgotou o limite
+> de uso. A T6 e a T8, que eram dele, foram executadas pelo Claude Code por
+> determinação do Mestre. As tarefas restantes do Codex — T10, T12 e TF1 — não
+> têm mais executante designado; o pipeline paralelo da §3 deixou de valer e a
+> fila passou a ser sequencial. A regra de território de arquivo continua útil
+> como higiene, mas já não protege contra nada.
 
 ---
 

@@ -33,9 +33,12 @@ O protótipo já demonstra uma parte relevante da operação:
 - portal do cliente com obra, diário e financeiro;
 - guarda de rota por perfil e vínculo de obra.
 
-Ainda não é uma demonstração ponta a ponta completa. Indicadores, Orçamentos,
-Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
-`/financeiro` já expõe a tela de Fechamento de ciclo criada na P1A.
+Depois da T6, **só `/orçamentos` e a rota não encontrada continuam em `EmBreve`**.
+Financeiro da obra, Documentos da obra, Ficha da Pessoa e Indicadores passaram a
+existir; `/financeiro` já servia a tela de Fechamento de ciclo criada na P1A.
+
+O que falta para a demonstração ficar completa é o Orçamento — motor (T9) e
+assistente (T12) — e os formulários de criação (T10).
 
 ### Saúde técnica em 28/08/2026
 
@@ -43,9 +46,9 @@ Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | 138 testes em sete arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
+| Testes automatizados | 159 testes em oito arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
-| `src/components/` | quatro componentes: `TituloSecao`, `Avatar`, `CabecalhoTabela` e `DataComDiaSemana` |
+| `src/components/` | oito: `TituloSecao`, `Avatar`, `CabecalhoTabela`, `DataComDiaSemana`, `ValorMonetario`, `ChipVinculo`, `EstadoVazio` e `AbasDaObra` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
 | Navegador em 800 px | renderiza, com truncamentos visuais |
 | Navegador em 390 px | aplicação interna e Portal têm falhas estruturais de responsividade |
@@ -87,14 +90,14 @@ Em rotas `obraScoped`, o Gerente de Obras também precisa ter um vínculo ativo 
 | `/obras/:obraId/checklist` | `ObraChecklist` | internos | sim |
 | `/obras/:obraId/andamento` | `ObraAndamento` | internos | sim |
 | `/obras/:obraId/fotos` | `ObraFotos` | internos | sim |
-| `/obras/:obraId/financeiro` | **`EmBreve`** | Administração e Financeiro | sim |
-| `/obras/:obraId/documentos` | **`EmBreve`** | internos | sim |
+| `/obras/:obraId/financeiro` | `ObraFinanceiro` | Administração e Financeiro | sim |
+| `/obras/:obraId/documentos` | `ObraDocumentos` | internos | sim |
 | `/planejamento` | `Planejamento` | internos | não |
 | `/equipe` | `Equipe` | internos | não |
-| `/equipe/:pessoaId` | **`EmBreve`** | internos | não |
+| `/equipe/:pessoaId` | `FichaPessoa` | internos | não |
 | `/orcamentos` | **`EmBreve`** | Administração e Financeiro | não |
 | `/financeiro` | `Fechamento` | Administração e Financeiro | não |
-| `/indicadores` | **`EmBreve`** | Administração e Financeiro | não |
+| `/indicadores` | `Indicadores` | Administração e Financeiro | não |
 | `*` | **`EmBreve`** | internos | não |
 
 O Cliente que entra por `/` é encaminhado a `/portal` por um loader. Nas outras
@@ -129,9 +132,11 @@ Manter essa rota pública ou protegê-la ainda precisa de decisão explícita.
 
 ### 2.5 Rotas em `EmBreve`
 
-Seis rotas caem em `EmBreve`: Financeiro e Documentos da obra, Ficha da Pessoa,
-Orçamentos, Indicadores e a rota interna não encontrada. `/financeiro` saiu do
-`EmBreve` na P1A e passou a servir a tela de Fechamento de ciclo.
+**Duas** rotas caem em `EmBreve`: `/orcamentos` e a rota interna não encontrada.
+
+As outras quatro saíram: `/financeiro` na P1A (Fechamento de ciclo),
+`/indicadores` na T8, e `/obras/:obraId/financeiro`,
+`/obras/:obraId/documentos` e `/equipe/:pessoaId` na T6.
 
 ---
 
@@ -171,7 +176,10 @@ domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entid
 | `documentos` | `Documento` | 16 |
 | `usuarios` | `Usuario` | 4 |
 
-As oito últimas são **aditivas**: nenhuma tela existente as lê ainda.
+Depois da T6 as coleções aditivas deixaram de ser invisíveis: `custos_obra`,
+`recebimentos`, `adicionais_obra`, `documentos`, `tipos_documento`,
+`especialidades`, `contratos_terceirizado`, `parcelas_contrato`, `usuarios` e
+`parcelas` são lidas por Financeiro da obra, Documentos e Ficha da Pessoa.
 `Diario.fotos` continua sendo a fonte das telas de foto; `midias` é a modelagem
 real, com ambiente.
 
@@ -205,7 +213,13 @@ obras.
 - `indicadores.ts`: receita, custo, margem e despesas por período.
 - `indicadores.testes.ts`: 19 testes.
 - `criacao.ts`: funções de criação com a validação das `RN`.
+- `criacao.ts`: funções de criação com a validação das `RN`.
 - `criacao.testes.ts`: 39 testes.
+- `pessoa.ts`: mão de obra por pessoa e a ficha com as quatro camadas do
+  `INV-01`. Devolve também o `NovoLancamento` já com o ciclo aberto escolhido,
+  para que o formulário não escolha ciclo.
+- `pessoa.testes.ts`: 21 testes, entre eles a conferência de que a soma por
+  pessoa é idêntica ao total de `custoDeMaoDeObra` nas cinco obras.
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
@@ -241,10 +255,11 @@ altera a maquete.
 
 ### 4.1 Páginas e layouts
 
-Existem 19 páginas e 2 layouts:
+Existem 23 páginas e 2 layouts:
 
 - aplicação interna: Painel, Carteira, Visão da Obra, Diário, Diários,
-  Checklist, Andamento, Fotos, Planejamento, Equipe e Fechamento;
+  Checklist, Andamento, Fotos, Financeiro da obra, Documentos da obra,
+  Planejamento, Equipe, Ficha da Pessoa, Fechamento e Indicadores;
 - autenticação: Login e Primeiro Acesso;
 - cliente: Minha Obra, Diário e Financeiro;
 - apoio: Design System, Sem Acesso e Em Breve;
