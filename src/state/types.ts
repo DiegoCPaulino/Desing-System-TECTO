@@ -5,6 +5,22 @@ export interface Pessoa {
   funcao: string;
   ativo: boolean;
   desativado_em?: string;
+
+  /**
+   * Campos da `RN-001` — "toda Pessoa tem nome, endereço, RG, CPF, data de
+   * nascimento, telefone, foto da pessoa e fotos dos documentos".
+   *
+   * Opcionais no tipo porque as 34 pessoas do seed são anteriores a eles. Mas
+   * `criarPessoa` EXIGE o CPF, porque a `RN-002` o define como único no
+   * sistema e unicidade sobre campo ausente não significa nada.
+   */
+  cpf?: string;
+  rg?: string;
+  endereco?: string;
+  nascimento?: string;
+  telefone?: string;
+  foto_url?: string;
+  documentos_urls?: string[];
 }
 
 /**

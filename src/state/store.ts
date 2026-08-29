@@ -5,6 +5,21 @@ import { definirObraQueArca, executarFechamento } from './fechamento';
 import { estornarLancamento } from './estorno';
 import { marcarComoLidas } from './notificacoes';
 import { criarMidia } from './midia';
+import {
+  criarLancamento,
+  criarObra,
+  criarPessoa,
+  criarSemanaPlanejamento,
+  criarVinculo,
+  encerrarVinculo,
+  encerrarVinculoDeObra,
+  publicarPlanejamento,
+  vincularGerente,
+  type NovaObra,
+  type NovaPessoa,
+  type NovoLancamento,
+  type NovoVinculo,
+} from './criacao';
 
 /**
  * Instante "agora" do protótipo: a data é sempre HOJE, a data de referência
@@ -100,6 +115,21 @@ type Store = AppState & {
     tipo: 'foto' | 'video';
     diario_id?: string;
   }) => string | undefined;
+
+  // ── Criação (T7). Todas devolvem erro descritivo, ou undefined. ──
+  criarPessoaNoCadastro: (dados: NovaPessoa) => string | undefined;
+  criarVinculoDaPessoa: (dados: NovoVinculo) => string | undefined;
+  encerrarVinculoDaPessoa: (args: { vinculo_id: string; fim: string }) => string | undefined;
+  criarObraNova: (dados: NovaObra) => string | undefined;
+  vincularGerenteNaObra: (args: {
+    obra_id: string;
+    pessoa_id: string;
+    papel: 'gerente' | 'assistente';
+    inicio: string;
+  }) => string | undefined;
+  encerrarVinculoDeObraDaPessoa: (args: { vinculo_obra_id: string; fim: string }) => string | undefined;
+  criarSemanaDePlanejamento: (semana_inicio: string) => string | undefined;
+  criarLancamentoParaPessoa: (dados: NovoLancamento) => string | undefined;
 };
 
 export const useStore = create<Store>(() => ({
@@ -216,13 +246,15 @@ export const useStore = create<Store>(() => ({
     });
   },
 
+  /**
+   * Mantém a assinatura que as telas já usam, e delega para a versão validada
+   * de `criacao.ts`. Duas funções publicando a semana de jeitos diferentes é
+   * exatamente o tipo de divergência que este projeto evita — então só existe
+   * uma regra, e ela mora num lugar só.
+   */
   publicarSemana: (semana_inicio) => {
-    useStore.setState((s) => ({
-      semanas: s.semanas.map((w) => (w.inicio === semana_inicio ? { ...w, estado: 'publicado' } : w)),
-      planejamento: s.planejamento.map((p) =>
-        p.semana_inicio === semana_inicio ? { ...p, estado: 'publicado' } : p
-      ),
-    }));
+    const r = publicarPlanejamento(useStore.getState(), semana_inicio);
+    if (r.ok && r.estado) useStore.setState(r.estado);
   },
 
   salvarAlteracoes: (semana_inicio) => {
@@ -336,6 +368,66 @@ export const useStore = create<Store>(() => ({
     const resultado = executarFechamento(useStore.getState(), ciclo_id, fechado_por, ajustes);
     if (!resultado.ok) return resultado.erro;
     useStore.setState({ fechamentos: resultado.fechamentos!, parcelas: resultado.parcelas! });
+    return undefined;
+  },
+
+  // As oito mutações de criação repetem o mesmo `if` de propósito. Extrair um
+  // helper que chamasse `useStore` no topo do módulo criava um ciclo de
+  // inferência: o TypeScript perdia o tipo de `Store` e todas as telas
+  // passavam a receber `any` silenciosamente.
+  criarPessoaNoCadastro: (dados) => {
+    const r = criarPessoa(useStore.getState(), dados);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  criarVinculoDaPessoa: (dados) => {
+    const r = criarVinculo(useStore.getState(), dados);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  encerrarVinculoDaPessoa: ({ vinculo_id, fim }) => {
+    const r = encerrarVinculo(useStore.getState(), vinculo_id, fim);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  criarObraNova: (dados) => {
+    const r = criarObra(useStore.getState(), dados);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  vincularGerenteNaObra: (dados) => {
+    const r = vincularGerente(useStore.getState(), dados);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  encerrarVinculoDeObraDaPessoa: ({ vinculo_obra_id, fim }) => {
+    const r = encerrarVinculoDeObra(useStore.getState(), vinculo_obra_id, fim);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  criarSemanaDePlanejamento: (semana_inicio) => {
+    const r = criarSemanaPlanejamento(useStore.getState(), semana_inicio);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
+    return undefined;
+  },
+
+  criarLancamentoParaPessoa: (dados) => {
+    const r = criarLancamento(useStore.getState(), dados);
+    if (!r.ok) return r.erro;
+    useStore.setState(r.estado!);
     return undefined;
   },
 
