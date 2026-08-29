@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import { useStore, calcularPctObra, calcularPctAmbiente, formatarReais, obraSlug, obraPorSlug } from '../state/store';
+import { useStore, calcularPctObra, calcularPctAmbiente, obraSlug, obraPorSlug } from '../state/store';
 import EmBreve from './EmBreve';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
+import ValorMonetario from '../components/ValorMonetario';
 
 const C = {
   acento: '#FFC213',
@@ -436,18 +437,18 @@ export default function ObraVisaoGeral() {
                     const total = obra.valor_contratado_centavos + obra.adicionais_centavos;
                     const aReceber = total - obra.recebido_centavos;
                     const rows = [
-                      { label: 'Valor contratado', value: formatarReais(obra.valor_contratado_centavos), bold: false, separator: false },
-                      { label: 'Adicionais aprovados', value: formatarReais(obra.adicionais_centavos), bold: false, separator: false },
-                      { label: 'Total da obra', value: formatarReais(total), bold: false, separator: true },
-                      { label: 'Recebido', value: formatarReais(obra.recebido_centavos), bold: false, separator: false },
-                      { label: 'A receber', value: formatarReais(aReceber), bold: true, separator: false },
+                      { label: 'Valor contratado', value: obra.valor_contratado_centavos, bold: false, separator: false },
+                      { label: 'Adicionais aprovados', value: obra.adicionais_centavos, bold: false, separator: false },
+                      { label: 'Total da obra', value: total, bold: false, separator: true },
+                      { label: 'Recebido', value: obra.recebido_centavos, bold: false, separator: false },
+                      { label: 'A receber', value: aReceber, bold: true, separator: false },
                     ];
                     return rows.map(({ label, value, bold, separator }, i) => (
                       <div key={label}>
                         {separator && <div style={{ height: '1px', backgroundColor: C.borda, margin: '4px 0 8px' }} />}
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < rows.length - 1 && !rows[i + 1]?.separator ? `1px solid ${C.borda}` : 'none', gap: '12px' }}>
                           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: bold ? 600 : 400, color: bold ? C.tinta : C.grafite }}>{label}</span>
-                          <span style={{ fontFamily: 'Inter, sans-serif', fontSize: bold ? '16px' : '14px', fontWeight: bold ? 700 : 500, color: bold ? C.tinta : C.grafite, fontVariantNumeric: 'tabular-nums', textAlign: 'right' as const, whiteSpace: 'nowrap' as const, letterSpacing: '-0.01em' }}>{value}</span>
+                          <ValorMonetario valorCentavos={value} style={{ fontSize: bold ? '16px' : '14px', fontWeight: bold ? 700 : 500, color: bold ? C.tinta : C.grafite }} />
                         </div>
                       </div>
                     ));

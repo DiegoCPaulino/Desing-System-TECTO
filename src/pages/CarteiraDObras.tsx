@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore, calcularPctObra, getGerenteDaObra, formatarReais, obraSlug } from '../state/store';
+import { useStore, calcularPctObra, getGerenteDaObra, obraSlug } from '../state/store';
 import Avatar from '../components/Avatar';
 
 const C = {

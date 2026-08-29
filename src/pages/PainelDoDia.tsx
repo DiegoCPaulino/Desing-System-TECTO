@@ -1,9 +1,10 @@
 import React from 'react';
-import { useStore, calcularIndicadores, calcularPendencias, formatarReais, getGerenteDaObra } from '../state/store';
+import { useStore, calcularIndicadores, calcularPendencias, getGerenteDaObra } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
+import ValorMonetario from '../components/ValorMonetario';
 
 const C = {
   acento: '#FFC213',
@@ -200,7 +201,7 @@ export default function PainelDoDia() {
         <Card style={{ padding: '24px' }}>
           <TituloSecao>A fechar esta semana</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
-            {formatarReais(ind.totalAFechar)}
+            <ValorMonetario valorCentavos={ind.totalAFechar} />
           </p>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', lineHeight: '18px', color: C.tintaFraca, marginTop: '6px' }}>
             {maisProximoFech ? `${maisProximoFech.qtd} pessoas · ciclo ${maisProximoFech.ciclo}` : '—'}
@@ -391,7 +392,7 @@ export default function PainelDoDia() {
                       </div>
                     </div>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', fontWeight: 600, color: C.tinta, fontVariantNumeric: 'tabular-nums', textAlign: 'right' as const, whiteSpace: 'nowrap' as const, letterSpacing: '-0.01em' }}>
-                      {formatarReais(total)}
+                      <ValorMonetario valorCentavos={total} />
                     </p>
                   </div>
                 );

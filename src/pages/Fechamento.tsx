@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useStore, formatarReais, getPessoaNome } from '../state/store';
+import { useStore, getPessoaNome } from '../state/store';
 import {
   calcularFechamentoDaPessoa,
   pendenciasQueBloqueiam,
@@ -9,6 +9,7 @@ import {
   type PendenciaBloqueante,
   type TipoCiclo,
 } from '../state/fechamento';
+import ValorMonetario from '../components/ValorMonetario';
 
 /**
  * FECHAMENTO DE CICLO.
@@ -19,7 +20,7 @@ import {
  *
  * Nenhum valor é escrito no componente e nenhum cálculo acontece nele: tudo
  * vem de `src/state/fechamento.ts`. Dinheiro circula em centavos inteiros e só
- * vira texto em `formatarReais`, na hora de exibir.
+ * vira texto no componente visual, na hora de exibir.
  */
 
 const C = {
@@ -244,21 +245,21 @@ export default function Fechamento() {
                       style={{ cursor: 'pointer' }}
                     >
                       <td style={celula}>{getPessoaNome(state, x.pessoa_id)}</td>
-                      <td style={celulaNumero}>{formatarReais(somaPorTipo(x, 'diaria'))}</td>
-                      <td style={celulaNumero}>{formatarReais(somaPorTipo(x, 'adicional'))}</td>
+                      <td style={celulaNumero}><ValorMonetario valorCentavos={somaPorTipo(x, 'diaria')} /></td>
+                      <td style={celulaNumero}><ValorMonetario valorCentavos={somaPorTipo(x, 'adicional')} /></td>
                       <td style={{ ...celulaNumero, color: desconto > 0 ? C.negativo : C.tinta }}>
-                        {desconto > 0 ? '− ' : ''}{formatarReais(desconto)}
+                        <ValorMonetario valorCentavos={-desconto} />
                         {alvo !== undefined && <span style={{ fontSize: '11px', color: C.atencao }}> ajustado</span>}
                       </td>
-                      <td style={{ ...celulaNumero, fontWeight: 600 }}>{formatarReais(aPagar)}</td>
+                      <td style={{ ...celulaNumero, fontWeight: 600 }}><ValorMonetario valorCentavos={aPagar} /></td>
                       <td style={{ ...celula, fontSize: '13px', color: rola > 0 ? C.atencao : C.neutro }}>
-                        {rola > 0 ? formatarReais(rola) : '—'}
+                        {rola > 0 ? <ValorMonetario valorCentavos={rola} style={{ color: C.atencao }} /> : '—'}
                       </td>
                       {/* RN-095: o Financeiro sempre enxerga o saldo devedor
                           antes de fechar. Não é o desconto deste ciclo — é a
                           dívida inteira, de todos os ciclos. */}
                       <td style={{ ...celulaNumero, fontSize: '13px', color: x.saldo_devedor_total_centavos > 0 ? C.negativo : C.neutro }}>
-                        {x.saldo_devedor_total_centavos > 0 ? formatarReais(x.saldo_devedor_total_centavos) : '—'}
+                        {x.saldo_devedor_total_centavos > 0 ? <ValorMonetario valorCentavos={x.saldo_devedor_total_centavos} style={{ color: C.negativo }} /> : '—'}
                       </td>
                       <td style={celula}>
                         {!fechado && x.descontos_centavos > 0 && (
@@ -278,7 +279,7 @@ export default function Fechamento() {
                 <tr>
                   <td style={{ ...celula, fontWeight: 600 }}>Total do ciclo</td>
                   <td style={celula} colSpan={3} />
-                  <td style={{ ...celulaNumero, fontWeight: 700 }}>{formatarReais(totalAPagar)}</td>
+                  <td style={{ ...celulaNumero, fontWeight: 700 }}><ValorMonetario valorCentavos={totalAPagar} /></td>
                   <td style={celula} colSpan={3} />
                 </tr>
               </tfoot>
@@ -402,7 +403,7 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
               <td style={{ ...celula, fontSize: '13px', color: C.tintaFraca, whiteSpace: 'nowrap' }}>{l.data ?? '—'}</td>
               <td style={{ ...celula, fontSize: '13px' }}>{l.descricao}</td>
               <td style={{ ...celulaNumero, fontSize: '13px', color: l.valor_centavos < 0 ? C.negativo : C.tinta }}>
-                {formatarReais(l.valor_centavos)}
+                <ValorMonetario valorCentavos={l.valor_centavos} />
               </td>
             </tr>
           ))}
@@ -410,16 +411,16 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
       </table>
       <dl style={{ marginTop: '20px', fontSize: '14px', display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px 16px' }}>
         <dt>Bruto</dt>
-        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatarReais(extrato.bruto_centavos)}</dd>
+        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}><ValorMonetario valorCentavos={extrato.bruto_centavos} /></dd>
         <dt>Descontos</dt>
-        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: C.negativo }}>− {formatarReais(extrato.descontos_centavos)}</dd>
+        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: C.negativo }}><ValorMonetario valorCentavos={-extrato.descontos_centavos} /></dd>
         <dt style={{ fontWeight: 700 }}>A pagar</dt>
-        <dd style={{ margin: 0, textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{formatarReais(extrato.a_pagar_centavos)}</dd>
+        <dd style={{ margin: 0, textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}><ValorMonetario valorCentavos={extrato.a_pagar_centavos} /></dd>
         {extrato.saldo_a_rolar_centavos > 0 && (
           <>
             <dt style={{ color: C.atencao }}>Rola para o ciclo seguinte</dt>
             <dd style={{ margin: 0, textAlign: 'right', color: C.atencao, fontVariantNumeric: 'tabular-nums' }}>
-              {formatarReais(extrato.saldo_a_rolar_centavos)}
+              <ValorMonetario valorCentavos={extrato.saldo_a_rolar_centavos} style={{ color: C.atencao }} />
             </dd>
           </>
         )}
@@ -427,7 +428,7 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
           <>
             <dt style={{ color: C.negativo }}>Deve ao todo</dt>
             <dd style={{ margin: 0, textAlign: 'right', color: C.negativo, fontVariantNumeric: 'tabular-nums' }}>
-              {formatarReais(extrato.saldo_devedor_total_centavos)}
+              <ValorMonetario valorCentavos={extrato.saldo_devedor_total_centavos} style={{ color: C.negativo }} />
             </dd>
           </>
         )}
@@ -463,7 +464,7 @@ function FolhaRateio({ diaria_id, aoEscolher }: { diaria_id: string; aoEscolher:
     <>
       <p style={{ fontSize: '14px', marginTop: 0 }}>
         {getPessoaNome(state, diaria.pessoa_id)} esteve em {obras.length} obras em {diaria.data}, e
-        isso gerou <strong>uma única diária</strong> de {formatarReais(diaria.valor_centavos)}.
+        isso gerou <strong>uma única diária</strong> de <ValorMonetario valorCentavos={diaria.valor_centavos} alinhamento="left" />.
       </p>
       <p style={{ fontSize: '13px', color: C.tintaFraca }}>
         Não há rateio proporcional. A obra escolhida arca com o valor inteiro; a outra
@@ -500,14 +501,14 @@ function FolhaAjuste({
   return (
     <>
       <p style={{ fontSize: '14px', marginTop: 0 }}>
-        Desconto proposto pelo cálculo: <strong>{formatarReais(proposto)}</strong>.
+        Desconto proposto pelo cálculo: <strong><ValorMonetario valorCentavos={proposto} alinhamento="left" /></strong>.
       </p>
       <p style={{ fontSize: '13px', color: C.tintaFraca }}>
         É possível descontar menos, nunca mais. O que deixar de ser descontado continua
         devido e é cobrado no ciclo seguinte.
       </p>
       <label style={{ ...rotulo, display: 'block', marginTop: '16px', marginBottom: '6px' }}>
-        Descontar neste ciclo (R$)
+        Descontar neste ciclo (em reais)
       </label>
       <input
         value={reais}
@@ -517,7 +518,7 @@ function FolhaAjuste({
       />
       {excede && (
         <p style={{ fontSize: '13px', color: C.negativo, marginTop: '8px' }}>
-          Maior que o proposto. O máximo é {formatarReais(proposto)} — descontar mais
+          Maior que o proposto. O máximo é <ValorMonetario valorCentavos={proposto} alinhamento="left" /> — descontar mais
           seria cobrar dívida que não existe.
         </p>
       )}
@@ -586,7 +587,7 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
                 .filter(Boolean)
                 .sort();
               // O Gerente de Obras recebe valor fixo por Obra (RN-004), mas o
-              // valor não está definido — Q-001. Exibir R$ 0,00 aqui diria que
+              // valor não está definido — Q-001. Exibir zero aqui diria que
               // ele não recebe nada, que é uma afirmação diferente de "ainda
               // não se sabe quanto".
               const temValor = vinculo?.valor_obra_centavos !== undefined;
@@ -595,7 +596,7 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
                   <td style={celula}>{getPessoaNome(state, pid)}</td>
                   <td style={{ ...celula, fontSize: '13px' }}>{obras.length ? obras.join(', ') : '—'}</td>
                   <td style={temValor ? celulaNumero : { ...celulaNumero, color: C.tintaFraca, fontStyle: 'italic' }}>
-                    {temValor ? formatarReais(vinculo!.valor_obra_centavos!) : 'a definir'}
+                    {temValor ? <ValorMonetario valorCentavos={vinculo!.valor_obra_centavos!} /> : 'a definir'}
                   </td>
                   <td style={{ ...celula, fontSize: '13px', color: C.tintaFraca }}>Em aberto</td>
                 </tr>

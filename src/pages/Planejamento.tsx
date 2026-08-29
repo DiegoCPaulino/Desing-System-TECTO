@@ -12,7 +12,6 @@ import {
   rotuloCelula,
   obrasNaoConcluidas,
   valorDiaria,
-  formatarReais,
   GERENTE_ID,
   type CelulaValor,
 } from '../state/store';
@@ -20,6 +19,7 @@ import type { Planejamento as Cel } from '../state/types';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
+import ValorMonetario from '../components/ValorMonetario';
 import DataComDiaSemana from '../components/DataComDiaSemana';
 
 type StoreState = ReturnType<typeof useStore.getState>;
@@ -300,7 +300,7 @@ export default function Planejamento() {
         <ResumoTile label="Pessoas na grade" valor={String(resumo.pessoasNaGrade)} />
         <ResumoTile label="Em aberto" valor={String(resumo.emAberto)} destaque={resumo.emAberto > 0} />
         <ResumoTile label="Ausências" valor={String(resumo.ausencias)} />
-        <ResumoTile label="Custo previsto da semana" valor={formatarReais(resumo.custoPrevisto)} />
+        <ResumoTile label="Custo previsto da semana" valor={<ValorMonetario valorCentavos={resumo.custoPrevisto} />} />
       </div>
 
       {/* ── Grade ── */}
@@ -432,7 +432,7 @@ export default function Planejamento() {
                 </div>
                 <div style={{ position: 'relative', marginBottom: '12px' }}>
                   <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca }}>
-                    {adTipo === 'fixo' ? 'R$' : '%'}
+                    {adTipo === 'fixo' ? 'Reais' : '%'}
                   </span>
                   <input
                     type="text"
@@ -563,7 +563,7 @@ function CelulaConteudo({ state, cel }: { state: StoreState; cel?: Cel }) {
   );
 }
 
-function ResumoTile({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
+function ResumoTile({ label, valor, destaque }: { label: string; valor: React.ReactNode; destaque?: boolean }) {
   return (
     <div style={{ backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px', padding: '18px 20px' }}>
       <TituloSecao>{label}</TituloSecao>
