@@ -221,7 +221,27 @@ export interface Notificacao {
   titulo: string;
   descricao: string;
   data: string;
-  lida: boolean;
+
+  /**
+   * Quem deve ver esta notificação. Resposta [SÓ PROTÓTIPO] à `Q-027`, que
+   * pergunta "quem recebe qual notificação".
+   *
+   * Por PERFIL, e não por Usuário. No sistema real o destinatário é o Usuário,
+   * porque é ele que tem credencial — mas a maquete tem um Usuário por perfil,
+   * e modelar por Usuário aqui só acrescentaria uma indireção sem mudar nada
+   * do que se vê. Ver `docs/DECISOES.md`.
+   *
+   * O Cliente nunca entra nesta lista: notificação interna é operação da
+   * TECTO, e a `RN-136` mantém o Cliente fora disso.
+   */
+  destinatario_perfis: TipoPerfil[];
+
+  /**
+   * Quem já leu. É lista, e não um booleano, por um motivo concreto: com um
+   * `lida` só, o Pedro abrir o painel zeraria o contador do Rafael, que nunca
+   * viu a notificação.
+   */
+  lida_por: TipoPerfil[];
 }
 
 export interface Especialidade {

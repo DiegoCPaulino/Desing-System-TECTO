@@ -3,6 +3,7 @@ import type { AppState, Planejamento, Presenca, Diaria, Diario, Obra, TipoPerfil
 import DADOS_INICIAIS, { HOJE } from './dados-iniciais';
 import { definirObraQueArca, executarFechamento } from './fechamento';
 import { estornarLancamento } from './estorno';
+import { marcarComoLidas } from './notificacoes';
 
 /**
  * Instante "agora" do protótipo: a data é sempre HOJE, a data de referência
@@ -79,6 +80,11 @@ type Store = AppState & {
     motivo: string;
     autor_id: string;
   }) => string | undefined;
+  /**
+   * Marca como lidas, para o PERFIL ATIVO, as notificações endereçadas a ele.
+   * Sem `ids`, marca todas — é o "abrir o painel zera o contador".
+   */
+  marcarNotificacoesComoLidas: (args?: { ids?: string[] }) => void;
 };
 
 export const useStore = create<Store>(() => ({
@@ -292,6 +298,14 @@ export const useStore = create<Store>(() => ({
     if (!resultado.ok) return resultado.erro;
     useStore.setState({ fechamentos: resultado.fechamentos!, parcelas: resultado.parcelas! });
     return undefined;
+  },
+
+  marcarNotificacoesComoLidas: (args) => {
+    const perfil = useStore.getState().perfil_ativo;
+    if (!perfil) return;
+    useStore.setState({
+      notificacoes: marcarComoLidas(useStore.getState(), perfil, args?.ids),
+    });
   },
 
   estornarLancamentoDaPessoa: ({ lancamento_id, motivo, autor_id }) => {

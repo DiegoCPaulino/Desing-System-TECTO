@@ -857,6 +857,9 @@ const DADOS: AppState = {
   // descreve evento inventado. 6 notificações, 4 não lidas.
   // ─── NOTIFICAÇÕES ─────────────────────────────────────────────────────────
   // Cada uma aponta para um registro que existe de fato neste seed, e cada uma
+  // vai para quem AGE sobre o fato: rateio para o Financeiro (RN-087), diário
+  // faltando para o Gerente que precisa preenchê-lo, decisão de pagamento para
+  // a Administração. Nenhuma vai para o Cliente.
   // corresponde a uma das cinco pendências que o Painel deriva hoje, mais os
   // dois diários finalizados. 7 notificações, 5 não lidas.
   notificacoes: [
@@ -864,43 +867,43 @@ const DADOS: AppState = {
       id: 'nt01', tipo: 'divergencia', origem_tipo: 'diario', origem_id: 'd01',
       titulo: 'Divergência: Rafael Duarte',
       descricao: 'Planejado em Obra 18 - GFR, presente em Obra 22 - MCL em 19/08/2026',
-      data: '2026-08-19T18:32:00', lida: false,
+      data: '2026-08-19T18:32:00', destinatario_perfis: ['administracao', 'financeiro'], lida_por: [],
     },
     {
       id: 'nt02', tipo: 'rateio_pendente', origem_tipo: 'diaria', origem_id: 'di_1908_rateio_p19',
       titulo: 'Rateio pendente: Israel Fontes',
       descricao: 'Diária de 19/08/2026 sem obra definida — esteve em duas obras',
-      data: '2026-08-19T18:40:00', lida: false,
+      data: '2026-08-19T18:40:00', destinatario_perfis: ['financeiro', 'administracao'], lida_por: [],
     },
     {
       id: 'nt03', tipo: 'diario_pendente', origem_tipo: 'obra', origem_id: 'o03',
       titulo: 'Diário faltando: Obra 25 - ATB',
       descricao: 'Nenhum diário finalizado em 19/08/2026 ou 20/08/2026',
-      data: '2026-08-20T08:00:00', lida: false,
+      data: '2026-08-20T08:00:00', destinatario_perfis: ['gerente_obras', 'administracao'], lida_por: [],
     },
     {
       id: 'nt04', tipo: 'ausencia_sem_decisao', origem_tipo: 'diario', origem_id: 'd06',
       titulo: 'Decisão de pagamento: Jonas Ribeiro',
       descricao: 'Doente — dia 20/08/2026. A Administração decide se o dia é pago.',
-      data: '2026-08-20T16:15:00', lida: false,
+      data: '2026-08-20T16:15:00', destinatario_perfis: ['administracao'], lida_por: [],
     },
     {
       id: 'nt05', tipo: 'fechamento_proximo', origem_tipo: 'fechamento', origem_id: 'fc_sem_p07',
       titulo: 'Fechamento semanal em 22/08/2026',
       descricao: '14 pessoas aguardando fechamento do ciclo semanal',
-      data: '2026-08-20T08:00:00', lida: false,
+      data: '2026-08-20T08:00:00', destinatario_perfis: ['financeiro', 'administracao'], lida_por: [],
     },
     {
       id: 'nt06', tipo: 'diario_finalizado', origem_tipo: 'diario', origem_id: 'd04',
       titulo: 'Diário finalizado: Obra 18 - GFR',
       descricao: 'Sofia Monteiro finalizou o diário de 20/08/2026',
-      data: '2026-08-20T17:20:00', lida: true,
+      data: '2026-08-20T17:20:00', destinatario_perfis: ['administracao'], lida_por: ['administracao'],
     },
     {
       id: 'nt07', tipo: 'diario_finalizado', origem_tipo: 'diario', origem_id: 'd_18',
       titulo: 'Diário finalizado: Obra 22 - MCL',
       descricao: 'Rafael Duarte finalizou o diário de 18/08/2026',
-      data: '2026-08-18T17:50:00', lida: true,
+      data: '2026-08-18T17:50:00', destinatario_perfis: ['administracao'], lida_por: ['administracao'],
     },
   ],
   // ─── ESPECIALIDADES ───────────────────────────────────────────────────────
