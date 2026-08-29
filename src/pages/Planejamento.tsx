@@ -21,6 +21,7 @@ import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
 import ValorMonetario from '../components/ValorMonetario';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import ChipVinculo from '../components/ChipVinculo';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -325,6 +326,7 @@ export default function Planejamento() {
 
         {roster.map((pid, idx) => {
           const pessoa = state.pessoas.find((p) => p.id === pid)!;
+          const tipoVinculo = state.vinculos.find((v) => v.pessoa_id === pid)!.tipo;
           return (
             <div key={pid} style={{ ...gridRow(false), borderTop: idx === 0 ? 'none' : `1px solid ${C.borda}` }}>
               <div style={nameCell}>
@@ -332,6 +334,7 @@ export default function Planejamento() {
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pessoa.nome}</p>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.tintaFraca, margin: '1px 0 0' }}>{pessoa.funcao}</p>
+                  <ChipVinculo tipo={tipoVinculo} compacto style={{ marginTop: '3px' }} />
                 </div>
               </div>
               {dias.map((d) => {

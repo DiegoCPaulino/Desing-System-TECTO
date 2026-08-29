@@ -152,12 +152,21 @@ Estas **não** entram em `docs/PRODUTO.md`. Vão à pauta com Pedro e Fernando.
 | Saldo devedor | Pagamento nunca negativo; o saldo rola para o ciclo seguinte |
 | Bloqueio do Fechamento | Pendência aberta impede executar o fechamento |
 | Nomenclatura no Portal | "Direto do fornecedor" em vez de "Direto do Cliente" |
-| Cor por tipo de vínculo (`D5`) | Cinco chips diferenciados por tratamento antes de matiz: sólido escuro, vazado, violeta suave, cinza claro, terracota |
+| Cor por tipo de vínculo (`D5`) | Seis chips diferenciados por tratamento antes de matiz: sólido escuro, vazado, violeta suave, cinza claro, terracota e hachura neutra |
 | Avatares | Ilustrados e determinísticos, gerados por código. **Nunca fotografia de pessoa real** — o protótipo será publicado num link |
 
 ---
 
 ## Decisões técnicas e de processo
+
+### `[SÓ PROTÓTIPO]` · Sexto tratamento visual do Vínculo
+**Decisão:** `Financeiro` usa fundo neutro com hachura diagonal discreta e borda
+cinza. Os demais seguem a `D5`: Funcionário próprio em sólido grafite,
+Terceirizado vazado, Administração em violeta suave, Gerente de Obras em cinza
+claro e Assistente de Gerenciamento em terracota.
+**Por quê:** a `RN-004` tem seis tipos, enquanto a `D5` havia definido apenas
+cinco tratamentos. A hachura diferencia o sexto tipo pela textura antes da
+matiz e não reutiliza positivo, atenção, negativo ou informativo.
 
 ### `[PROCESSO]` · Push após cada commit, nunca para master
 **Decisão:** todo agente empurra a própria branch depois de cada commit. O merge

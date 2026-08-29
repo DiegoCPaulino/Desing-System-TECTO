@@ -5,6 +5,7 @@ import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import ChipVinculo from '../components/ChipVinculo';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
@@ -728,6 +729,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
                 {presencasFinais.map((pr, i) => {
                   const p = pessoasMap[pr.pessoa_id];
                   if (!p) return null;
+                  const tipoVinculo = s.vinculos.find((v) => v.pessoa_id === p.id)!.tipo;
                   const periodoLabel = pr.periodo === 'dia_todo' ? 'Dia todo' : pr.periodo === 'manha' ? 'Manhã' : 'Tarde';
                   return (
                     <div key={pr.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 0', borderBottom: i < presencasFinais.length - 1 ? `1px solid ${C.borda}` : 'none' }}>
@@ -736,6 +738,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: C.grafite }}>{p.nome}</p>
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.tintaFraca }}>{p.funcao}</p>
                       </div>
+                      <ChipVinculo tipo={tipoVinculo} compacto />
                       <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '12px', color: C.tintaFraca }}>{periodoLabel}</span>
                     </div>
                   );
@@ -861,6 +864,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
               {workers.map((w, i) => {
                 const p = pessoasMap[w.pessoa_id];
                 if (!p) return null;
+                const tipoVinculo = s.vinculos.find((v) => v.pessoa_id === p.id)!.tipo;
                 return (
                   <div
                     key={w.pessoa_id}
@@ -879,6 +883,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
                         {w.removido ? w.motivoRemocao ?? 'Removido' : p.funcao}
                       </p>
                     </div>
+                    {!w.removido && <ChipVinculo tipo={tipoVinculo} compacto />}
                     {w.removido ? (
                       <button
                         onClick={() => handleDesfazerRemocao(w.pessoa_id)}

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useStore } from '../state/store';
+import type { TipoVinculo } from '../state/types';
 import Avatar from '../components/Avatar';
+import ChipVinculo from '../components/ChipVinculo';
 
 const C = {
   acento: '#FFC213',
@@ -15,33 +17,17 @@ const C = {
   informativoFundo: '#E7F1FF',
 } as const;
 
-type FilterKey = 'todos' | 'funcionario_proprio' | 'terceirizado' | 'gerencia' | 'administracao';
+type FilterKey = 'todos' | TipoVinculo;
 
 const FILTER_TABS: { label: string; key: FilterKey }[] = [
   { label: 'Todos', key: 'todos' },
   { label: 'Funcionário próprio', key: 'funcionario_proprio' },
   { label: 'Terceirizado', key: 'terceirizado' },
-  { label: 'Gerência', key: 'gerencia' },
+  { label: 'Gerente de Obras', key: 'gerente_obras' },
+  { label: 'Assistente', key: 'assistente_gerenciamento' },
   { label: 'Administração', key: 'administracao' },
+  { label: 'Financeiro', key: 'financeiro' },
 ];
-
-const GERENCIA_IDS = new Set(['p04', 'p05', 'p06']);
-const ADMIN_IDS = new Set(['p01', 'p02', 'p03']);
-
-function getCategoryKey(pessoaId: string, tipo: string): FilterKey {
-  if (ADMIN_IDS.has(pessoaId)) return 'administracao';
-  if (GERENCIA_IDS.has(pessoaId)) return 'gerencia';
-  if (tipo === 'terceirizado') return 'terceirizado';
-  return 'funcionario_proprio';
-}
-
-const CATEGORY_STYLES: Record<FilterKey, { label: string; bg: string; color: string }> = {
-  todos:             { label: 'Todos',              bg: '#F5F5F5', color: '#555555' },
-  funcionario_proprio:{ label: 'Funcionário próprio', bg: '#F5F5F5', color: '#555555' },
-  terceirizado:      { label: 'Terceirizado',        bg: '#E7F1FF', color: '#215FD7' },
-  gerencia:          { label: 'Gerência',            bg: '#F0F0F0', color: '#363636' },
-  administracao:     { label: 'Administração',       bg: '#F5F5F5', color: '#555555' },
-};
 
 export default function Equipe() {
   const state = useStore();
@@ -49,14 +35,12 @@ export default function Equipe() {
   const [search, setSearch] = useState('');
 
   const pessoas = state.pessoas.filter(p => p.ativo).map((pessoa) => {
-    const vinculo = state.vinculos.find(v => v.pessoa_id === pessoa.id);
-    const tipo = vinculo?.tipo ?? 'funcionario_proprio';
-    const category = getCategoryKey(pessoa.id, tipo);
-    return { pessoa, tipo, category };
+    const tipo = state.vinculos.find(v => v.pessoa_id === pessoa.id)!.tipo;
+    return { pessoa, tipo };
   });
 
-  const filtered = pessoas.filter(({ pessoa, category }) => {
-    const matchFilter = activeFilter === 'todos' || category === activeFilter;
+  const filtered = pessoas.filter(({ pessoa, tipo }) => {
+    const matchFilter = activeFilter === 'todos' || tipo === activeFilter;
     const matchSearch = search === '' || pessoa.nome.toLowerCase().includes(search.toLowerCase());
     return matchFilter && matchSearch;
   });
@@ -117,8 +101,7 @@ export default function Equipe() {
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-          {filtered.map(({ pessoa, category }) => {
-            const catStyle = CATEGORY_STYLES[category];
+          {filtered.map(({ pessoa, tipo }) => {
             return (
               <div key={pessoa.id} style={{
                 backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`,
@@ -134,15 +117,7 @@ export default function Equipe() {
                     {pessoa.funcao}
                   </p>
                 </div>
-                <span style={{
-                  fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 500,
-                  color: catStyle.color, backgroundColor: catStyle.bg,
-                  padding: '3px 10px', borderRadius: '999px',
-                  display: 'inline-flex', alignItems: 'center', gap: '5px',
-                }}>
-                  <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: catStyle.color, flexShrink: 0 }} />
-                  {catStyle.label}
-                </span>
+                <ChipVinculo tipo={tipo} />
               </div>
             );
           })}
