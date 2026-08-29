@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, obraPorSlug, GERENTE_ID } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import { ambientesDaObra } from '../state/midia';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
@@ -43,6 +44,7 @@ interface WorkerEntry {
 interface Media {
   url: string;
   tipo: 'foto' | 'video';
+  ambiente_id: string;
 }
 
 type GravacaoEstado = 'idle' | 'gravando' | 'transcrevendo' | 'transcrito';
@@ -65,7 +67,7 @@ MATERIAIS RECEBIDOS
 PRÓXIMO DIA
 - Continuidade do porcelanato da cozinha`;
 
-const FOTOS_INICIAIS: Media[] = [
+const FOTOS_INICIAIS: Array<Omit<Media, 'ambiente_id'>> = [
   { url: 'https://images.unsplash.com/photo-1618832515490-e181c4794a45?w=280&h=280&fit=crop&auto=format', tipo: 'foto' },
   { url: 'https://images.unsplash.com/photo-1634586648651-f1fb9ec10d90?w=280&h=280&fit=crop&auto=format', tipo: 'foto' },
   { url: 'https://images.unsplash.com/photo-1505798577917-a65157d3320a?w=280&h=280&fit=crop&auto=format', tipo: 'foto' },
@@ -438,6 +440,7 @@ export default function DiarioObra() {
 function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo: string }) {
   const s = useStore();
   const finalizarDiario = useStore((st) => st.finalizarDiario);
+  const ambientes = ambientesDaObra(s, obraId);
   const perfilAtivo = s.perfil_ativo;
   const pessoaAtuante = perfilAtivo === 'gerente_obras' ? GERENTE_ID : perfilAtivo === 'financeiro' ? 'p03' : 'p01';
 
@@ -473,7 +476,10 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
   const [gravacaoEstado, setGravacaoEstado] = useState<GravacaoEstado>('idle');
   const [segundosGravacao, setSegundosGravacao] = useState(0);
   const [textoTranscrito, setTextoTranscrito] = useState(false);
-  const [fotosLocais, setFotosLocais] = useState<Media[]>(FOTOS_INICIAIS);
+  const [fotosLocais, setFotosLocais] = useState<Media[]>(() =>
+    FOTOS_INICIAIS.map((midia) => ({ ...midia, ambiente_id: '' }))
+  );
+  const [erroMidia, setErroMidia] = useState('');
   const [sheetEstado, setSheetEstado] = useState<SheetEstado>(null);
   const [buscarTexto, setBuscarTexto] = useState('');
 
@@ -577,10 +583,16 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
   const handleAdicionarFoto = useCallback(() => {
     const url = FOTOS_EXTRA[extraFotoIdxRef.current % FOTOS_EXTRA.length];
     extraFotoIdxRef.current += 1;
-    setFotosLocais((prev) => [{ url, tipo: 'foto' }, ...prev]);
+    setFotosLocais((prev) => [{ url, tipo: 'foto', ambiente_id: '' }, ...prev]);
+    setErroMidia('Escolha o ambiente da mídia adicionada.');
   }, []);
 
   const handleFinalizar = useCallback(() => {
+    if (fotosLocais.some((midia) => !midia.ambiente_id)) {
+      setErroMidia('Escolha o ambiente de cada mídia antes de finalizar o diário.');
+      return;
+    }
+
     const confirmados = workers
       .filter((w) => !w.removido)
       .map((w) => ({ pessoa_id: w.pessoa_id, periodo: w.periodo }));
@@ -599,6 +611,7 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
       data: HOJE,
       texto_linhas: texto ? texto.split('\n').filter((l) => l.trim()) : [],
       fotos: fotosLocais.map((f) => f.url),
+      midias: fotosLocais.map(({ url, tipo, ambiente_id }) => ({ url, tipo, ambiente_id })),
       confirmados,
       removidos_planejados: removidosPlanejados,
       finalizado_por: pessoaAtuante,
@@ -1006,18 +1019,39 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
                 <IconPlus />
               </button>
               {fotosLocais.map((media, i) => (
-                <div key={`${media.url}-${i}`} style={{ aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', position: 'relative', backgroundColor: '#CCCCCC' }}>
-                  <img src={media.url} alt={`${media.tipo === 'video' ? 'Vídeo' : 'Foto'} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' as const, display: 'block' }} />
-                  {media.tipo === 'video' && (
-                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <IconPlay />
+                <div key={`${media.url}-${i}`}>
+                  <div style={{ aspectRatio: '1', borderRadius: '8px', overflow: 'hidden', position: 'relative', backgroundColor: '#CCCCCC' }}>
+                    <img src={media.url} alt={`${media.tipo === 'video' ? 'Vídeo' : 'Foto'} ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' as const, display: 'block' }} />
+                    {media.tipo === 'video' && (
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <IconPlay />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                  <select
+                    aria-label={`Ambiente da ${media.tipo === 'video' ? 'mídia' : 'foto'} ${i + 1}`}
+                    aria-required="true"
+                    value={media.ambiente_id}
+                    onChange={(event) => {
+                      const ambiente_id = event.target.value;
+                      setFotosLocais((atuais) => atuais.map((item, indice) => indice === i ? { ...item, ambiente_id } : item));
+                      setErroMidia('');
+                    }}
+                    style={{ width: '100%', minWidth: 0, marginTop: '4px', padding: '6px 7px', border: `1px solid ${media.ambiente_id ? C.borda : C.atencao}`, borderRadius: '6px', backgroundColor: C.superficie, color: media.ambiente_id ? C.grafite : C.atencao, fontFamily: 'Inter, sans-serif', fontSize: '11px' }}
+                  >
+                    <option value="">Escolha o ambiente</option>
+                    {ambientes.map((ambiente) => <option key={ambiente.id} value={ambiente.id}>{ambiente.nome}</option>)}
+                  </select>
                 </div>
               ))}
             </div>
+            {erroMidia && (
+              <p role="alert" style={{ margin: '10px 0 0', fontFamily: 'Inter, sans-serif', fontSize: '12px', lineHeight: '18px', color: C.atencao }}>
+                {erroMidia}
+              </p>
+            )}
           </div>
         </>
       )}

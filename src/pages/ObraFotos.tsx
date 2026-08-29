@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, obraPorSlug } from '../state/store';
+import { ambientesDaObra } from '../state/midia';
 import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
@@ -12,6 +13,8 @@ const C = {
   fundo: '#FAFAFA',
   superficie: '#FFFFFF',
   neutro: '#9A9A9A',
+  positivo: '#2E9E5B',
+  atencao: '#E8833A',
 } as const;
 
 const MESES_FULL = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
@@ -49,6 +52,13 @@ function IconDownload() {
     </svg>
   );
 }
+function IconUpload() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7.5 12V4M4 7l3.5-3.5L11 7" /><path d="M2 13h11" />
+    </svg>
+  );
+}
 
 interface FotoEntry {
   url: string;
@@ -63,16 +73,21 @@ export default function ObraFotos() {
   const [activeAmbiente, setActiveAmbiente] = useState('todos');
   const [ordem, setOrdem] = useState<'recentes' | 'antigas'>('recentes');
   const [lightbox, setLightbox] = useState<{ index: number } | null>(null);
+  const [envioAberto, setEnvioAberto] = useState(false);
+  const [ambienteEnvio, setAmbienteEnvio] = useState('');
+  const [arquivoEnvio, setArquivoEnvio] = useState<File | null>(null);
+  const [erroEnvio, setErroEnvio] = useState('');
+  const [confirmacaoEnvio, setConfirmacaoEnvio] = useState('');
 
   const obra = obraId ? obraPorSlug(state, obraId) : undefined;
 
-  const ambientesDaObra = useMemo(
-    () => (obra ? state.ambientes.filter(a => a.obra_id === obra.id) : []),
+  const ambientesDisponiveis = useMemo(
+    () => (obra ? ambientesDaObra(state, obra.id) : []),
     [state.ambientes, obra]
   );
   const AMBIENTE_TABS = useMemo(
-    () => [{ key: 'todos', label: 'Todos' }, ...ambientesDaObra.map(a => ({ key: a.id, label: a.nome }))],
-    [ambientesDaObra]
+    () => [{ key: 'todos', label: 'Todos' }, ...ambientesDisponiveis.map(a => ({ key: a.id, label: a.nome }))],
+    [ambientesDisponiveis]
   );
 
   // Collect all photos from this obra's diaries
@@ -126,6 +141,28 @@ export default function ObraFotos() {
 
   const currentFoto = lightbox !== null ? fotosVisiveis[lightbox.index] : null;
 
+  const handleEnviarMidia = () => {
+    const erro = state.adicionarMidiaNaObra({
+      obra_id: obra.id,
+      ambiente_id: ambienteEnvio,
+      url: arquivoEnvio ? URL.createObjectURL(arquivoEnvio) : '',
+      tipo: arquivoEnvio?.type.startsWith('video/') ? 'video' : 'foto',
+    });
+
+    if (erro) {
+      setErroEnvio(erro);
+      setConfirmacaoEnvio('');
+      return;
+    }
+
+    setErroEnvio('');
+    setConfirmacaoEnvio('Mídia enviada.');
+    setActiveAmbiente(ambienteEnvio);
+    setArquivoEnvio(null);
+    setAmbienteEnvio('');
+    setEnvioAberto(false);
+  };
+
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
 
@@ -139,16 +176,65 @@ export default function ObraFotos() {
             {totalFotos} foto{totalFotos !== 1 ? 's' : ''}
           </p>
         </div>
-        <button style={{
-          display: 'inline-flex', alignItems: 'center', gap: '7px',
-          fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500,
-          color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
-          borderRadius: '8px', padding: '9px 16px', cursor: 'pointer',
-        }}>
-          <IconDownload />
-          Baixar todas
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={() => { setEnvioAberto((aberto) => !aberto); setErroEnvio(''); setConfirmacaoEnvio(''); }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 700, color: C.tinta, backgroundColor: C.acento, border: 'none', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer' }}
+          >
+            <IconUpload />
+            Enviar mídia
+          </button>
+          <button style={{
+            display: 'inline-flex', alignItems: 'center', gap: '7px',
+            fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500,
+            color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
+            borderRadius: '8px', padding: '9px 16px', cursor: 'pointer',
+          }}>
+            <IconDownload />
+            Baixar todas
+          </button>
+        </div>
       </div>
+
+      {confirmacaoEnvio && (
+        <p role="status" aria-live="polite" data-confirmacao-acao="true" style={{ margin: '-8px 0 20px', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#EDFAF3', color: C.positivo, fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 600 }}>
+          {confirmacaoEnvio}
+        </p>
+      )}
+
+      {envioAberto && (
+        <section aria-label="Enviar mídia" style={{ marginBottom: '24px', padding: '20px', border: `1px solid ${C.borda}`, borderRadius: '12px', backgroundColor: C.superficie }}>
+          <h2 style={{ margin: '0 0 16px', fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', color: C.tinta }}>Enviar mídia</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(180px, 1fr) minmax(220px, 1fr) auto', gap: '12px', alignItems: 'end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, color: C.grafite }}>
+              Ambiente
+              <select
+                aria-required="true"
+                value={ambienteEnvio}
+                onChange={(event) => { setAmbienteEnvio(event.target.value); setErroEnvio(''); }}
+                style={{ width: '100%', padding: '10px 11px', border: `1px solid ${erroEnvio && !ambienteEnvio ? C.atencao : C.borda}`, borderRadius: '8px', backgroundColor: C.superficie, color: C.grafite, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
+              >
+                <option value="">Escolha o ambiente</option>
+                {ambientesDisponiveis.map((ambiente) => <option key={ambiente.id} value={ambiente.id}>{ambiente.nome}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, color: C.grafite }}>
+              Arquivo
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(event) => { setArquivoEnvio(event.target.files?.[0] ?? null); setErroEnvio(''); }}
+                style={{ width: '100%', padding: '8px', boxSizing: 'border-box', border: `1px solid ${C.borda}`, borderRadius: '8px', backgroundColor: C.superficie, color: C.tintaFraca, fontFamily: 'Inter, sans-serif', fontSize: '12px' }}
+              />
+            </label>
+            <button type="button" onClick={handleEnviarMidia} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: C.acento, color: C.tinta, fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+              Enviar mídia
+            </button>
+          </div>
+          {erroEnvio && <p role="alert" style={{ margin: '10px 0 0', color: C.atencao, fontFamily: 'Inter, sans-serif', fontSize: '13px', lineHeight: '19px' }}>{erroEnvio}</p>}
+        </section>
+      )}
 
       {/* Filters */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '16px' }}>
