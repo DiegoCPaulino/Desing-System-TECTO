@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStore } from '../state/store';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -143,6 +144,15 @@ export default function PortalDiario() {
       </div>
 
       {/* ── Timeline ── */}
+      {diariosFiltrados.length === 0 ? (
+        <EstadoVazio
+          mensagem={
+            filter === 'com_fotos'
+              ? 'Sua obra ainda não tem diários com fotos. As imagens aparecem aqui depois do registro do gerente.'
+              : 'Sua obra ainda não tem diários publicados. O primeiro dia aparece aqui depois do registro do gerente.'
+          }
+        />
+      ) : (
       <div style={{ position: 'relative' }}>
         {/* Vertical line */}
         <div style={{ position: 'absolute', left: '10px', top: '20px', bottom: '20px', width: '1px', backgroundColor: C.borda }} />
@@ -245,6 +255,7 @@ export default function PortalDiario() {
           })}
         </div>
       </div>
+      )}
 
       {/* Lightbox */}
       {lightbox && (

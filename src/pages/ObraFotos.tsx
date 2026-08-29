@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, obraPorSlug } from '../state/store';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -186,9 +187,13 @@ export default function ObraFotos() {
 
       {/* Groups */}
       {groups.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: C.neutro, fontSize: '14px' }}>
-          Nenhuma foto encontrada.
-        </div>
+        <EstadoVazio
+          mensagem={
+            activeAmbiente === 'todos'
+              ? 'Esta obra ainda não tem fotos. As primeiras aparecem aqui quando o gerente registrar o dia.'
+              : 'Este ambiente ainda não tem fotos. Elas aparecem aqui quando o gerente registrar o serviço.'
+          }
+        />
       )}
 
       {groups.map(group => (

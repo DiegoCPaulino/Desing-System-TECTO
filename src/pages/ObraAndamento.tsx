@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente, obraPorSlug } from '../state/store';
 import TituloSecao from '../components/TituloSecao';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -112,9 +113,7 @@ export default function ObraAndamento() {
 
           {/* Per-ambiente */}
           {ambientes.length === 0 ? (
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, margin: 0 }}>
-              Nenhum ambiente cadastrado para esta obra ainda.
-            </p>
+            <EstadoVazio compacto mensagem="Esta obra ainda não tem ambientes. O andamento aparece aqui quando a estrutura da obra for cadastrada." />
           ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {ambientes.map(amb => {
@@ -145,7 +144,9 @@ export default function ObraAndamento() {
 
                   {isOpen && (
                     <div style={{ paddingBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {itens.map(item => (
+                      {itens.length === 0 ? (
+                        <EstadoVazio compacto mensagem="Este ambiente ainda não tem serviços. Eles aparecem aqui quando o orçamento for detalhado." />
+                      ) : itens.map(item => (
                         <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '4px' }}>
                           {item.executado ? <IconCheck /> : <IconCircleEmpty />}
                           <span style={{
@@ -190,9 +191,7 @@ export default function ObraAndamento() {
 
             {/* Per-ambiente — no detail, with "marcar" button */}
             {ambientes.length === 0 ? (
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, margin: 0 }}>
-                Nenhum ambiente cadastrado para esta obra ainda.
-              </p>
+              <EstadoVazio compacto mensagem="Esta obra ainda não tem ambientes. O andamento geral aparece aqui quando a estrutura da obra for cadastrada." />
             ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {ambientes.map(amb => {

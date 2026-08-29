@@ -5,6 +5,7 @@ import EmBreve from './EmBreve';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import ValorMonetario from '../components/ValorMonetario';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -333,9 +334,7 @@ export default function ObraVisaoGeral() {
           <Card>
             <CardHeader>Ambientes</CardHeader>
             {ambientes.length === 0 ? (
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro, lineHeight: '21px' }}>
-                Nenhum ambiente cadastrado para esta obra ainda.
-              </p>
+              <EstadoVazio compacto mensagem="Esta obra ainda não tem ambientes. O andamento aparece aqui quando a estrutura da obra for cadastrada." />
             ) : (
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               {ambientes.map((amb, i) => {
@@ -364,9 +363,18 @@ export default function ObraVisaoGeral() {
               Último Diário
             </CardHeader>
             {!diarioFinalizado ? (
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro, lineHeight: '21px' }}>
-                Nenhum diário registrado para esta obra ainda.
-              </p>
+              <EstadoVazio
+                compacto
+                mensagem="Esta obra ainda não tem diários finalizados. O primeiro resumo aparece aqui quando o gerente registrar o dia."
+                acao={(
+                  <Link
+                    to={`${basePath}/diarios`}
+                    style={{ color: C.informativo, fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}
+                  >
+                    Ver diários da obra
+                  </Link>
+                )}
+              />
             ) : (
             <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>

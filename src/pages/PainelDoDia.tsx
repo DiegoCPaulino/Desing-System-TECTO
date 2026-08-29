@@ -5,6 +5,7 @@ import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
 import ValorMonetario from '../components/ValorMonetario';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -226,7 +227,11 @@ export default function PainelDoDia() {
               )}
             </div>
             {pendencias.length === 0 ? (
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro }}>Sem pendências no momento.</p>
+              <EstadoVazio
+                compacto
+                tom="positivo"
+                mensagem="Tudo em dia. Novas pendências aparecem aqui quando precisarem de decisão."
+              />
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {pendencias.map(({ id, tipo, descricao, detalhe }, i) => {
@@ -266,7 +271,10 @@ export default function PainelDoDia() {
               <TituloSecao>Quem está onde hoje</TituloSecao>
             </div>
             {whereRows.length === 0 ? (
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro }}>Nenhuma presença registrada hoje.</p>
+              <EstadoVazio
+                compacto
+                mensagem="Ainda não há presenças registradas hoje. A distribuição aparece aqui quando o gerente confirmar a equipe."
+              />
             ) : (
               <table style={{ width: '100%', borderCollapse: 'collapse' as const }}>
                 <thead>

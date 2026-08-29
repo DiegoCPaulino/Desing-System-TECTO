@@ -6,6 +6,7 @@ import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
 import ChipVinculo from '../components/ChipVinculo';
+import EstadoVazio from '../components/EstadoVazio';
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
@@ -332,9 +333,10 @@ function BuscaWorkerSheet({
       </div>
       <div style={{ flex: 1, overflowY: 'auto' }}>
         {filtrados.length === 0 ? (
-          <p style={{ textAlign: 'center' as const, color: C.neutro, fontFamily: 'Inter, sans-serif', fontSize: '14px', padding: '24px 0' }}>
-            Nenhuma pessoa encontrada
-          </p>
+          <EstadoVazio
+            compacto
+            mensagem="Não há pessoas com este nome. Limpe a busca para ver toda a equipe disponível."
+          />
         ) : (
           filtrados.map(({ id, nome, funcao }) => (
             <button
@@ -423,8 +425,8 @@ export default function DiarioObra() {
   if (!obra) return null;
   if (obra.tipo === 'pequeno_servico') {
     return (
-      <div style={{ padding: '48px 40px', fontFamily: 'Inter, sans-serif', color: C.neutro, fontSize: '14px', textAlign: 'center' as const }}>
-        {obra.codigo} é um pequeno serviço e não tem Diário de Obra.
+      <div style={{ padding: '48px 40px' }}>
+        <EstadoVazio mensagem={`${obra.codigo} é um pequeno serviço e não usa Diário de Obra. O acompanhamento acontece na visão geral.`} />
       </div>
     );
   }

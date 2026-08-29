@@ -3,6 +3,7 @@ import { useStore } from '../state/store';
 import type { TipoVinculo } from '../state/types';
 import Avatar from '../components/Avatar';
 import ChipVinculo from '../components/ChipVinculo';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -96,9 +97,7 @@ export default function Equipe() {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: C.neutro, fontSize: '14px' }}>
-          Nenhuma pessoa encontrada.
-        </div>
+        <EstadoVazio mensagem="Não há pessoas nesta visão. Ajuste a busca ou escolha outro tipo de vínculo." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           {filtered.map(({ pessoa, tipo }) => {

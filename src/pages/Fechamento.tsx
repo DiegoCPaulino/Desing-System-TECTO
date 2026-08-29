@@ -15,6 +15,7 @@ import CabecalhoTabela from '../components/CabecalhoTabela';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
 import ChipVinculo from '../components/ChipVinculo';
+import EstadoVazio from '../components/EstadoVazio';
 
 /**
  * FECHAMENTO DE CICLO.
@@ -171,9 +172,7 @@ export default function Fechamento() {
       )}
 
       {!ciclo && (
-        <div style={{ padding: '32px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '8px', fontSize: '14px', color: C.tintaFraca }}>
-          Não há ciclo deste tipo com pessoas vinculadas.
-        </div>
+        <EstadoVazio mensagem="Este tipo de ciclo ainda não tem pessoas vinculadas. Ele aparece aqui quando o vínculo de pagamento for definido." />
       )}
 
       {/* ── CICLO POR OBRA — estrutura sem afirmar a regra ── */}
@@ -202,9 +201,7 @@ export default function Fechamento() {
           <section style={{ marginBottom: '24px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px', padding: '20px' }}>
             <TituloSecao margemInferior={14}>Pendências que bloqueiam o fechamento</TituloSecao>
             {pendencias.length === 0 ? (
-              <p style={{ fontSize: '14px', color: C.positivo, margin: 0 }}>
-                Nenhuma. O ciclo pode ser fechado.
-              </p>
+              <EstadoVazio compacto tom="positivo" mensagem="O ciclo está sem pendências e pode ser fechado." />
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {pendencias.map((p) => (
@@ -408,10 +405,10 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
   if (!extrato) return <p style={{ fontSize: '14px' }}>Extrato não encontrado.</p>;
   if (!extrato.linhas.length) {
     return (
-      <p style={{ fontSize: '14px', color: C.tintaFraca }}>
-        Nenhum lançamento neste período. Sem diário finalizado não há presença, e sem
-        presença não há diária.
-      </p>
+      <EstadoVazio
+        compacto
+        mensagem="Este período ainda não tem lançamentos. As diárias aparecem quando houver presença em um diário finalizado."
+      />
     );
   }
   return (
@@ -581,6 +578,11 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
         <TituloSecao>Contratos por obra</TituloSecao>
         <span style={{ fontSize: '13px', color: C.tintaFraca }}>{ciclo.pessoas.length} pessoas</span>
       </div>
+      <EstadoVazio
+        compacto
+        mensagem="Este ciclo por obra ainda não tem período definido. Os contratos ficam listados abaixo sem antecipar a regra de pagamento."
+        style={{ marginBottom: '16px' }}
+      />
       <div style={{ overflowX: 'auto', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
           <thead>

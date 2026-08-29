@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore, calcularPctObra, getGerenteDaObra, obraSlug } from '../state/store';
 import Avatar from '../components/Avatar';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -157,9 +158,7 @@ export default function CarteiraDObras() {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: C.neutro, fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
-          Nenhuma obra encontrada.
-        </div>
+        <EstadoVazio mensagem="Não há obras nesta visão. Ajuste a busca ou escolha outro status para continuar." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           {filtered.map(({ obra, pct, gerente }) => {

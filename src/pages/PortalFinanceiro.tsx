@@ -9,6 +9,7 @@ import {
 import TituloSecao from '../components/TituloSecao';
 import CabecalhoTabela from '../components/CabecalhoTabela';
 import ValorMonetario from '../components/ValorMonetario';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -125,7 +126,13 @@ export default function PortalFinanceiro() {
             ))}
           </div>
 
-          {parcelas.map((p, idx) => {
+          {parcelas.length === 0 ? (
+            <EstadoVazio
+              compacto
+              mensagem="Esta obra ainda não tem parcelas. O calendário aparece aqui quando o plano de pagamento for registrado."
+              style={{ margin: '20px 28px' }}
+            />
+          ) : parcelas.map((p, idx) => {
             const s = SITUACAO_STYLE[p.situacao];
             return (
               <div
@@ -163,7 +170,13 @@ export default function PortalFinanceiro() {
             <TituloSecao>Serviços adicionais aprovados</TituloSecao>
           </div>
 
-          {adicionais.map((a) => (
+          {adicionais.length === 0 ? (
+            <EstadoVazio
+              compacto
+              mensagem="Esta obra ainda não tem serviços adicionais aprovados. Os próximos aparecem aqui depois da aprovação."
+              style={{ margin: '0 28px 20px' }}
+            />
+          ) : adicionais.map((a) => (
             <div
               key={a.id}
               style={{
@@ -181,10 +194,10 @@ export default function PortalFinanceiro() {
           ))}
 
           {/* Total adicionais */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderTop: `2px solid ${C.borda}`, backgroundColor: '#FAFAFA' }}>
+          {adicionais.length > 0 && <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 28px', borderTop: `2px solid ${C.borda}`, backgroundColor: '#FAFAFA' }}>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 600, color: C.grafite }}>Total em adicionais</span>
             <ValorMonetario valorCentavos={totalAdicionais} style={{ fontSize: '16px', fontWeight: 700, color: C.tinta }} />
-          </div>
+          </div>}
         </Card>
 
         {/* ── Materiais e Notas ── */}
@@ -193,7 +206,13 @@ export default function PortalFinanceiro() {
             <TituloSecao>Materiais e notas</TituloSecao>
           </div>
 
-          {materiais.map((m) => {
+          {materiais.length === 0 ? (
+            <EstadoVazio
+              compacto
+              mensagem="Esta obra ainda não tem materiais ou notas publicados. Os registros aparecem aqui depois da conferência."
+              style={{ margin: '0 28px 20px' }}
+            />
+          ) : materiais.map((m) => {
             const ms = MODALIDADE_STYLE[m.modalidade_rotulo];
             return (
               <div

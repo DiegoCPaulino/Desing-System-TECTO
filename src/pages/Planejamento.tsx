@@ -22,6 +22,7 @@ import CabecalhoTabela from '../components/CabecalhoTabela';
 import ValorMonetario from '../components/ValorMonetario';
 import DataComDiaSemana from '../components/DataComDiaSemana';
 import ChipVinculo from '../components/ChipVinculo';
+import EstadoVazio from '../components/EstadoVazio';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -319,9 +320,10 @@ export default function Planejamento() {
         </div>
 
         {roster.length === 0 && (
-          <div style={{ padding: '40px', textAlign: 'center', color: C.tintaFraca, fontSize: '14px' }}>
-            Nenhuma pessoa nesta visão para a semana selecionada.
-          </div>
+          <EstadoVazio
+            mensagem="Esta semana ainda não tem pessoas nesta visão. Escolha outro vínculo ou volte para Todos."
+            style={{ margin: '20px' }}
+          />
         )}
 
         {roster.map((pid, idx) => {

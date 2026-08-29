@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, calcularPctAmbiente, getPessoaNome, obraPorSlug } from '../state/store';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -61,6 +62,20 @@ export default function ObraChecklist() {
   const foraEscopoCount = state.itens_fora_escopo.filter(
     i => i.obra_id === obra.id && i.estado === 'rascunho'
   ).length;
+
+  const itensDaVisao = (ambienteId: string) => {
+    const itens = state.itens_orcamento.filter(i => i.ambiente_id === ambienteId);
+    const pelaBusca = search
+      ? itens.filter(i => i.servico.toLowerCase().includes(search.toLowerCase()))
+      : itens;
+    return filterTab === 'pendentes'
+      ? pelaBusca.filter(i => !i.executado)
+      : filterTab === 'concluidos'
+      ? pelaBusca.filter(i => i.executado)
+      : pelaBusca;
+  };
+
+  const haItensNaVisao = ambientes.some(amb => itensDaVisao(amb.id).length > 0);
 
   const toggleAmbiente = (id: string) => {
     setExpandedAmbientes(prev => {
@@ -126,7 +141,7 @@ export default function ObraChecklist() {
       )}
 
       {/* Fora do escopo banner */}
-      {foraEscopoCount > 0 && (
+      {foraEscopoCount > 0 ? (
         <div style={{
           display: 'flex', alignItems: 'center', gap: '10px',
           backgroundColor: '#FFF6D6', border: '1px solid #FFC213', borderRadius: '10px',
@@ -140,6 +155,24 @@ export default function ObraChecklist() {
             revisão da Administração.
           </span>
         </div>
+      ) : (
+        <EstadoVazio
+          compacto
+          mensagem="Esta obra ainda não tem serviços fora do escopo. Registre aqui o que precisa de orçamento adicional."
+          acao={(
+            <button
+              onClick={() => setSidePanel(true)}
+              style={{
+                fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 600,
+                color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
+                borderRadius: '8px', padding: '8px 14px', cursor: 'pointer',
+              }}
+            >
+              Registrar fora do escopo
+            </button>
+          )}
+          style={{ marginBottom: '20px' }}
+        />
       )}
 
       {/* Header bar */}
@@ -191,21 +224,23 @@ export default function ObraChecklist() {
 
       {/* Ambiente blocks */}
       {ambientes.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: C.neutro, fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>
-          Nenhum ambiente cadastrado para esta obra ainda.
-        </div>
+        <EstadoVazio mensagem="Esta obra ainda não tem ambientes. O checklist aparece aqui quando a estrutura da obra for cadastrada." />
+      ) : !haItensNaVisao ? (
+        <EstadoVazio
+          mensagem={
+            search
+              ? 'Não há serviços com esta busca. Limpe o termo para ver o checklist da obra.'
+              : filterTab === 'pendentes'
+              ? 'Esta obra está com o checklist em dia. Novos serviços pendentes aparecem aqui.'
+              : 'Esta obra ainda não tem serviços concluídos. O primeiro aparece aqui quando for marcado.'
+          }
+          tom={filterTab === 'pendentes' && !search ? 'positivo' : 'neutro'}
+        />
       ) : (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {ambientes.map(amb => {
           const allItens = state.itens_orcamento.filter(i => i.ambiente_id === amb.id);
-          const searchFiltered = search
-            ? allItens.filter(i => i.servico.toLowerCase().includes(search.toLowerCase()))
-            : allItens;
-          const tabFiltered = filterTab === 'pendentes'
-            ? searchFiltered.filter(i => !i.executado)
-            : filterTab === 'concluidos'
-            ? searchFiltered.filter(i => i.executado)
-            : searchFiltered;
+          const tabFiltered = itensDaVisao(amb.id);
 
           if (tabFiltered.length === 0 && (search !== '' || filterTab !== 'todos')) return null;
 
@@ -256,9 +291,11 @@ export default function ObraChecklist() {
               {isOpen && (
                 <div>
                   {tabFiltered.length === 0 ? (
-                    <div style={{ padding: '16px 20px', borderTop: `1px solid ${C.borda}`, fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.neutro, textAlign: 'center' }}>
-                      Nenhum item {filterTab === 'pendentes' ? 'pendente' : 'concluído'} neste ambiente.
-                    </div>
+                    <EstadoVazio
+                      compacto
+                      mensagem="Este ambiente ainda não tem serviços. Eles aparecem aqui quando o orçamento for detalhado."
+                      style={{ borderRadius: 0, borderLeft: 0, borderRight: 0, borderBottom: 0 }}
+                    />
                   ) : tabFiltered.map(item => (
                     <label key={item.id} style={{
                       display: 'flex', alignItems: 'flex-start', gap: '14px',

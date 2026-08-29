@@ -5,6 +5,7 @@ import { HOJE } from '../state/dados-iniciais';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -186,7 +187,13 @@ export default function PortalMinhaObra() {
           <TituloSecao margemInferior={20}>Ambiente por ambiente</TituloSecao>
         </div>
 
-        {ambientes.map((amb, idx) => {
+        {ambientes.length === 0 ? (
+          <EstadoVazio
+            compacto
+            mensagem="Sua obra ainda não tem ambientes cadastrados. O acompanhamento aparece aqui quando a estrutura for definida."
+            style={{ margin: '0 28px 28px' }}
+          />
+        ) : ambientes.map((amb, idx) => {
           const pct = calcularPctAmbiente(state, amb.id);
           const done = pct === 100;
           const isOpen = expandedAmbientes.has(amb.id);
@@ -228,7 +235,9 @@ export default function PortalMinhaObra() {
               {isOpen && (
                 <div style={{ backgroundColor: '#FAFAFA', borderTop: `1px solid ${C.borda}`, padding: '16px 28px 20px calc(28px + 160px + 16px)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {itens.map(item => (
+                    {itens.length === 0 ? (
+                      <EstadoVazio compacto mensagem="Este ambiente ainda não tem serviços detalhados." />
+                    ) : itens.map(item => (
                       <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                         <div style={{ marginTop: '1px', flexShrink: 0 }}>
                           {item.executado ? <IconCheck /> : <IconCircle />}
@@ -253,11 +262,25 @@ export default function PortalMinhaObra() {
         <Card>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', gap: '16px' }}>
             <TituloSecao margemInferior={20}>O que aconteceu hoje</TituloSecao>
-            <DataComDiaSemana data={diarioData} style={{ justifyContent: 'flex-end', marginTop: '-2px' }} />
+            {diarioHoje && <DataComDiaSemana data={diarioData} style={{ justifyContent: 'flex-end', marginTop: '-2px' }} />}
           </div>
 
+          {!diarioHoje ? (
+            <EstadoVazio
+              compacto
+              mensagem="Sua obra ainda não tem diários publicados. O primeiro resumo aparece aqui depois do registro do gerente."
+              acao={(
+                <Link to="/portal/diario" style={{ color: C.grafite, fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                  Ver diário da obra
+                </Link>
+              )}
+            />
+          ) : (
+          <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-            {diarioTexto.slice(0, 3).map((line, i) => (
+            {diarioTexto.length === 0 ? (
+              <EstadoVazio compacto mensagem="Este diário ainda não tem um resumo publicado." />
+            ) : diarioTexto.slice(0, 3).map((line, i) => (
               <p key={i} style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', lineHeight: '23px', color: C.grafite }}>
                 {line}
               </p>
@@ -281,13 +304,17 @@ export default function PortalMinhaObra() {
           }}>
             Ver todos os dias →
           </Link>
+          </>
+          )}
         </Card>
 
         {/* Quem Está na Sua Obra */}
         <Card>
           <TituloSecao margemInferior={20}>Quem está na sua obra</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {pessoasHoje.map(({ id, name, role }) => (
+            {pessoasHoje.length === 0 ? (
+              <EstadoVazio compacto mensagem="A equipe de hoje ainda não foi confirmada. Os nomes aparecem aqui depois do registro de presença." />
+            ) : pessoasHoje.map(({ id, name, role }) => (
               <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#FAFAFA', borderRadius: '10px', padding: '12px 14px' }}>
                 <Avatar pessoaId={id} nome={name} tamanho={38} />
                 <div>
