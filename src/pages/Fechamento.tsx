@@ -82,7 +82,7 @@ export default function Fechamento() {
   const [rateioAberto, setRateioAberto] = useState<string | null>(null);
   const [ajusteAberto, setAjusteAberto] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<Record<string, number>>({});
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; tom: 'ok' | 'erro' } | null>(null);
 
   // Quem executa é quem está na sessão. Só Administração e Financeiro chegam
   // aqui — a guarda de rota já barrou o resto.
@@ -120,13 +120,17 @@ export default function Fechamento() {
       fechado_por: autor,
       ajustes,
     });
-    setAviso(erro ?? 'Fechamento executado. O período está travado.');
+    setAviso(erro
+      ? { texto: erro, tom: 'erro' }
+      : { texto: 'Executado. O período está travado.', tom: 'ok' });
     if (!erro) setAjustes({});
   }
 
   function resolverRateio(diaria_id: string, obra_id: string) {
     const erro = definirObraQueArcaNaDiaria({ diaria_id, obra_id, definido_por: autor });
-    setAviso(erro ?? 'Obra definida. A outra obra fica com custo zero.');
+    setAviso(erro
+      ? { texto: erro, tom: 'erro' }
+      : { texto: 'Obra definida. A outra obra fica com custo zero.', tom: 'ok' });
     if (!erro) setRateioAberto(null);
   }
 
@@ -166,8 +170,13 @@ export default function Fechamento() {
       </div>
 
       {aviso && (
-        <div style={{ padding: '12px 16px', marginBottom: '20px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderLeft: `4px solid ${C.atencao}`, borderRadius: '6px', fontSize: '14px' }}>
-          {aviso}
+        <div
+          role="status"
+          aria-live="polite"
+          data-confirmacao-acao={aviso.tom === 'ok' ? 'true' : undefined}
+          style={{ padding: '12px 16px', marginBottom: '20px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderLeft: `4px solid ${aviso.tom === 'erro' ? C.negativo : C.positivo}`, borderRadius: '6px', fontSize: '14px' }}
+        >
+          {aviso.texto}
         </div>
       )}
 
@@ -357,7 +366,7 @@ export default function Fechamento() {
             aoAplicar={(v) => {
               setAjustes((prev) => ({ ...prev, [ajusteAberto]: v }));
               setAjusteAberto(null);
-              setAviso('Desconto ajustado. O que deixou de ser descontado continua devido.');
+              setAviso({ texto: 'Ajuste salvo. O que deixou de ser descontado continua devido.', tom: 'ok' });
             }}
           />
         </Folha>
@@ -558,7 +567,7 @@ function FolhaAjuste({
           cursor: invalido || excede ? 'not-allowed' : 'pointer',
         }}
       >
-        Aplicar ajuste
+        Salvar ajuste
       </button>
     </>
   );

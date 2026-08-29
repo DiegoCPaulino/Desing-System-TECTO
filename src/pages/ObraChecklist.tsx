@@ -86,18 +86,18 @@ export default function ObraChecklist() {
   };
 
   const handleMarcar = (itemId: string, checked: boolean, ambienteId: string) => {
+    let confirmacao = checked ? 'Marcado.' : 'Desmarcado.';
     if (checked) {
       const itensAmbiente = state.itens_orcamento.filter(i => i.ambiente_id === ambienteId);
       const outrosPendentes = itensAmbiente.filter(i => i.id !== itemId && !i.executado);
       if (outrosPendentes.length === 0) {
         const amb = ambientes.find(a => a.id === ambienteId);
-        if (amb) {
-          setToast(`${amb.nome} concluído.`);
-          setTimeout(() => setToast(null), 3000);
-        }
+        if (amb) confirmacao = `Marcado. ${amb.nome} concluído.`;
       }
     }
     state.marcarItem({ item_id: itemId, executado: checked, pessoa_id: pessoaId });
+    setToast(confirmacao);
+    setTimeout(() => setToast(null), 3000);
   };
 
   const handleSalvarFora = () => {
@@ -113,6 +113,8 @@ export default function ObraChecklist() {
     setForaQtd('1');
     setForaUnidade('vb');
     setSidePanel(false);
+    setToast('Rascunho salvo.');
+    setTimeout(() => setToast(null), 3000);
   };
 
   const inputStyle: React.CSSProperties = {
@@ -130,7 +132,7 @@ export default function ObraChecklist() {
 
       {/* Toast */}
       {toast && (
-        <div style={{
+        <div role="status" aria-live="polite" data-confirmacao-acao="true" style={{
           position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
           backgroundColor: C.grafite, color: '#FFFFFF', fontFamily: 'Inter, sans-serif',
           fontSize: '14px', fontWeight: 500, padding: '12px 24px', borderRadius: '8px',
@@ -305,6 +307,7 @@ export default function ObraChecklist() {
                     }}>
                       <input
                         type="checkbox"
+                        aria-label={`${item.executado ? 'Desmarcar' : 'Marcar'} ${item.servico}`}
                         checked={item.executado}
                         onChange={e => handleMarcar(item.id, e.target.checked, amb.id)}
                         style={{

@@ -183,13 +183,13 @@ export default function Planejamento() {
     if (!confirm) return;
     gravar(confirm.pessoa_id, confirm.data, confirm.valor, true);
     setConfirm(null);
-    setAviso({ texto: 'Alteração registrada. As pessoas envolvidas foram notificadas.', tom: 'ok' });
+    setAviso({ texto: 'Alteração salva. As pessoas envolvidas foram notificadas.', tom: 'ok' });
   }
 
   function publicar() {
     const n = pessoasNaSemana(state, semana.inicio);
     state.publicarSemana(semana.inicio);
-    setAviso({ texto: `Planejamento publicado. ${n} pessoas foram notificadas.`, tom: 'ok' });
+    setAviso({ texto: `Publicado. ${n} pessoas foram notificadas.`, tom: 'ok' });
   }
   function salvar() {
     state.salvarAlteracoes(semana.inicio);
@@ -265,7 +265,7 @@ export default function Planejamento() {
                   cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: '-0.01em',
                 }}
               >
-                {publicada ? 'Salvar alterações' : 'Publicar planejamento'}
+                {publicada ? 'Salvar alterações' : 'Publicar'}
               </button>
             )
           )}
@@ -474,7 +474,7 @@ export default function Planejamento() {
             </p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button onClick={() => setConfirm(null)} style={{ ...choiceBtn, flex: 'none', padding: '9px 18px' }}>Cancelar</button>
-              <button onClick={confirmarAlteracao} style={{ ...choiceBtn, flex: 'none', padding: '9px 18px', backgroundColor: C.acento, borderColor: C.acento, color: C.tinta, fontWeight: 600 }}>Confirmar</button>
+              <button onClick={confirmarAlteracao} style={{ ...choiceBtn, flex: 'none', padding: '9px 18px', backgroundColor: C.acento, borderColor: C.acento, color: C.tinta, fontWeight: 600 }}>Salvar alteração</button>
             </div>
           </div>
         </div>
@@ -483,6 +483,9 @@ export default function Planejamento() {
       {/* ── Aviso (toast) ── */}
       {aviso && (
         <div
+          role="status"
+          aria-live="polite"
+          data-confirmacao-acao={aviso.tom === 'ok' ? 'true' : undefined}
           onClick={() => setAviso(null)}
           style={{
             position: 'fixed', bottom: '28px', left: '50%', transform: 'translateX(-50%)', zIndex: 60,

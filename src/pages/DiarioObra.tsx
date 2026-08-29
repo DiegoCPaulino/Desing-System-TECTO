@@ -366,7 +366,7 @@ function BuscaWorkerSheet({
 function ConfirmacaoSheet({ contConfirmados, onClose }: { contConfirmados: number; onClose: () => void }) {
   return (
     <SheetBase>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' as const, padding: '8px 0 4px' }}>
+      <div role="status" aria-live="polite" data-confirmacao-acao="true" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', textAlign: 'center' as const, padding: '8px 0 4px' }}>
         <div style={{ width: '52px', height: '52px', borderRadius: '50%', backgroundColor: C.positivoFundo, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.positivo }}>
           <IconCheck />
         </div>
@@ -613,8 +613,8 @@ function DiarioObraConteudo({ obraId, obraCodigo }: { obraId: string; obraCodigo
   const handleSalvarRascunho = useCallback(() => {
     showSheet(
       <div style={{ display: 'flex', justifyContent: 'center', paddingBottom: '120px' }}>
-        <div style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFFFFF', padding: '10px 20px', borderRadius: '8px', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500 }}>
-          Rascunho salvo
+        <div role="status" aria-live="polite" data-confirmacao-acao="true" style={{ backgroundColor: 'rgba(0,0,0,0.8)', color: '#FFFFFF', padding: '10px 20px', borderRadius: '8px', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500 }}>
+          Rascunho salvo.
         </div>
       </div>
     );

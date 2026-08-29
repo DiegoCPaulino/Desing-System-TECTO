@@ -53,6 +53,7 @@ export default function ObraAndamento() {
   const state = useStore();
   const { obraId } = useParams<{ obraId: string }>();
   const [expandedTecto, setExpandedTecto] = useState<Set<string>>(new Set());
+  const [confirmacao, setConfirmacao] = useState<string | null>(null);
 
   const perfilAtivo = state.perfil_ativo;
   const pessoaId = perfilAtivo === 'gerente_obras' ? 'p04' : perfilAtivo === 'financeiro' ? 'p03' : 'p01';
@@ -76,6 +77,9 @@ export default function ObraAndamento() {
 
   const handleMarcarAmbiente = (ambienteId: string) => {
     state.marcarTodosItensAmbiente({ ambiente_id: ambienteId, executado: true, pessoa_id: pessoaId });
+    const ambiente = ambientes.find(amb => amb.id === ambienteId);
+    setConfirmacao(`Concluído. ${ambiente?.nome ?? 'Ambiente'} está com todos os serviços marcados.`);
+    setTimeout(() => setConfirmacao(null), 3000);
   };
 
   const cardStyle: React.CSSProperties = {
@@ -85,6 +89,22 @@ export default function ObraAndamento() {
 
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+
+      {confirmacao && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-confirmacao-acao="true"
+          style={{
+            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 200, maxWidth: 'calc(100vw - 32px)', padding: '12px 24px', borderRadius: '8px',
+            backgroundColor: C.grafite, color: C.superficie, boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            fontSize: '14px', fontWeight: 500, textAlign: 'center',
+          }}
+        >
+          ✓ {confirmacao}
+        </div>
+      )}
 
       {/* Two-column layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
@@ -209,6 +229,7 @@ export default function ObraAndamento() {
                     {!isDone && (
                       <button
                         onClick={() => handleMarcarAmbiente(amb.id)}
+                        aria-label={`Concluir ${amb.nome}`}
                         style={{
                           fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 500,
                           color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
