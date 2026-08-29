@@ -109,6 +109,9 @@ durante a prototipação. Precisam virar `RN`.
 2. **Recorte de quem aparece no Planejamento.** A `RN-052` exige que toda Pessoa
    com Vínculo ativo apareça no Planejamento da semana, mas Administração e
    Financeiro não vão a obra. Falta o recorte explícito.
+   **Implementado, aguardando virar `RN`:** `pessoasDaSemana` exclui pelo TIPO
+   do vínculo — `administracao` e `financeiro` ficam de fora. Falta escrever a
+   regra. O caso do terceirizado por diária continua sendo a `Q-006`.
 
 3. ~~**Classificação de mídia por Ambiente.**~~ **FECHADA** — virou a `RN-081`.
 

@@ -43,7 +43,7 @@ Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | 99 testes em seis arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
+| Testes automatizados | 138 testes em sete arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
 | `src/components/` | quatro componentes: `TituloSecao`, `Avatar`, `CabecalhoTabela` e `DataComDiaSemana` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
@@ -200,13 +200,18 @@ obras.
   `RN-133b`).
 - `indicadores.ts`: receita, custo, margem e despesas por período.
 - `indicadores.testes.ts`: 19 testes.
+- `criacao.ts`: funções de criação com a validação das `RN`.
+- `criacao.testes.ts`: 39 testes.
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
 `publicarSemana`, `salvarAlteracoes`, `finalizarDiario`,
 `definirObraQueArcaNaDiaria`, `executarFechamentoDoCiclo`,
 `estornarLancamentoDaPessoa`, `entrarComoUsuario`,
-`marcarNotificacoesComoLidas` e `adicionarMidiaNaObra`.
+`marcarNotificacoesComoLidas`, `adicionarMidiaNaObra`, `criarPessoaNoCadastro`,
+`criarVinculoDaPessoa`, `encerrarVinculoDaPessoa`, `criarObraNova`,
+`vincularGerenteNaObra`, `encerrarVinculoDeObraDaPessoa`,
+`criarSemanaDePlanejamento` e `criarLancamentoParaPessoa`.
 
 As datas gravadas pelas mutações usam `agoraNoPrototipo()`, e não o relógio
 real da máquina — ver §11.1.

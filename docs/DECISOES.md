@@ -385,6 +385,32 @@ direto do Cliente a TECTO não desembolsa nada. É a mesma regra já aplicada em
 
 ---
 
+### `[TÉCNICA]` · O tipo do lançamento é derivado, não escolhido · `RN-094`
+**Decisão:** `criarLancamento` é uma função só. Uma parcela produz
+`adiantamento`; mais de uma produz `emprestimo`.
+**Por quê:** a `RN-094` diz que são a mesma entidade diferenciada pelo número de
+parcelas. Oferecer os dois numa lista deixaria criar um "adiantamento em quatro
+parcelas", que não existe.
+**Sem limite de valor:** a `Q-007` continua aberta, e impor um teto seria
+respondê-la.
+
+### `[TÉCNICA]` · O recorte do Planejamento sai do tipo do vínculo
+**Decisão:** entram na grade todos os vínculos ativos, exceto `administracao` e
+`financeiro`. Terceirizado **continua entrando**.
+**Por quê:** a `RN-052` diz "toda Pessoa com Vínculo ativo", o que ao pé da letra
+poria Pedro e Fernanda na escala. É a lacuna 2 do `docs/ABERTO.md` §7, que a
+`RN-004` agora permite resolver pelo tipo em vez da lista de ids escrita à mão
+que existia. Tirar o terceirizado seria responder a `Q-006`, aberta — então o
+comportamento atual é preservado.
+
+### `[TÉCNICA]` · O resto da divisão vai na primeira parcela
+**Decisão:** ao parcelar, `valor − base × n` é somado à parcela 1.
+**Por quê:** a soma das parcelas tem de fechar exatamente com o total. Centavo
+perdido em arredondamento é dinheiro que não existe em lugar nenhum, e o
+`INV-10` existe para impedir exatamente esse tipo de perda.
+
+---
+
 ## Aguardando registro
 
 Itens decididos em conversa e ainda não escritos aqui em formato completo. Quem
