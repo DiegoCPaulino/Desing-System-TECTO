@@ -124,6 +124,11 @@ const DADOS: AppState = {
   ],
 
   // ─── OBRAS ────────────────────────────────────────────────────────────────
+  // `andamento_geral_pct` é o total devolvido por `calcularAndamentoGeral`.
+  // O campo continua existindo porque três telas o leem — Carteira, Visão da
+  // Obra e Portal — e elas pertencem ao outro agente. Semear o valor derivado
+  // é o que mantém os três números iguais até que essas telas passem a chamar
+  // a função. Há teste conferindo a igualdade nas cinco obras.
   obras: [
     {
       id: 'o01',
@@ -137,7 +142,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 14832000,
       adicionais_centavos: 1248000,
       recebido_centavos: 9648000,
-      andamento_geral_pct: 54,
+      andamento_geral_pct: 49,
     },
     {
       id: 'o02',
@@ -151,7 +156,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 9800000,
       adicionais_centavos: 0,
       recebido_centavos: 4900000,
-      andamento_geral_pct: 41,
+      andamento_geral_pct: 40,
     },
     {
       id: 'o03',
@@ -167,7 +172,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 7400000,
       adicionais_centavos: 0,
       recebido_centavos: 1700000,
-      andamento_geral_pct: 23,
+      andamento_geral_pct: 26,
     },
     {
       id: 'o04',
@@ -195,7 +200,7 @@ const DADOS: AppState = {
       valor_contratado_centavos: 2800000,
       adicionais_centavos: 0,
       recebido_centavos: 2380000,
-      andamento_geral_pct: 85,
+      andamento_geral_pct: 89,
     },
   ],
 
