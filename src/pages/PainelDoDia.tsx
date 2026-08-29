@@ -1,6 +1,8 @@
 import React from 'react';
 import { useStore, calcularIndicadores, calcularPendencias, getGerenteDaObra } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import { midiasDaObra } from '../state/midia';
+import { obrasDoGerenteAtivo } from '../state/sessao';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
@@ -148,14 +150,34 @@ export default function PainelDoDia() {
     return { obra, avatars, extra, gerente, diarioLabel };
   });
 
-  // Fotos do último diário finalizado da MCL
-  const fotosMCL = state.diarios.find(d => d.obra_id === 'o01' && d.estado === 'finalizado')?.fotos ?? [];
+  const obrasVisiveis = state.perfil_ativo === 'gerente_obras' ? obrasDoGerenteAtivo(state) : state.obras;
+  const ultimasMidias = obrasVisiveis
+    .flatMap((obra) => midiasDaObra(state, obra.id))
+    .sort((a, b) => b.data.localeCompare(a.data))
+    .slice(0, 6);
 
   // Indicador de string "a fechar"
   const maisProximoFech = gruposFechamento[0];
 
   return (
-    <div style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="painel-do-dia" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '24px', fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        @media (max-width: 1000px) {
+          .painel-indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+          .painel-conteudo { grid-template-columns: 1fr !important; }
+          .painel-conteudo > div { min-width: 0; }
+        }
+        @media (max-width: 700px) {
+          .painel-do-dia { padding: 24px 16px 88px !important; }
+          .painel-indicadores { gap: 12px !important; }
+          .painel-indicadores > div { padding: 18px !important; }
+          .painel-valor-fechamento { font-size: 22px !important; }
+          .painel-tabela-wrap { overflow-x: auto; }
+          .painel-tabela-wrap table { min-width: 640px; }
+          .painel-pendencia { align-items: flex-start !important; flex-wrap: wrap; gap: 12px !important; }
+          .painel-pendencia-acoes { width: calc(100% - 46px); margin-left: 46px; justify-content: flex-start; }
+        }
+      `}</style>
 
       {/* ===== TITLE ===== */}
       <div>
@@ -168,7 +190,7 @@ export default function PainelDoDia() {
       </div>
 
       {/* ===== INDICATOR CARDS ===== */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+      <div className="painel-indicadores" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
         <Card style={{ padding: '24px' }}>
           <TituloSecao>Pessoas em campo hoje</TituloSecao>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
@@ -201,7 +223,7 @@ export default function PainelDoDia() {
 
         <Card style={{ padding: '24px' }}>
           <TituloSecao>A fechar esta semana</TituloSecao>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
+          <p className="painel-valor-fechamento" style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, lineHeight: '40px', letterSpacing: '-0.02em', color: C.tinta, marginTop: '12px', fontVariantNumeric: 'tabular-nums' }}>
             <ValorMonetario valorCentavos={ind.totalAFechar} />
           </p>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', lineHeight: '18px', color: C.tintaFraca, marginTop: '6px' }}>
@@ -211,7 +233,7 @@ export default function PainelDoDia() {
       </div>
 
       {/* ===== BODY ===== */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', alignItems: 'start' }}>
+      <div className="painel-conteudo" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', alignItems: 'start' }}>
 
         {/* ─── LEFT ─── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -239,14 +261,14 @@ export default function PainelDoDia() {
                   const badge = badgeParaTipo(tipo);
                   const acao = acaoParaTipo(tipo);
                   return (
-                    <div key={id} style={{
+                    <div className="painel-pendencia" key={id} style={{
                       display: 'flex', alignItems: 'center', gap: '16px', padding: '14px 0',
                       borderBottom: i < pendencias.length - 1 ? `1px solid ${C.borda}` : 'none',
                     }}>
                       <div style={{ width: '34px', height: '34px', borderRadius: '8px', backgroundColor: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: iconColor, flexShrink: 0 }}>
                         <Icon />
                       </div>
-                      <div style={{ flex: 1 }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', lineHeight: '20px', color: C.grafite }}>
                           {descricao}
                         </p>
@@ -256,8 +278,10 @@ export default function PainelDoDia() {
                           </p>
                         )}
                       </div>
-                      {badge && <StatusBadge label={badge.label} bg={badge.bg} color={badge.color} />}
-                      <SmallBtn>{acao}</SmallBtn>
+                      <div className="painel-pendencia-acoes" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        {badge && <StatusBadge label={badge.label} bg={badge.bg} color={badge.color} />}
+                        <SmallBtn>{acao}</SmallBtn>
+                      </div>
                     </div>
                   );
                 })}
@@ -276,6 +300,7 @@ export default function PainelDoDia() {
                 mensagem="Ainda não há presenças registradas hoje. A distribuição aparece aqui quando o gerente confirmar a equipe."
               />
             ) : (
+              <div className="painel-tabela-wrap">
               <table style={{ width: '100%', borderCollapse: 'collapse' as const }}>
                 <thead>
                   <tr>
@@ -338,6 +363,7 @@ export default function PainelDoDia() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </Card>
         </div>
@@ -350,18 +376,28 @@ export default function PainelDoDia() {
             <div style={{ marginBottom: '16px' }}>
               <TituloSecao>Últimas fotos</TituloSecao>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {fotosMCL.slice(0, 6).map((url, i) => (
-                <div key={i} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', aspectRatio: '1 / 1', backgroundColor: '#CCCCCC' }}>
-                  <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            {ultimasMidias.length === 0 ? (
+              <EstadoVazio compacto mensagem="Ainda não há mídias das obras. As últimas aparecem aqui quando o gerente registrar o serviço." />
+            ) : <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {ultimasMidias.map((midia) => {
+                const obra = state.obras.find((item) => item.id === midia.obra_id);
+                const ambiente = state.ambientes.find((item) => item.id === midia.ambiente_id);
+                const descricao = [obra?.codigo, ambiente?.nome, formatarDataCurta(midia.data)].filter(Boolean).join(' · ');
+                return (
+                <div key={midia.id} style={{ position: 'relative', borderRadius: '8px', overflow: 'hidden', aspectRatio: '1 / 1', backgroundColor: '#CCCCCC' }}>
+                  {midia.tipo === 'video' ? (
+                    <video src={midia.url} muted preload="metadata" aria-label={descricao} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <img src={midia.url} alt={descricao} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  )}
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.68) 0%, transparent 100%)', padding: '22px 8px 8px' }}>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 500, color: '#FFFFFF', lineHeight: '14px' }}>
-                      Obra 22 - MCL · {formatarDataCurta(HOJE)}
+                      {descricao}
                     </p>
                   </div>
                 </div>
-              ))}
-            </div>
+              );})}
+            </div>}
           </Card>
 
           {/* PRÓXIMOS FECHAMENTOS */}
