@@ -11,6 +11,26 @@ export const SEMANA_2_INICIO = '2026-08-24'; // segunda-feira (próxima semana)
 // duas descrevem a mesma foto, e divergir aqui criaria duas verdades.
 const FOTO = (id: string) => `https://images.unsplash.com/${id}?w=280&h=280&fit=crop&auto=format`;
 
+/**
+ * CUSTO DA EMPRESA POR DIA, por pessoa. Números da contabilidade externa,
+ * lançados à mão — é o segundo campo do "padrão de dois campos" da decisão
+ * sobre encargos.
+ *
+ * NÃO É O LÍQUIDO VEZES UM PERCENTUAL, e não pode virar isso. Repare que a
+ * razão entre os dois muda de pessoa para pessoa: são dois fatos separados,
+ * um acordado com a pessoa e outro apurado pela contabilidade.
+ *
+ * [SÓ PROTÓTIPO] — valores plausíveis, aguardando os números reais do Pedro.
+ * Só funcionário próprio tem: terceirizado emite nota e não gera encargo, e o
+ * regime da gestão é Q-001 a Q-004.
+ */
+const CUSTO_EMPRESA_DIARIA: Record<string, number> = {
+  p07: 41000, p08: 30500, p11: 41000, p12: 40500, p13: 39800, p14: 38200,
+  p15: 37900, p16: 36400, p17: 36400, p18: 33500, p19: 33200, p20: 30500,
+  p21: 30100, p22: 30500, p23: 41200, p24: 30300, p25: 38000, p26: 36600,
+  p27: 30400, p28: 30200, p29: 41000, p30: 30600, p31: 38300,
+};
+
 // Segunda a sábado da semana corrente. Hoje é QUINTA, 20/08: os dias 21 e 22
 // ainda não aconteceram, e por isso não têm diário, presença nem diária.
 const S1 = ['2026-08-17', '2026-08-18', '2026-08-19', '2026-08-20', '2026-08-21', '2026-08-22'];
@@ -89,38 +109,38 @@ const DADOS: AppState = {
     { id: 'v06', pessoa_id: 'p06', tipo: 'assistente_gerenciamento', inicio: '2025-08-01' },
 
     // ── Ciclo SEMANAL — fecha 22/08 ──
-    { id: 'v07', pessoa_id: 'p07', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-03-01' },
-    { id: 'v08', pessoa_id: 'p08', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-03-01' },
-    { id: 'v11', pessoa_id: 'p11', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-01-01' },
-    { id: 'v12', pessoa_id: 'p12', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, inicio: '2025-01-01' },
-    { id: 'v13', pessoa_id: 'p13', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 24000, inicio: '2025-01-01' },
-    { id: 'v14', pessoa_id: 'p14', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, inicio: '2025-01-01' },
-    { id: 'v15', pessoa_id: 'p15', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, inicio: '2025-01-01' },
-    { id: 'v16', pessoa_id: 'p16', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, inicio: '2025-01-01' },
-    { id: 'v17', pessoa_id: 'p17', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, inicio: '2025-01-01' },
-    { id: 'v18', pessoa_id: 'p18', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, inicio: '2025-01-01' },
-    { id: 'v19', pessoa_id: 'p19', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, inicio: '2025-01-01' },
-    { id: 'v20', pessoa_id: 'p20', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-01-01' },
-    { id: 'v21', pessoa_id: 'p21', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-01-01' },
-    { id: 'v22', pessoa_id: 'p22', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, inicio: '2025-01-01' },
+    { id: 'v07', pessoa_id: 'p07', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p07'], inicio: '2025-03-01' },
+    { id: 'v08', pessoa_id: 'p08', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p08'], inicio: '2025-03-01' },
+    { id: 'v11', pessoa_id: 'p11', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p11'], inicio: '2025-01-01' },
+    { id: 'v12', pessoa_id: 'p12', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p12'], inicio: '2025-01-01' },
+    { id: 'v13', pessoa_id: 'p13', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 24000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p13'], inicio: '2025-01-01' },
+    { id: 'v14', pessoa_id: 'p14', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p14'], inicio: '2025-01-01' },
+    { id: 'v15', pessoa_id: 'p15', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p15'], inicio: '2025-01-01' },
+    { id: 'v16', pessoa_id: 'p16', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p16'], inicio: '2025-01-01' },
+    { id: 'v17', pessoa_id: 'p17', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p17'], inicio: '2025-01-01' },
+    { id: 'v18', pessoa_id: 'p18', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p18'], inicio: '2025-01-01' },
+    { id: 'v19', pessoa_id: 'p19', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 20000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p19'], inicio: '2025-01-01' },
+    { id: 'v20', pessoa_id: 'p20', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p20'], inicio: '2025-01-01' },
+    { id: 'v21', pessoa_id: 'p21', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p21'], inicio: '2025-01-01' },
+    { id: 'v22', pessoa_id: 'p22', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p22'], inicio: '2025-01-01' },
     // ── Ciclo QUINZENAL — fecha 29/08 ──
-    { id: 'v23', pessoa_id: 'p23', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 25000, inicio: '2025-02-01' },
-    { id: 'v24', pessoa_id: 'p24', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, inicio: '2025-02-01' },
-    { id: 'v25', pessoa_id: 'p25', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 23000, inicio: '2025-02-01' },
-    { id: 'v26', pessoa_id: 'p26', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 22000, inicio: '2025-02-01' },
-    { id: 'v27', pessoa_id: 'p27', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, inicio: '2025-02-01' },
-    { id: 'v28', pessoa_id: 'p28', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, inicio: '2025-02-01' },
+    { id: 'v23', pessoa_id: 'p23', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p23'], inicio: '2025-02-01' },
+    { id: 'v24', pessoa_id: 'p24', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p24'], inicio: '2025-02-01' },
+    { id: 'v25', pessoa_id: 'p25', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p25'], inicio: '2025-02-01' },
+    { id: 'v26', pessoa_id: 'p26', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p26'], inicio: '2025-02-01' },
+    { id: 'v27', pessoa_id: 'p27', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p27'], inicio: '2025-02-01' },
+    { id: 'v28', pessoa_id: 'p28', tipo: 'funcionario_proprio', ciclo_pagamento: 'quinzenal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p28'], inicio: '2025-02-01' },
     // ── Ciclo MENSAL — fecha 31/08 ──
-    { id: 'v29', pessoa_id: 'p29', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 25000, inicio: '2024-11-01' },
-    { id: 'v30', pessoa_id: 'p30', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 18000, inicio: '2024-11-01' },
-    { id: 'v31', pessoa_id: 'p31', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 23000, inicio: '2024-11-01' },
+    { id: 'v29', pessoa_id: 'p29', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 25000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p29'], inicio: '2024-11-01' },
+    { id: 'v30', pessoa_id: 'p30', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 18000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p30'], inicio: '2024-11-01' },
+    { id: 'v31', pessoa_id: 'p31', tipo: 'funcionario_proprio', ciclo_pagamento: 'mensal', valor_diaria_centavos: 23000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p31'], inicio: '2024-11-01' },
     // ── TERCEIRIZADOS — ciclo por obra ──
     { id: 'v09', pessoa_id: 'p09', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 320000, inicio: '2026-05-01' },
     { id: 'v32', pessoa_id: 'p32', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 280000, inicio: '2026-06-01' },
     { id: 'v33', pessoa_id: 'p33', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 190000, inicio: '2026-06-15' },
     { id: 'v34', pessoa_id: 'p34', tipo: 'terceirizado', ciclo_pagamento: 'por_obra', valor_obra_centavos: 240000, inicio: '2026-07-01' },
     // Wagner Lopes (p10) teve vínculo encerrado ao ser desativado em 12/06.
-    { id: 'v10', pessoa_id: 'p10', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, inicio: '2025-01-01', fim: '2026-06-12' },
+    { id: 'v10', pessoa_id: 'p10', tipo: 'funcionario_proprio', ciclo_pagamento: 'semanal', valor_diaria_centavos: 22000, custo_empresa_diaria_centavos: CUSTO_EMPRESA_DIARIA['p10'], inicio: '2025-01-01', fim: '2026-06-12' },
   ],
 
   // ─── OBRAS ────────────────────────────────────────────────────────────────
@@ -756,6 +776,9 @@ const DADOS: AppState = {
       (pessoas as [string, number][]).map(([pid, valor]) => ({
         id: `di_${d.slice(5).replace('-', '')}_${obra}_${pid}`,
         pessoa_id: pid,
+        // Congelado no fato, como o líquido. Ausente para quem não tem custo
+        // informado — e aí os Indicadores avisam em vez de supor.
+        custo_empresa_centavos: CUSTO_EMPRESA_DIARIA[pid],
         data: d,
         obra_que_arca_id: obra,
         valor_centavos: valor,
@@ -764,7 +787,7 @@ const DADOS: AppState = {
     ),
     // Israel Fontes em 19/08: duas presenças, UMA diária, sem obra que arca.
     // O Financeiro escolhe qual obra paga; a outra fica com custo zero.
-    { id: 'di_1908_rateio_p19', pessoa_id: 'p19', data: ONTEM, obra_que_arca_id: undefined, valor_centavos: 20000, adicional_centavos: 0 },
+    { id: 'di_1908_rateio_p19', pessoa_id: 'p19', data: ONTEM, obra_que_arca_id: undefined, valor_centavos: 20000, adicional_centavos: 0, custo_empresa_centavos: CUSTO_EMPRESA_DIARIA['p19'] },
   ],
   // ─── FECHAMENTOS ──────────────────────────────────────────────────────────
   // Ciclo semanal: 18 pessoas, fecha 22/08

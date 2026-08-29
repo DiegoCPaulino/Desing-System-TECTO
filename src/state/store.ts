@@ -294,6 +294,10 @@ export const useStore = create<Store>(() => ({
       const novasDiarias: Diaria[] = confirmados.map((c) => {
         const vinculo = s.vinculos.find((v) => v.pessoa_id === c.pessoa_id && !v.fim);
         const valorDiaria = vinculo?.valor_diaria_centavos ?? 0;
+        // O custo da empresa é COPIADO do cadastro no momento do fato, como o
+        // líquido, e congelado aqui (INV-03). Os dois são lidos de campos
+        // diferentes do vínculo: um nunca vira o outro.
+        const custoEmpresa = vinculo?.custo_empresa_diaria_centavos;
         // Check if person already has presença in another obra today
         const emOutraObra = s.presencas.some(
           (p) => p.pessoa_id === c.pessoa_id && p.data === data && p.obra_id !== obra_id && p.diario_id !== diario_id
@@ -305,6 +309,7 @@ export const useStore = create<Store>(() => ({
           obra_que_arca_id: emOutraObra ? undefined : obra_id,
           valor_centavos: valorDiaria,
           adicional_centavos: 0,
+          custo_empresa_centavos: custoEmpresa,
           definido_por: finalizado_por,
         };
       });

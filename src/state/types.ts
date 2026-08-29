@@ -44,6 +44,19 @@ export interface Vinculo {
    * varia. A estrutura existe; a regra não é assumida.
    */
   valor_obra_centavos?: number;
+  /**
+   * O que a Pessoa custa à empresa por dia — o segundo campo do "padrão de
+   * dois campos" da decisão sobre encargos, em `docs/DECISOES.md`.
+   *
+   * **Nunca é derivado do líquido, e o líquido nunca é derivado dele.** São
+   * dois números independentes: o líquido é o acordo com a pessoa, e este vem
+   * da contabilidade externa, lançado à mão. Multiplicar um pelo outro por um
+   * percentual seria exatamente o cálculo de encargos que a decisão proíbe.
+   *
+   * Ausente para terceirizado, que emite nota e não gera encargo, e para a
+   * gestão, cujo regime é `Q-001` a `Q-004`.
+   */
+  custo_empresa_diaria_centavos?: number;
   inicio: string;
   fim?: string;
 }
@@ -145,6 +158,18 @@ export interface Diaria {
   obra_que_arca_id?: string;
   valor_centavos: number;
   adicional_centavos: number;
+  /**
+   * O custo da empresa naquele dia, CONGELADO no momento do fato, como manda o
+   * `INV-03` — do mesmo jeito que `valor_centavos`.
+   *
+   * Mora aqui, e não só no Vínculo, por um motivo concreto: se os Indicadores
+   * lessem o cadastro ao vivo, mudar a folha hoje reescreveria a margem do mês
+   * passado, e não existiria auditoria possível.
+   *
+   * Ausente quando a empresa não informou o custo. Nesse caso os Indicadores
+   * **avisam**, em vez de substituir pelo líquido em silêncio.
+   */
+  custo_empresa_centavos?: number;
   definido_por?: string;
 }
 
