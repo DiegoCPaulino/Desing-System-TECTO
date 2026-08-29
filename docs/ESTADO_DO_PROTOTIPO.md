@@ -121,6 +121,10 @@ representavam o código.
 |---|---|---|
 | `/design-system` | `DesignSystemPage` | pública, sem guarda |
 
+A página documenta as seis implementações públicas do design system:
+`TituloSecao`, `Avatar`, `CabecalhoTabela`, `DataComDiaSemana`,
+`ValorMonetario` e `ChipVinculo`, incluindo suas variações de exibição.
+
 Manter essa rota pública ou protegê-la ainda precisa de decisão explícita.
 
 ### 2.5 Rotas em `EmBreve`
@@ -223,28 +227,39 @@ Existem 19 páginas e 2 layouts:
 
 Não existe `CampoLayout`; o Diário usa `AppLayout`.
 
+O Fechamento usa os componentes compartilhados sem alterar as funções de
+cálculo. As telas e abas com coleções vazias exibem mensagens contextuais e uma
+ação quando há próximo passo. Publicação de planejamento, marcação de checklist,
+conclusão de ambiente, finalização de diário, execução de fechamento e ajuste de
+desconto têm confirmação visível com o mesmo nome da ação.
+
 ### 4.2 Componentes compartilhados
 
-`src/components/` contém exatamente os quatro componentes visuais aprovados
-para esta etapa:
+`src/components/` contém os seis componentes públicos do design system e um
+componente de apoio para estados vazios:
 
 - `TituloSecao`: bloco amarelo de preenchimento e texto grafite, aplicado nas
   seções das telas do app e do Portal;
 - `Avatar`: retrato SVG ilustrado e determinístico a partir de `pessoaId`,
   aplicado em Painel, Equipe, Diário, Planejamento, Obra, Login e Portal;
 - `CabecalhoTabela`: Inter Semibold, caixa alta e `letter-spacing: 0.08em`,
-  aplicado nos cabeçalhos de tabela e grade, exceto em `Fechamento.tsx` por
-  determinação expressa da tarefa;
+  aplicado nos cabeçalhos de tabela e grade, inclusive no Fechamento;
 - `DataComDiaSemana`: deriva data e dia da semana do ISO e oferece os modos
-  padrão, destaque e grade compacta.
+  padrão, destaque e grade compacta;
+- `ValorMonetario`: único ponto de formatação de centavos nas telas, mantém
+  símbolo e número juntos, usa numerais tabulares, alinha tabelas à direita e
+  apresenta negativos com sinal antes de `R$` e cor negativa;
+- `ChipVinculo`: apresenta os seis tipos de vínculo com tratamentos visuais
+  distintos nos modos padrão e compacto;
+- `EstadoVazio`: componente de apoio, fora do catálogo público dos seis, usado
+  para mensagens contextuais, tom positivo e ação sugerida.
 
-`/design-system` usa as quatro implementações reais e documenta todas as suas
-variações públicas. `ValorMonetario` e `ChipVinculo` continuam fora do escopo:
-dependem de entidades que ainda não existem no estado.
+`/design-system` usa as seis implementações reais e documenta todas as suas
+variações públicas. `EstadoVazio` é apoio de interface e não entra nessa conta.
 
 As 19 páginas e os 2 layouts ainda repetem uma constante local `C` com cores.
-Botões, cartões, badges e valores monetários continuam, em sua maioria,
-reconstruídos tela a tela.
+Botões, cartões e badges continuam, em sua maioria, reconstruídos tela a tela;
+valores monetários e chips de vínculo já estão centralizados.
 
 ---
 
