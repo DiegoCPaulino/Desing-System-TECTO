@@ -57,9 +57,18 @@ type AbasDaObraProps = {
   resumo?: React.ReactNode;
   /** Ação principal da tela, alinhada à direita. */
   acao?: React.ReactNode;
+  /**
+   * `false` desenha só migalha e abas, sem o título.
+   *
+   * É o que permite acrescentar a navegação às telas que já desenham o próprio
+   * cabeçalho — Fotos, Andamento, Checklist, Diários — inserindo uma linha e
+   * removendo nada. Ali o `titulo` ainda é obrigatório: ele nomeia a posição
+   * atual na migalha.
+   */
+  mostrarTitulo?: boolean;
 };
 
-export default function AbasDaObra({ obra, titulo, resumo, acao }: AbasDaObraProps) {
+export default function AbasDaObra({ obra, titulo, resumo, acao, mostrarTitulo = true }: AbasDaObraProps) {
   const { pathname } = useLocation();
   const perfil = useStore((s) => s.perfil_ativo);
 
@@ -105,6 +114,7 @@ export default function AbasDaObra({ obra, titulo, resumo, acao }: AbasDaObraPro
       </div>
 
       {/* ── Título da tela ── */}
+      {mostrarTitulo && (
       <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', minWidth: 0 }}>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '24px', fontWeight: 600, color: C.tinta, letterSpacing: '-0.02em', margin: 0 }}>
@@ -116,6 +126,7 @@ export default function AbasDaObra({ obra, titulo, resumo, acao }: AbasDaObraPro
         </div>
         {acao}
       </div>
+      )}
 
       {/* ── Abas ── */}
       <div

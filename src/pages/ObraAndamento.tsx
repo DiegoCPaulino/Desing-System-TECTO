@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import AbasDaObra from '../components/AbasDaObra';
 import { useStore, calcularPctObra, calcularPctAmbiente, obraPorSlug } from '../state/store';
 import TituloSecao from '../components/TituloSecao';
 import EstadoVazio from '../components/EstadoVazio';
@@ -89,6 +90,9 @@ export default function ObraAndamento() {
 
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <AbasDaObra obra={obra} titulo="Andamento" mostrarTitulo={false} />
+      </div>
 
       {confirmacao && (
         <div

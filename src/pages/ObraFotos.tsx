@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
+import AbasDaObra from '../components/AbasDaObra';
 import { useStore, obraPorSlug } from '../state/store';
 import { ambientesComMidia, ambientesDaObra, midiasPorData } from '../state/midia';
 import EstadoVazio from '../components/EstadoVazio';
@@ -170,6 +171,9 @@ export default function ObraFotos() {
 
   return (
     <div className="obra-fotos-root" style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <AbasDaObra obra={obra} titulo="Fotos" mostrarTitulo={false} />
+      </div>
       <style>{`
         @media (max-width: 900px) {
           .obra-fotos-envio-grid { grid-template-columns: 1fr !important; }

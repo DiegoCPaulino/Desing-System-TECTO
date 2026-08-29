@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
+import AbasDaObra from '../components/AbasDaObra';
 import { useStore, calcularPctAmbiente, getPessoaNome, obraPorSlug } from '../state/store';
 import EstadoVazio from '../components/EstadoVazio';
 
@@ -129,6 +130,9 @@ export default function ObraChecklist() {
 
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <AbasDaObra obra={obra} titulo="Checklist" mostrarTitulo={false} />
+      </div>
 
       {/* Toast */}
       {toast && (

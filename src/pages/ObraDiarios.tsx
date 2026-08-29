@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import AbasDaObra from '../components/AbasDaObra';
 import { useStore, getPessoaNome, obraSlug, obraPorSlug } from '../state/store';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
@@ -119,6 +120,9 @@ export default function ObraDiarios() {
 
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <AbasDaObra obra={obra} titulo="Diários" mostrarTitulo={false} />
+      </div>
 
       {/* Title row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
