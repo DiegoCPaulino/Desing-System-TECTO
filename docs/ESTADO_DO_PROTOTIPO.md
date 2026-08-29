@@ -43,7 +43,7 @@ Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | 38 testes em `fechamento.testes.ts` e `portal.testes.ts`; não há runner instalado — ver §12.3 |
+| Testes automatizados | 65 testes em quatro arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
 | `src/components/` | quatro componentes: `TituloSecao`, `Avatar`, `CabecalhoTabela` e `DataComDiaSemana` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
@@ -133,7 +133,7 @@ Orçamentos, Indicadores e a rota interna não encontrada. `/financeiro` saiu do
 
 ## 3. Estado em memória
 
-`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 19 coleções de
+`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 26 coleções de
 domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entidade.
 
 | Coleção | Interface | Registros no seed |
@@ -160,6 +160,10 @@ domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entid
 | `recebimentos` | `Recebimento` | 21 |
 | `adicionais_obra` | `AdicionalObra` | 2 |
 | `custos_obra` | `CustoObra` | 11 |
+| `servicos_terceiros` | `ServicoTerceiro` | 20 |
+| `despesas_empresa` | `DespesaEmpresa` | 8 |
+| `contratos_terceirizado` | `ContratoTerceirizado` | 4 |
+| `parcelas_contrato` | `ParcelaContrato` | 8 |
 
 As oito últimas são **aditivas**: nenhuma tela existente as lê ainda.
 `Diario.fotos` continua sendo a fonte das telas de foto; `midias` é a modelagem
@@ -182,11 +186,16 @@ obras.
 - `visibilidade.ts`: fronteira de visibilidade do Cliente (`RN-135`, `RN-136`) e
   totais derivados da Obra. Funções puras, sem dependência do store.
 - `portal.testes.ts`: 11 testes de visibilidade e de coerência do seed.
+- `estorno.ts`: `estornarLancamento` e a auditoria dos estornos.
+- `estorno.testes.ts`: 15 testes.
+- `andamento.ts`: Andamento Geral com dois eixos (`RN-125`, `RN-125b`).
+- `andamento.testes.ts`: 12 testes.
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
 `publicarSemana`, `salvarAlteracoes`, `finalizarDiario`,
-`definirObraQueArcaNaDiaria` e `executarFechamentoDoCiclo`.
+`definirObraQueArcaNaDiaria`, `executarFechamentoDoCiclo` e
+`estornarLancamentoDaPessoa`.
 
 As datas gravadas pelas mutações usam `agoraNoPrototipo()`, e não o relógio
 real da máquina — ver §11.1.
@@ -589,3 +598,54 @@ node <tmp>/run.js
 
 Transformar isso num `npm test` é tarefa própria, e precisa de autorização para
 mexer no `package.json`.
+
+---
+
+## 13. Estorno e Andamento Geral
+
+Criados na T3.
+
+### 13.1 Estorno — `src/state/estorno.ts`
+
+`estornarLancamento(state, lancamento_id, motivo, autor_id, data)`. Funções
+puras; quem grava é o store, por `estornarLancamentoDaPessoa`.
+
+O crédito devolvido é a soma das parcelas **pagas** do lançamento original — o
+dinheiro que de fato saiu do bolso da pessoa —, e não o valor do lançamento. As
+parcelas ainda pendentes passam a `estornada` e deixam de ser cobradas, sem
+sumir do extrato.
+
+`Parcela.situacao` ganhou o estado `estornada`. Isso **não** é o `UPDATE`
+destrutivo que o `INV-08` proíbe: número e valor continuam intactos e a linha
+continua no extrato. É transição de estado, como `pendente → paga`.
+
+O crédito cai no primeiro ciclo **aberto** posterior à última cobrança, nunca no
+ciclo já fechado — é a `RN-073`. No cálculo do Fechamento ele entra em
+`creditos_centavos`, campo próprio, e não como desconto negativo:
+`a_pagar = max(0, bruto + creditos − descontos)`.
+
+### 13.2 Andamento Geral — `src/state/andamento.ts`
+
+`calcularAndamentoGeral(state, obra_id)` devolve os três percentuais da
+`RN-125`: por especialidade, por ambiente e total da obra.
+
+Os três saem de **uma lista só**, montada em memória por `montarRegistros` a
+partir de `itens_orcamento` e `servicos_terceiros`. Não existe entidade nova — o
+`INV-06` continua de pé, e há teste que falha se alguém criar uma coleção de
+andamento ou de checklist no estado.
+
+Duas decisões `[SÓ PROTÓTIPO]` viraram código:
+
+- os itens de orçamento entram sob a especialidade sintética **"TECTO"**, e por
+  construção a fatia dela dá o mesmo número que `calcularPctObra`;
+- serviço sem ambiente único cai no pseudo-ambiente **"Obra inteira"**, que é
+  pseudo de verdade: não existe linha em `ambientes`.
+
+O total é calculado sobre o conjunto inteiro, não somado das fatias.
+
+### 13.3 O percentual armazenado
+
+`Obra.andamento_geral_pct` passou a ser o valor devolvido por
+`calcularAndamentoGeral` — 49, 40, 26, 0 e 89. O campo continua existindo porque
+três telas o leem, e elas pertencem ao outro agente. Há teste conferindo a
+igualdade entre o derivado e o armazenado nas cinco obras.
