@@ -59,7 +59,7 @@ Idêntico em toda tarefa. Só as duas últimas linhas mudam.
 
 ```
 Leia AGENTS.md inteiro. Se você é o Claude Code, leia CLAUDE.md também.
-Consulte docs/ESTADO.md para saber o que existe hoje.
+Consulte docs/ESTADO_DO_PROTOTIPO.md para saber o que existe hoje.
 Se a tarefa depender de algo em docs/ABERTO.md, PARE e reporte.
 
 Antes de escrever qualquer código, me diga em três frases: o que você leu,
@@ -506,7 +506,7 @@ narrativa procurando onde clicar. Ensaio resolve isso, e nada mais resolve.
 | A tarefa exigiria tocar arquivo do outro agente | Pare e reporte. Nunca "só um ajustezinho" |
 | O agente pediu decisão | Procure em `docs/DECISOES.md`, depois em `docs/ABERTO.md`. Se não estiver em nenhum, a decisão é sua — e vai para o `DECISOES.md` antes de a sessão acabar |
 | O aceite falhou num item | Reverta **aquele commit**, não a tarefa. É para isso que serve o commit por item |
-| O relatório trouxe achado fora do escopo | Não mande corrigir agora. Anote no `docs/ESTADO.md` §achados e trate como tarefa própria |
+| O relatório trouxe achado fora do escopo | Não mande corrigir agora. Anote no `docs/ESTADO_DO_PROTOTIPO.md` §achados e trate como tarefa própria |
 | A sessão acabou no meio | Confira o último commit, confira `git status`, e retome do item seguinte. Nunca reexecute um item já commitado |
 
 ---
@@ -525,7 +525,7 @@ git push
 **Code primeiro, sempre.** Se houver conflito, você quer resolver com o estado
 já em pé.
 
-**Onde o conflito vai aparecer:** `docs/ESTADO.md`, porque os dois escrevem nele.
+**Onde o conflito vai aparecer:** `docs/ESTADO_DO_PROTOTIPO.md`, porque os dois escrevem nele.
 Resolva mantendo as duas listas. Conflito em `src/` significa que alguém saiu do
 território dele — investigue antes de resolver, porque isso é sintoma, não
 acidente.

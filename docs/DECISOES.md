@@ -317,6 +317,44 @@ diferente, e é o total que precisa bater com o do Portal.
 
 ---
 
+### `[SÓ PROTÓTIPO]` · Notificação é endereçada por perfil · responde `Q-027`
+**Decisão:** `Notificacao` tem `destinatario_perfis` e `lida_por`, ambos listas
+de perfil. A central de notificações existe, e cada perfil vê e marca só o que
+é dele.
+**Por quê:** a `Q-027` perguntava quem recebe o quê. Com um `lida` booleano, o
+Pedro abrir o painel zeraria o contador do Rafael, que nunca viu o aviso.
+**Vigilância:** no sistema real o destinatário é o **Usuário**, não o perfil,
+porque é o Usuário que tem credencial (`INV-01`). A maquete tem um Usuário por
+perfil, e modelar por Usuário aqui só acrescentaria indireção. **Confirmar com
+Pedro antes de virar `RN`.**
+**Invalida:** o campo `lida` de `Notificacao`.
+
+### `[SÓ PROTÓTIPO]` · O Cliente ainda não é uma Pessoa
+**Decisão:** a camada `Usuario` do `INV-01` passou a existir. Para os três
+perfis internos ela aponta para uma `Pessoa`; para o Cliente aponta para a
+`Obra`.
+**Por quê:** o glossário define Usuário como "credencial ligada a uma Pessoa",
+o que faz do Cliente uma Pessoa. Mas `Obra.cliente` é um nome em texto, e
+acrescentar os cinco clientes a `pessoas` faria o Painel exibir "38 com vínculo
+ativo" quando só 33 têm vínculo — numa tela que pertence ao outro agente.
+**Pendência:** transformar o Cliente em Pessoa, com `Obra.cliente_pessoa_id`, e
+corrigir a contagem do Painel. É uma tarefa só, e das duas pontas.
+
+### `[TÉCNICA]` · Mídia com ambiente é a fonte quando existe
+**Decisão:** `finalizarDiario` aceita `midias` com ambiente; quando vem,
+`Diario.fotos` é derivada dela e os registros de `midias` são criados junto.
+**Por quê:** as duas representações da mesma foto não podem contar histórias
+diferentes. Enquanto as telas lerem `Diario.fotos`, ela continua existindo — mas
+deixa de ser escrita à mão.
+
+### `[TÉCNICA]` · Nota fiscal não é `Documento`
+**Decisão:** `Documento` cobre projeto e contrato. A nota continua em
+`custos_obra`, pelo `tipo_documento_id`.
+**Por quê:** a nota é sempre a nota **de** alguma coisa. Separá-la do custo
+criaria duas verdades sobre o mesmo papel — e a `RN-133b` foi escrita assim.
+
+---
+
 ## Aguardando registro
 
 Itens decididos em conversa e ainda não escritos aqui em formato completo. Quem
@@ -325,8 +363,8 @@ encostar neles, complete o registro.
 - Comportamento do Checklist quando um Orçamento Adicional é aprovado (`A12`)
 - Destino do harness de SSR criado durante o P0.5: manter como script
   documentado ou remover
-- Nome fixo "Mariana Costa Lima" dentro do `PortalLayout` — viola a regra de nada
-  escrito no código; precisa sair
+- ~~Nome fixo "Mariana Costa Lima" dentro do `PortalLayout`~~ — **destravado**. A
+  camada `Usuario` e `nomeDoUsuarioAtivo` existem; a remoção em si é do Codex
 - **`docs/DECISOES.md` não está na tabela de precedência do `AGENTS.md` §2.**
   Pela letra do contrato, uma `RN` vence uma decisão registrada aqui — mesmo
   quando a decisão declara invalidá-la, como a `D1` fazia com a `RN-125`. Ou

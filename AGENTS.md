@@ -36,7 +36,7 @@ reporta** em vez de escolher.
 | 2 | `RN-XXX` em `docs/PRODUTO.md` | Regras de negócio fechadas. |
 | 3 | Instrução explícita do Mestre no prompt da tarefa | Vale para a tarefa corrente. |
 | 4 | Este arquivo e o `CLAUDE.md` | Regras operacionais do protótipo. |
-| 5 | `docs/ESTADO.md` | Inventário do que existe. |
+| 5 | `docs/ESTADO_DO_PROTOTIPO.md` | Inventário do que existe. |
 | 6 | `docs/HANDOFF.md`, `docs/SPRINT.md` | Contexto e backlog. |
 
 **`docs/ABERTO.md` não é fonte — é lista de proibições.** Se a sua tarefa depende
@@ -53,7 +53,7 @@ Não leia tudo. Leia o que a sua tarefa pede.
 | Qualquer coisa | Este arquivo, inteiro |
 | Cálculo, dinheiro, fechamento, permissão | `docs/PRODUTO.md` — seções 3, 8, 10.2, 12 |
 | Uma tela específica | `docs/HANDOFF.md` §9, o apontamento correspondente |
-| Saber o que já existe | `docs/ESTADO.md` |
+| Saber o que já existe | `docs/ESTADO_DO_PROTOTIPO.md` |
 | Saber o que vem depois | `docs/SPRINT.md` §2 — escada de prioridade |
 | Saber por que a tela existe | `docs/ROTEIRO.md` — a cena que ela sustenta |
 | Uma decisão que parece faltar | `docs/DECISOES.md` primeiro; se não estiver lá, `docs/ABERTO.md`; se estiver em nenhum, **pare e pergunte** |
@@ -264,7 +264,7 @@ arquivo e linha. Nunca afirme ter verificado visualmente o que não clicou.
    do Mestre.
 3. **Não fabrique commit vazio** para bater um número de itens. Se um item não
    exigiu mudança, diga isso.
-4. **Atualize `docs/ESTADO.md`** no último commit, com o que passou a existir.
+4. **Atualize `docs/ESTADO_DO_PROTOTIPO.md`** no último commit, com o que passou a existir.
 5. **Escreva o relatório em `docs/relatorios/<tarefa>.md`**, no formato da §10.
 6. **Se uma decisão nova foi tomada**, registre em `docs/DECISOES.md` antes de
    encerrar. Decisão não registrada volta a ser discutida noutra sessão, com

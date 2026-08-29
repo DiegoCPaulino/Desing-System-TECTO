@@ -43,7 +43,7 @@ Financeiro/Documentos da obra e Ficha da Pessoa continuam em `EmBreve`. A rota
 |---|---|
 | `npx tsc --noEmit` | passa sem erros |
 | `npm run build` | passa |
-| Testes automatizados | 65 testes em quatro arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
+| Testes automatizados | 80 testes em cinco arquivos `*.testes.ts` de `src/state/`; não há runner instalado — ver §12.3 |
 | Script de lint | não existe |
 | `src/components/` | quatro componentes: `TituloSecao`, `Avatar`, `CabecalhoTabela` e `DataComDiaSemana` |
 | Navegador em 1440 px | telas auditadas renderizam sem erro de console |
@@ -133,7 +133,7 @@ Orçamentos, Indicadores e a rota interna não encontrada. `/financeiro` saiu do
 
 ## 3. Estado em memória
 
-`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 26 coleções de
+`AppState`, em [src/state/types.ts](../src/state/types.ts), tem 28 coleções de
 domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entidade.
 
 | Coleção | Interface | Registros no seed |
@@ -164,6 +164,8 @@ domínio. A sessão `perfil_ativo` é acrescentada pelo store, mas não é entid
 | `despesas_empresa` | `DespesaEmpresa` | 8 |
 | `contratos_terceirizado` | `ContratoTerceirizado` | 4 |
 | `parcelas_contrato` | `ParcelaContrato` | 8 |
+| `documentos` | `Documento` | 16 |
+| `usuarios` | `Usuario` | 4 |
 
 As oito últimas são **aditivas**: nenhuma tela existente as lê ainda.
 `Diario.fotos` continua sendo a fonte das telas de foto; `midias` é a modelagem
@@ -190,12 +192,19 @@ obras.
 - `estorno.testes.ts`: 15 testes.
 - `andamento.ts`: Andamento Geral com dois eixos (`RN-125`, `RN-125b`).
 - `andamento.testes.ts`: 12 testes.
+- `sessao.ts`: quem está logado — a camada Usuário do `INV-01`.
+- `sessao.testes.ts`: 15 testes de identidade e de notificação por perfil.
+- `notificacoes.ts`: leitura por perfil (`Q-027`).
+- `midia.ts`: mídia por Ambiente (`RN-081`).
+- `documentos.ts`: documentos por especialidade e notas por tipo (`RN-128`,
+  `RN-133b`).
 
 As mutações disponíveis são `setPerfil`, `resetarDados`, `marcarItem`,
 `marcarTodosItensAmbiente`, `adicionarItemForaEscopo`, `gravarCelula`,
 `publicarSemana`, `salvarAlteracoes`, `finalizarDiario`,
-`definirObraQueArcaNaDiaria`, `executarFechamentoDoCiclo` e
-`estornarLancamentoDaPessoa`.
+`definirObraQueArcaNaDiaria`, `executarFechamentoDoCiclo`,
+`estornarLancamentoDaPessoa`, `entrarComoUsuario`,
+`marcarNotificacoesComoLidas` e `adicionarMidiaNaObra`.
 
 As datas gravadas pelas mutações usam `agoraNoPrototipo()`, e não o relógio
 real da máquina — ver §11.1.
@@ -283,13 +292,13 @@ e pelas telas de cálculo, sem o Codex inventar a interface ou as funções.
 
 ### 6.1 Fontes de verdade
 
-**A1 — `docs/PRODUTO.md` não existe.** O `AGENTS.md` aponta para INV-01 a INV-10
-e RN-XXX nesse arquivo, mas ele não está no repositório nem aparece no histórico
-Git disponível. Qualquer tarefa que exija interpretar ou criar regra de negócio
-fica sem a fonte de maior precedência e deve parar.
+**A1 — ~~`docs/PRODUTO.md` não existe.~~ RESOLVIDO.** O Documento Canônico entrou
+no repositório em `d10aabc`. As tarefas executadas antes dele foram reconferidas
+contra os invariantes — ver `docs/relatorios/ajustes-pos-produto.md`.
 
-**A2 — `docs/ESTADO.md` também não existe.** O mapa do `AGENTS.md` cita esse
-nome; o inventário real é este `ESTADO_DO_PROTOTIPO.md`.
+**A2 — ~~`docs/ESTADO.md` também não existe.~~ RESOLVIDO.** O `AGENTS.md` e o
+`docs/EXECUCAO.md` passaram a citar `docs/ESTADO_DO_PROTOTIPO.md`, que é o nome
+real deste arquivo.
 
 ### 6.2 Seed e consistência de dados — responsabilidade do Claude Code
 

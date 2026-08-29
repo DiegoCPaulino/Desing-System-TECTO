@@ -314,6 +314,12 @@ Este é o fluxo mais crítico do sistema operacional. Ele deve funcionar exatame
  
 **RN-080** — O Diário é integralmente destinado ao Cliente. Não existe seção interna oculta dentro dele. Informação que o Cliente não pode ver vive em outro recurso.
  
+**RN-081** — Toda mídia — foto ou vídeo — é classificada por **Ambiente**, obrigatoriamente, no momento do envio. Mídia sem Ambiente não é aceita.
+ 
+*Consequência:* o Cliente e o Gerente conseguem percorrer a obra por cômodo, e não só por data. Sem a classificação, o filtro por Ambiente da galeria é decorativo — era o estado do protótipo antes desta regra.
+ 
+*Origem:* lacuna 3 registrada em `docs/ABERTO.md` §7, encontrada durante a prototipação. Nenhuma `RN` tratava do assunto e o protótipo já dependia do campo.
+ 
 ---
  
 # 8. Presença, diária e fechamento
@@ -400,6 +406,12 @@ Este é o fluxo mais crítico do sistema operacional. Ele deve funcionar exatame
  
 **RN-127** — O Gerente é responsável por gerenciar também os serviços de terceiros, ainda que eles não entrem no escopo comercial da TECTO.
  
+**RN-128** — A **Especialidade** é um catálogo fechado, mantido pela Administração, e é atributo do serviço de terceiro. Catálogo inicial: marcenaria, marmoraria, vidro, ar-condicionado, gesso, piso de madeira, elétrica, hidráulica e pintura.
+ 
+*Consequência:* é a Especialidade que sustenta o eixo do Andamento Geral (`RN-125b`) e a classificação de projetos e contratos (`RN-133b`). Texto livre no lugar dela impediria os dois.
+ 
+*Origem:* lacuna 4 registrada em `docs/ABERTO.md` §7. A taxonomia era pré-requisito de quatro telas e não estava definida em `RN` nenhuma.
+ 
 ---
  
 # 10. Financeiro
@@ -419,6 +431,12 @@ Este é o fluxo mais crítico do sistema operacional. Ele deve funcionar exatame
 **RN-132** — Quando um Orçamento Externo é aprovado, registra-se quem pagou. Isso determina a modalidade e todo o comportamento subsequente.
  
 **RN-133** — Um mesmo prestador pode operar em modalidades diferentes em obras diferentes. A modalidade pertence ao registro do custo, nunca ao cadastro do prestador.
+ 
+**RN-133b** — O **Tipo de Documento** é um catálogo em dois níveis. No topo: nota fiscal, projeto e contrato. Abaixo de nota fiscal: depósito de material, parte elétrica, reembolso de material, compra online e outros.
+ 
+*Consequência:* a nota vive junto do custo que ela comprova, e é filtrada por tipo no Financeiro da Obra. Projeto e contrato existem por si, são classificados também por Especialidade (`RN-128`), e são filtrados em Documentos.
+ 
+*Origem:* lacuna 4 registrada em `docs/ABERTO.md` §7.
  
 ## 10.2 Fronteira de visibilidade do Cliente
  
@@ -566,7 +584,7 @@ Não implementar nada que dependa destas respostas.
  
 **Q-026** — O que define que uma Obra está concluída: o Checklist em 100%, ou decisão manual da Administração?
  
-**Q-027** — Quem recebe qual notificação? Existe uma central de notificações dentro do sistema, ou apenas o aviso no momento?
+**Q-027** — ~~Quem recebe qual notificação? Existe uma central de notificações dentro do sistema, ou apenas o aviso no momento?~~ **RESPONDIDA.** A central existe; o destinatário é por perfil no protótipo e será por Usuário no sistema real. Ver `docs/DECISOES.md`.
  
 **Q-028** — Fotos e vídeos são armazenados no original ou comprimidos? Nada é apagado — qual o horizonte de retenção?
  
