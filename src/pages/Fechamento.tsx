@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { useStore, formatarReais, getPessoaNome } from '../state/store';
+import { useStore, getPessoaNome } from '../state/store';
 import {
   calcularFechamentoDaPessoa,
   pendenciasQueBloqueiam,
@@ -9,17 +9,23 @@ import {
   type PendenciaBloqueante,
   type TipoCiclo,
 } from '../state/fechamento';
+import ValorMonetario from '../components/ValorMonetario';
+import TituloSecao from '../components/TituloSecao';
+import CabecalhoTabela from '../components/CabecalhoTabela';
+import Avatar from '../components/Avatar';
+import DataComDiaSemana from '../components/DataComDiaSemana';
+import ChipVinculo from '../components/ChipVinculo';
+import EstadoVazio from '../components/EstadoVazio';
 
 /**
  * FECHAMENTO DE CICLO.
  *
  * Esta tela é o próprio cálculo, e por isso mora aqui e não no território das
- * telas. Ela nasce visualmente CRUA de propósito: o design system é aplicado
- * depois, num passo separado. O que precisa estar certo aqui é o número.
+ * telas. A camada visual apenas apresenta o resultado das funções de estado.
  *
  * Nenhum valor é escrito no componente e nenhum cálculo acontece nele: tudo
  * vem de `src/state/fechamento.ts`. Dinheiro circula em centavos inteiros e só
- * vira texto em `formatarReais`, na hora de exibir.
+ * vira texto no componente visual, na hora de exibir.
  */
 
 const C = {
@@ -44,10 +50,11 @@ const ABAS: { tipo: TipoCiclo; rotulo: string }[] = [
 ];
 
 const celula: React.CSSProperties = {
-  padding: '10px 12px',
+  padding: '14px 16px',
   borderBottom: `1px solid ${C.borda}`,
   fontSize: '14px',
   textAlign: 'left',
+  verticalAlign: 'middle',
 };
 
 const celulaNumero: React.CSSProperties = {
@@ -75,7 +82,7 @@ export default function Fechamento() {
   const [rateioAberto, setRateioAberto] = useState<string | null>(null);
   const [ajusteAberto, setAjusteAberto] = useState<string | null>(null);
   const [ajustes, setAjustes] = useState<Record<string, number>>({});
-  const [aviso, setAviso] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<{ texto: string; tom: 'ok' | 'erro' } | null>(null);
 
   // Quem executa é quem está na sessão. Só Administração e Financeiro chegam
   // aqui — a guarda de rota já barrou o resto.
@@ -113,27 +120,31 @@ export default function Fechamento() {
       fechado_por: autor,
       ajustes,
     });
-    setAviso(erro ?? 'Fechamento executado. O período está travado.');
+    setAviso(erro
+      ? { texto: erro, tom: 'erro' }
+      : { texto: 'Executado. O período está travado.', tom: 'ok' });
     if (!erro) setAjustes({});
   }
 
   function resolverRateio(diaria_id: string, obra_id: string) {
     const erro = definirObraQueArcaNaDiaria({ diaria_id, obra_id, definido_por: autor });
-    setAviso(erro ?? 'Obra definida. A outra obra fica com custo zero.');
+    setAviso(erro
+      ? { texto: erro, tom: 'erro' }
+      : { texto: 'Obra definida. A outra obra fica com custo zero.', tom: 'ok' });
     if (!erro) setRateioAberto(null);
   }
 
   return (
-    <div style={{ padding: '32px 40px', backgroundColor: C.fundo, minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: C.tinta }}>
-      <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', margin: '0 0 4px' }}>
+    <div style={{ padding: '40px', backgroundColor: C.fundo, minHeight: '100vh', fontFamily: 'Inter, sans-serif', color: C.tinta }}>
+      <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '32px', lineHeight: '40px', fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 4px' }}>
         Fechamento de ciclo
       </h1>
-      <p style={{ fontSize: '14px', color: C.tintaFraca, margin: '0 0 24px' }}>
+      <p style={{ fontSize: '15px', lineHeight: '22px', color: C.tintaFraca, margin: '0 0 28px' }}>
         O fechamento é por ciclo e por pessoa. Os quatro ciclos correm ao mesmo tempo.
       </p>
 
       {/* ── ABAS POR CICLO ── */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap', borderBottom: `1px solid ${C.borda}` }}>
         {ABAS.map((a) => {
           const ativa = a.tipo === abaAtiva;
           return (
@@ -141,14 +152,15 @@ export default function Fechamento() {
               key={a.tipo}
               onClick={() => { setAbaAtiva(a.tipo); setAviso(null); }}
               style={{
-                padding: '8px 16px',
+                padding: '10px 18px',
                 border: `1px solid ${ativa ? C.acento : C.borda}`,
                 backgroundColor: ativa ? C.acento : C.superficie,
                 color: C.tinta,
                 fontSize: '14px',
                 fontWeight: ativa ? 600 : 400,
-                borderRadius: '6px',
+                borderRadius: '8px 8px 0 0',
                 cursor: 'pointer',
+                marginBottom: '-1px',
               }}
             >
               {a.rotulo}
@@ -158,15 +170,18 @@ export default function Fechamento() {
       </div>
 
       {aviso && (
-        <div style={{ padding: '12px 16px', marginBottom: '20px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderLeft: `4px solid ${C.atencao}`, borderRadius: '6px', fontSize: '14px' }}>
-          {aviso}
+        <div
+          role="status"
+          aria-live="polite"
+          data-confirmacao-acao={aviso.tom === 'ok' ? 'true' : undefined}
+          style={{ padding: '12px 16px', marginBottom: '20px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderLeft: `4px solid ${aviso.tom === 'erro' ? C.negativo : C.positivo}`, borderRadius: '6px', fontSize: '14px' }}
+        >
+          {aviso.texto}
         </div>
       )}
 
       {!ciclo && (
-        <div style={{ padding: '32px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '8px', fontSize: '14px', color: C.tintaFraca }}>
-          Não há ciclo deste tipo com pessoas vinculadas.
-        </div>
+        <EstadoVazio mensagem="Este tipo de ciclo ainda não tem pessoas vinculadas. Ele aparece aqui quando o vínculo de pagamento for definido." />
       )}
 
       {/* ── CICLO POR OBRA — estrutura sem afirmar a regra ── */}
@@ -176,20 +191,26 @@ export default function Fechamento() {
 
       {ciclo && ciclo.tipo !== 'por_obra' && (
         <>
-          <p style={{ ...rotulo, marginBottom: '12px' }}>
-            Período {ciclo.periodo_inicio} a {ciclo.periodo_fim} · {ciclo.pessoas.length} pessoas
-            {fechado && ' · FECHADO'}
-          </p>
+          <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px', marginBottom: '16px', flexWrap: 'wrap' }}>
+            <div>
+              <TituloSecao margemInferior={8}>Período do ciclo</TituloSecao>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <DataComDiaSemana data={ciclo.periodo_inicio!} />
+                <span style={{ color: C.neutro, fontSize: '13px' }}>até</span>
+                <DataComDiaSemana data={ciclo.periodo_fim!} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ fontSize: '13px', color: C.tintaFraca }}>{ciclo.pessoas.length} pessoas</span>
+              {fechado && <span style={{ padding: '4px 10px', borderRadius: '999px', backgroundColor: '#EDFAF3', color: C.positivo, fontSize: '11px', fontWeight: 700 }}>Fechado</span>}
+            </div>
+          </div>
 
           {/* ── PENDÊNCIAS QUE BLOQUEIAM ── */}
-          <section style={{ marginBottom: '24px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '8px', padding: '16px' }}>
-            <p style={{ ...rotulo, margin: '0 0 12px' }}>
-              Pendências que bloqueiam o fechamento
-            </p>
+          <section style={{ marginBottom: '24px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px', padding: '20px' }}>
+            <TituloSecao margemInferior={14}>Pendências que bloqueiam o fechamento</TituloSecao>
             {pendencias.length === 0 ? (
-              <p style={{ fontSize: '14px', color: C.positivo, margin: 0 }}>
-                Nenhuma. O ciclo pode ser fechado.
-              </p>
+              <EstadoVazio compacto tom="positivo" mensagem="O ciclo está sem pendências e pode ser fechado." />
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {pendencias.map((p) => (
@@ -217,22 +238,23 @@ export default function Fechamento() {
           </section>
 
           {/* ── TABELA POR PESSOA ── */}
-          <div style={{ overflowX: 'auto', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '8px' }}>
+          <div style={{ overflowX: 'auto', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '880px' }}>
               <thead>
                 <tr>
-                  <th style={{ ...celula, ...rotulo }}>Pessoa</th>
-                  <th style={{ ...celulaNumero, ...rotulo }}>Diárias</th>
-                  <th style={{ ...celulaNumero, ...rotulo }}>Adicionais</th>
-                  <th style={{ ...celulaNumero, ...rotulo }}>Descontos</th>
-                  <th style={{ ...celulaNumero, ...rotulo }}>A pagar</th>
-                  <th style={{ ...celula, ...rotulo }}>Rola</th>
-                  <th style={{ ...celulaNumero, ...rotulo }}>Deve ao todo</th>
-                  <th style={{ ...celula, ...rotulo }} />
+                  <CabecalhoTabela style={celula}>Pessoa</CabecalhoTabela>
+                  <CabecalhoTabela alinhamento="right" style={celulaNumero}>Diárias</CabecalhoTabela>
+                  <CabecalhoTabela alinhamento="right" style={celulaNumero}>Adicionais</CabecalhoTabela>
+                  <CabecalhoTabela alinhamento="right" style={celulaNumero}>Descontos</CabecalhoTabela>
+                  <CabecalhoTabela alinhamento="right" style={celulaNumero}>A pagar</CabecalhoTabela>
+                  <CabecalhoTabela style={celula}>Rola</CabecalhoTabela>
+                  <CabecalhoTabela alinhamento="right" style={celulaNumero}>Deve ao todo</CabecalhoTabela>
+                  <CabecalhoTabela style={celula}>Ação</CabecalhoTabela>
                 </tr>
               </thead>
               <tbody>
                 {extratos.map((x) => {
+                  const pessoa = state.pessoas.find((p) => p.id === x.pessoa_id)!;
                   const alvo = ajustes[x.pessoa_id];
                   const desconto = alvo === undefined ? x.descontos_centavos : Math.min(alvo, x.descontos_centavos);
                   const aPagar = Math.max(0, x.bruto_centavos - desconto);
@@ -243,22 +265,27 @@ export default function Fechamento() {
                       onClick={() => setExtratoAberto(x.pessoa_id)}
                       style={{ cursor: 'pointer' }}
                     >
-                      <td style={celula}>{getPessoaNome(state, x.pessoa_id)}</td>
-                      <td style={celulaNumero}>{formatarReais(somaPorTipo(x, 'diaria'))}</td>
-                      <td style={celulaNumero}>{formatarReais(somaPorTipo(x, 'adicional'))}</td>
+                      <td style={celula}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '180px' }}>
+                          <Avatar pessoaId={pessoa.id} nome={pessoa.nome} tamanho={34} />
+                          <span style={{ fontWeight: 600, color: C.grafite }}>{getPessoaNome(state, x.pessoa_id)}</span>
+                        </div>
+                      </td>
+                      <td style={celulaNumero}><ValorMonetario valorCentavos={somaPorTipo(x, 'diaria')} /></td>
+                      <td style={celulaNumero}><ValorMonetario valorCentavos={somaPorTipo(x, 'adicional')} /></td>
                       <td style={{ ...celulaNumero, color: desconto > 0 ? C.negativo : C.tinta }}>
-                        {desconto > 0 ? '− ' : ''}{formatarReais(desconto)}
+                        <ValorMonetario valorCentavos={-desconto} />
                         {alvo !== undefined && <span style={{ fontSize: '11px', color: C.atencao }}> ajustado</span>}
                       </td>
-                      <td style={{ ...celulaNumero, fontWeight: 600 }}>{formatarReais(aPagar)}</td>
+                      <td style={{ ...celulaNumero, fontWeight: 600 }}><ValorMonetario valorCentavos={aPagar} /></td>
                       <td style={{ ...celula, fontSize: '13px', color: rola > 0 ? C.atencao : C.neutro }}>
-                        {rola > 0 ? formatarReais(rola) : '—'}
+                        {rola > 0 ? <ValorMonetario valorCentavos={rola} style={{ color: C.atencao }} /> : '—'}
                       </td>
                       {/* RN-095: o Financeiro sempre enxerga o saldo devedor
                           antes de fechar. Não é o desconto deste ciclo — é a
                           dívida inteira, de todos os ciclos. */}
                       <td style={{ ...celulaNumero, fontSize: '13px', color: x.saldo_devedor_total_centavos > 0 ? C.negativo : C.neutro }}>
-                        {x.saldo_devedor_total_centavos > 0 ? formatarReais(x.saldo_devedor_total_centavos) : '—'}
+                        {x.saldo_devedor_total_centavos > 0 ? <ValorMonetario valorCentavos={x.saldo_devedor_total_centavos} style={{ color: C.negativo }} /> : '—'}
                       </td>
                       <td style={celula}>
                         {!fechado && x.descontos_centavos > 0 && (
@@ -278,7 +305,7 @@ export default function Fechamento() {
                 <tr>
                   <td style={{ ...celula, fontWeight: 600 }}>Total do ciclo</td>
                   <td style={celula} colSpan={3} />
-                  <td style={{ ...celulaNumero, fontWeight: 700 }}>{formatarReais(totalAPagar)}</td>
+                  <td style={{ ...celulaNumero, fontWeight: 700 }}><ValorMonetario valorCentavos={totalAPagar} /></td>
                   <td style={celula} colSpan={3} />
                 </tr>
               </tfoot>
@@ -286,7 +313,7 @@ export default function Fechamento() {
           </div>
 
           {/* ── EXECUTAR ── */}
-          <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', padding: '20px', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px' }}>
             <button
               onClick={executar}
               disabled={travado}
@@ -339,7 +366,7 @@ export default function Fechamento() {
             aoAplicar={(v) => {
               setAjustes((prev) => ({ ...prev, [ajusteAberto]: v }));
               setAjusteAberto(null);
-              setAviso('Desconto ajustado. O que deixou de ser descontado continua devido.');
+              setAviso({ texto: 'Ajuste salvo. O que deixou de ser descontado continua devido.', tom: 'ok' });
             }}
           />
         </Folha>
@@ -350,18 +377,18 @@ export default function Fechamento() {
 
 function botao(fundo: string): React.CSSProperties {
   return {
-    padding: '6px 14px',
+    padding: '8px 14px',
     border: `1px solid ${C.borda}`,
     backgroundColor: fundo,
     color: C.tinta,
     fontSize: '13px',
-    borderRadius: '6px',
+    borderRadius: '8px',
     cursor: 'pointer',
     fontFamily: 'Inter, sans-serif',
   };
 }
 
-/** Folha lateral simples. O acabamento vem depois, com o design system. */
+/** Folha lateral compartilhando a mesma hierarquia visual da tela. */
 function Folha({ titulo, aoFechar, children }: { titulo: string; aoFechar: () => void; children: React.ReactNode }) {
   return (
     <div
@@ -370,10 +397,10 @@ function Folha({ titulo, aoFechar, children }: { titulo: string; aoFechar: () =>
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ width: '100%', maxWidth: '520px', height: '100%', overflowY: 'auto', backgroundColor: C.superficie, padding: '24px' }}
+        style={{ width: '100%', maxWidth: '520px', height: '100%', overflowY: 'auto', backgroundColor: C.superficie, padding: '28px', boxShadow: '-12px 0 32px rgba(0,0,0,0.12)' }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '16px' }}>
-          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', margin: 0 }}>{titulo}</h2>
+          <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '20px', lineHeight: '28px', letterSpacing: '-0.01em', margin: 0 }}>{titulo}</h2>
           <button onClick={aoFechar} style={botao(C.superficie)}>Fechar</button>
         </div>
         {children}
@@ -387,22 +414,30 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
   if (!extrato) return <p style={{ fontSize: '14px' }}>Extrato não encontrado.</p>;
   if (!extrato.linhas.length) {
     return (
-      <p style={{ fontSize: '14px', color: C.tintaFraca }}>
-        Nenhum lançamento neste período. Sem diário finalizado não há presença, e sem
-        presença não há diária.
-      </p>
+      <EstadoVazio
+        compacto
+        mensagem="Este período ainda não tem lançamentos. As diárias aparecem quando houver presença em um diário finalizado."
+      />
     );
   }
   return (
     <>
+      <TituloSecao margemInferior={12}>Lançamentos do período</TituloSecao>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <CabecalhoTabela style={celula}>Data</CabecalhoTabela>
+            <CabecalhoTabela style={celula}>Descrição</CabecalhoTabela>
+            <CabecalhoTabela alinhamento="right" style={celulaNumero}>Valor</CabecalhoTabela>
+          </tr>
+        </thead>
         <tbody>
           {extrato.linhas.map((l, i) => (
             <tr key={`${l.referencia_id}_${i}`}>
               <td style={{ ...celula, fontSize: '13px', color: C.tintaFraca, whiteSpace: 'nowrap' }}>{l.data ?? '—'}</td>
               <td style={{ ...celula, fontSize: '13px' }}>{l.descricao}</td>
               <td style={{ ...celulaNumero, fontSize: '13px', color: l.valor_centavos < 0 ? C.negativo : C.tinta }}>
-                {formatarReais(l.valor_centavos)}
+                <ValorMonetario valorCentavos={l.valor_centavos} />
               </td>
             </tr>
           ))}
@@ -410,16 +445,16 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
       </table>
       <dl style={{ marginTop: '20px', fontSize: '14px', display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px 16px' }}>
         <dt>Bruto</dt>
-        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{formatarReais(extrato.bruto_centavos)}</dd>
+        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}><ValorMonetario valorCentavos={extrato.bruto_centavos} /></dd>
         <dt>Descontos</dt>
-        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: C.negativo }}>− {formatarReais(extrato.descontos_centavos)}</dd>
+        <dd style={{ margin: 0, textAlign: 'right', fontVariantNumeric: 'tabular-nums', color: C.negativo }}><ValorMonetario valorCentavos={-extrato.descontos_centavos} /></dd>
         <dt style={{ fontWeight: 700 }}>A pagar</dt>
-        <dd style={{ margin: 0, textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{formatarReais(extrato.a_pagar_centavos)}</dd>
+        <dd style={{ margin: 0, textAlign: 'right', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}><ValorMonetario valorCentavos={extrato.a_pagar_centavos} /></dd>
         {extrato.saldo_a_rolar_centavos > 0 && (
           <>
             <dt style={{ color: C.atencao }}>Rola para o ciclo seguinte</dt>
             <dd style={{ margin: 0, textAlign: 'right', color: C.atencao, fontVariantNumeric: 'tabular-nums' }}>
-              {formatarReais(extrato.saldo_a_rolar_centavos)}
+              <ValorMonetario valorCentavos={extrato.saldo_a_rolar_centavos} style={{ color: C.atencao }} />
             </dd>
           </>
         )}
@@ -427,7 +462,7 @@ function ExtratoDetalhado({ extrato }: { extrato?: ExtratoFechamento }) {
           <>
             <dt style={{ color: C.negativo }}>Deve ao todo</dt>
             <dd style={{ margin: 0, textAlign: 'right', color: C.negativo, fontVariantNumeric: 'tabular-nums' }}>
-              {formatarReais(extrato.saldo_devedor_total_centavos)}
+              <ValorMonetario valorCentavos={extrato.saldo_devedor_total_centavos} style={{ color: C.negativo }} />
             </dd>
           </>
         )}
@@ -462,8 +497,8 @@ function FolhaRateio({ diaria_id, aoEscolher }: { diaria_id: string; aoEscolher:
   return (
     <>
       <p style={{ fontSize: '14px', marginTop: 0 }}>
-        {getPessoaNome(state, diaria.pessoa_id)} esteve em {obras.length} obras em {diaria.data}, e
-        isso gerou <strong>uma única diária</strong> de {formatarReais(diaria.valor_centavos)}.
+        {getPessoaNome(state, diaria.pessoa_id)} esteve em {obras.length} obras em <DataComDiaSemana data={diaria.data} />, e
+        isso gerou <strong>uma única diária</strong> de <ValorMonetario valorCentavos={diaria.valor_centavos} alinhamento="left" />.
       </p>
       <p style={{ fontSize: '13px', color: C.tintaFraca }}>
         Não há rateio proporcional. A obra escolhida arca com o valor inteiro; a outra
@@ -500,14 +535,14 @@ function FolhaAjuste({
   return (
     <>
       <p style={{ fontSize: '14px', marginTop: 0 }}>
-        Desconto proposto pelo cálculo: <strong>{formatarReais(proposto)}</strong>.
+        Desconto proposto pelo cálculo: <strong><ValorMonetario valorCentavos={proposto} alinhamento="left" /></strong>.
       </p>
       <p style={{ fontSize: '13px', color: C.tintaFraca }}>
         É possível descontar menos, nunca mais. O que deixar de ser descontado continua
         devido e é cobrado no ciclo seguinte.
       </p>
       <label style={{ ...rotulo, display: 'block', marginTop: '16px', marginBottom: '6px' }}>
-        Descontar neste ciclo (R$)
+        Descontar neste ciclo (em reais)
       </label>
       <input
         value={reais}
@@ -517,7 +552,7 @@ function FolhaAjuste({
       />
       {excede && (
         <p style={{ fontSize: '13px', color: C.negativo, marginTop: '8px' }}>
-          Maior que o proposto. O máximo é {formatarReais(proposto)} — descontar mais
+          Maior que o proposto. O máximo é <ValorMonetario valorCentavos={proposto} alinhamento="left" /> — descontar mais
           seria cobrar dívida que não existe.
         </p>
       )}
@@ -532,7 +567,7 @@ function FolhaAjuste({
           cursor: invalido || excede ? 'not-allowed' : 'pointer',
         }}
       >
-        Aplicar ajuste
+        Salvar ajuste
       </button>
     </>
   );
@@ -548,15 +583,23 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
   const state = useStore();
   return (
     <>
-      <p style={{ ...rotulo, marginBottom: '12px' }}>{ciclo.pessoas.length} pessoas</p>
-      <div style={{ overflowX: 'auto', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '8px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', marginBottom: '12px' }}>
+        <TituloSecao>Contratos por obra</TituloSecao>
+        <span style={{ fontSize: '13px', color: C.tintaFraca }}>{ciclo.pessoas.length} pessoas</span>
+      </div>
+      <EstadoVazio
+        compacto
+        mensagem="Este ciclo por obra ainda não tem período definido. Os contratos ficam listados abaixo sem antecipar a regra de pagamento."
+        style={{ marginBottom: '16px' }}
+      />
+      <div style={{ overflowX: 'auto', backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
           <thead>
             <tr>
-              <th style={{ ...celula, ...rotulo }}>Pessoa</th>
-              <th style={{ ...celula, ...rotulo }}>Obra</th>
-              <th style={{ ...celulaNumero, ...rotulo }}>Valor do contrato</th>
-              <th style={{ ...celula, ...rotulo }}>Situação</th>
+              <CabecalhoTabela style={celula}>Pessoa</CabecalhoTabela>
+              <CabecalhoTabela style={celula}>Obra</CabecalhoTabela>
+              <CabecalhoTabela alinhamento="right" style={celulaNumero}>Valor do contrato</CabecalhoTabela>
+              <CabecalhoTabela style={celula}>Situação</CabecalhoTabela>
             </tr>
           </thead>
           <tbody>
@@ -586,16 +629,25 @@ function PorObra({ ciclo }: { ciclo: Ciclo }) {
                 .filter(Boolean)
                 .sort();
               // O Gerente de Obras recebe valor fixo por Obra (RN-004), mas o
-              // valor não está definido — Q-001. Exibir R$ 0,00 aqui diria que
+              // valor não está definido — Q-001. Exibir zero aqui diria que
               // ele não recebe nada, que é uma afirmação diferente de "ainda
               // não se sabe quanto".
               const temValor = vinculo?.valor_obra_centavos !== undefined;
+              const pessoa = state.pessoas.find((p) => p.id === pid)!;
               return (
                 <tr key={pid}>
-                  <td style={celula}>{getPessoaNome(state, pid)}</td>
+                  <td style={celula}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '220px' }}>
+                      <Avatar pessoaId={pessoa.id} nome={pessoa.nome} tamanho={34} />
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                        <span style={{ fontWeight: 600, color: C.grafite }}>{getPessoaNome(state, pid)}</span>
+                        {vinculo && <ChipVinculo tipo={vinculo.tipo} compacto />}
+                      </div>
+                    </div>
+                  </td>
                   <td style={{ ...celula, fontSize: '13px' }}>{obras.length ? obras.join(', ') : '—'}</td>
                   <td style={temValor ? celulaNumero : { ...celulaNumero, color: C.tintaFraca, fontStyle: 'italic' }}>
-                    {temValor ? formatarReais(vinculo!.valor_obra_centavos!) : 'a definir'}
+                    {temValor ? <ValorMonetario valorCentavos={vinculo!.valor_obra_centavos!} /> : 'a definir'}
                   </td>
                   <td style={{ ...celula, fontSize: '13px', color: C.tintaFraca }}>Em aberto</td>
                 </tr>

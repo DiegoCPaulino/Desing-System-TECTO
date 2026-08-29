@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useStore, getPessoaNome, obraSlug, obraPorSlug } from '../state/store';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -73,8 +74,8 @@ export default function ObraDiarios() {
 
   if (obra.tipo === 'pequeno_servico') {
     return (
-      <div style={{ padding: '48px 40px', fontFamily: 'Inter, sans-serif', color: C.neutro, fontSize: '14px', textAlign: 'center' }}>
-        {obra.codigo} é um pequeno serviço e não tem Diário de Obra.
+      <div style={{ padding: '48px 40px' }}>
+        <EstadoVazio mensagem={`${obra.codigo} é um pequeno serviço e não usa Diário de Obra. O acompanhamento acontece na visão geral.`} />
       </div>
     );
   }
@@ -182,9 +183,17 @@ export default function ObraDiarios() {
       {/* Diary cards */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '48px 0', color: C.neutro, fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>
-            Nenhum diário encontrado.
-          </div>
+          <EstadoVazio
+            mensagem={
+              search
+                ? 'Não há diários com esta busca. Limpe o termo para ver os dias registrados.'
+                : filterTab === 'com_fotos'
+                ? 'Esta obra ainda não tem diários com fotos. As imagens aparecem aqui quando o gerente registrar o dia.'
+                : filterTab === 'sem_execucao'
+                ? 'Esta obra não tem dias marcados sem execução. Quando houver uma pausa registrada, ela aparece aqui.'
+                : 'Esta obra ainda não tem diários. O primeiro aparece aqui quando o gerente registrar o dia.'
+            }
+          />
         )}
 
         {filtered.map(diario => {

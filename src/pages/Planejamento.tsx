@@ -12,7 +12,6 @@ import {
   rotuloCelula,
   obrasNaoConcluidas,
   valorDiaria,
-  formatarReais,
   GERENTE_ID,
   type CelulaValor,
 } from '../state/store';
@@ -20,7 +19,10 @@ import type { Planejamento as Cel } from '../state/types';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
+import ValorMonetario from '../components/ValorMonetario';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import ChipVinculo from '../components/ChipVinculo';
+import EstadoVazio from '../components/EstadoVazio';
 
 type StoreState = ReturnType<typeof useStore.getState>;
 
@@ -41,12 +43,12 @@ const C = {
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const MOTIVOS = ['Doente', 'Dispensado pela empresa', 'Falta', 'Folga', 'Férias', 'Afastado', 'Obra parada'];
 
-const OBRA_COR: Record<string, string> = {
-  o01: C.informativo,
-  o02: C.positivo,
-  o04: C.grafite,
-  o05: C.atencao,
-};
+const CORES_OBRA = [C.informativo, C.positivo, C.grafite, C.atencao];
+
+function corDaObra(chave: string) {
+  const indice = [...chave].reduce((total, caractere) => total + caractere.charCodeAt(0), 0) % CORES_OBRA.length;
+  return CORES_OBRA[indice];
+}
 
 function obraSigla(codigo: string): string {
   const parte = codigo.split(' - ')[1];
@@ -181,13 +183,13 @@ export default function Planejamento() {
     if (!confirm) return;
     gravar(confirm.pessoa_id, confirm.data, confirm.valor, true);
     setConfirm(null);
-    setAviso({ texto: 'Alteração registrada. As pessoas envolvidas foram notificadas.', tom: 'ok' });
+    setAviso({ texto: 'Alteração salva. As pessoas envolvidas foram notificadas.', tom: 'ok' });
   }
 
   function publicar() {
     const n = pessoasNaSemana(state, semana.inicio);
     state.publicarSemana(semana.inicio);
-    setAviso({ texto: `Planejamento publicado. ${n} pessoas foram notificadas.`, tom: 'ok' });
+    setAviso({ texto: `Publicado. ${n} pessoas foram notificadas.`, tom: 'ok' });
   }
   function salvar() {
     state.salvarAlteracoes(semana.inicio);
@@ -263,7 +265,7 @@ export default function Planejamento() {
                   cursor: 'pointer', whiteSpace: 'nowrap', letterSpacing: '-0.01em',
                 }}
               >
-                {publicada ? 'Salvar alterações' : 'Publicar planejamento'}
+                {publicada ? 'Salvar alterações' : 'Publicar'}
               </button>
             )
           )}
@@ -300,7 +302,7 @@ export default function Planejamento() {
         <ResumoTile label="Pessoas na grade" valor={String(resumo.pessoasNaGrade)} />
         <ResumoTile label="Em aberto" valor={String(resumo.emAberto)} destaque={resumo.emAberto > 0} />
         <ResumoTile label="Ausências" valor={String(resumo.ausencias)} />
-        <ResumoTile label="Custo previsto da semana" valor={formatarReais(resumo.custoPrevisto)} />
+        <ResumoTile label="Custo previsto da semana" valor={<ValorMonetario valorCentavos={resumo.custoPrevisto} />} />
       </div>
 
       {/* ── Grade ── */}
@@ -318,13 +320,15 @@ export default function Planejamento() {
         </div>
 
         {roster.length === 0 && (
-          <div style={{ padding: '40px', textAlign: 'center', color: C.tintaFraca, fontSize: '14px' }}>
-            Nenhuma pessoa nesta visão para a semana selecionada.
-          </div>
+          <EstadoVazio
+            mensagem="Esta semana ainda não tem pessoas nesta visão. Escolha outro vínculo ou volte para Todos."
+            style={{ margin: '20px' }}
+          />
         )}
 
         {roster.map((pid, idx) => {
           const pessoa = state.pessoas.find((p) => p.id === pid)!;
+          const tipoVinculo = state.vinculos.find((v) => v.pessoa_id === pid)!.tipo;
           return (
             <div key={pid} style={{ ...gridRow(false), borderTop: idx === 0 ? 'none' : `1px solid ${C.borda}` }}>
               <div style={nameCell}>
@@ -332,6 +336,7 @@ export default function Planejamento() {
                 <div style={{ minWidth: 0 }}>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500, color: C.grafite, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pessoa.nome}</p>
                   <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.tintaFraca, margin: '1px 0 0' }}>{pessoa.funcao}</p>
+                  <ChipVinculo tipo={tipoVinculo} compacto style={{ marginTop: '3px' }} />
                 </div>
               </div>
               {dias.map((d) => {
@@ -359,7 +364,7 @@ export default function Planejamento() {
       {/* ── Legenda ── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', marginTop: '16px' }}>
         {obras.map((o) => (
-          <LegendaItem key={o.id} cor={OBRA_COR[o.id] ?? C.neutro} label={o.codigo} />
+          <LegendaItem key={o.id} cor={corDaObra(o.id)} label={o.codigo} />
         ))}
         <LegendaItem cor={C.neutro} label="Ausência" quadrado />
         <LegendaItem cor={C.tintaFraca} label="Em aberto" tracejado />
@@ -396,7 +401,7 @@ export default function Planejamento() {
                   <MenuOpt
                     key={o.id}
                     label={o.codigo}
-                    dot={OBRA_COR[o.id] ?? C.neutro}
+                    dot={corDaObra(o.id)}
                     onClick={() => escolherObra(o.id)}
                   />
                 ))}
@@ -432,7 +437,7 @@ export default function Planejamento() {
                 </div>
                 <div style={{ position: 'relative', marginBottom: '12px' }}>
                   <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.tintaFraca }}>
-                    {adTipo === 'fixo' ? 'R$' : '%'}
+                    {adTipo === 'fixo' ? 'Reais' : '%'}
                   </span>
                   <input
                     type="text"
@@ -469,7 +474,7 @@ export default function Planejamento() {
             </p>
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button onClick={() => setConfirm(null)} style={{ ...choiceBtn, flex: 'none', padding: '9px 18px' }}>Cancelar</button>
-              <button onClick={confirmarAlteracao} style={{ ...choiceBtn, flex: 'none', padding: '9px 18px', backgroundColor: C.acento, borderColor: C.acento, color: C.tinta, fontWeight: 600 }}>Confirmar</button>
+              <button onClick={confirmarAlteracao} style={{ ...choiceBtn, flex: 'none', padding: '9px 18px', backgroundColor: C.acento, borderColor: C.acento, color: C.tinta, fontWeight: 600 }}>Salvar alteração</button>
             </div>
           </div>
         </div>
@@ -478,6 +483,9 @@ export default function Planejamento() {
       {/* ── Aviso (toast) ── */}
       {aviso && (
         <div
+          role="status"
+          aria-live="polite"
+          data-confirmacao-acao={aviso.tom === 'ok' ? 'true' : undefined}
           onClick={() => setAviso(null)}
           style={{
             position: 'fixed', bottom: '28px', left: '50%', transform: 'translateX(-50%)', zIndex: 60,
@@ -517,7 +525,7 @@ function CelulaConteudo({ state, cel }: { state: StoreState; cel?: Cel }) {
 
   if (tipo === 'alocada') {
     const obra = state.obras.find((o) => o.id === cel!.obra_id)!;
-    const cor = OBRA_COR[obra.id] ?? C.neutro;
+    const cor = corDaObra(obra.id);
     return (
       <div title={alteradaTip} style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {markers}
@@ -563,7 +571,7 @@ function CelulaConteudo({ state, cel }: { state: StoreState; cel?: Cel }) {
   );
 }
 
-function ResumoTile({ label, valor, destaque }: { label: string; valor: string; destaque?: boolean }) {
+function ResumoTile({ label, valor, destaque }: { label: string; valor: React.ReactNode; destaque?: boolean }) {
   return (
     <div style={{ backgroundColor: C.superficie, border: `1px solid ${C.borda}`, borderRadius: '12px', padding: '18px 20px' }}>
       <TituloSecao>{label}</TituloSecao>

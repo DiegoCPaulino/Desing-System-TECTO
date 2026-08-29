@@ -15,18 +15,12 @@ const C = {
   neutro: '#9A9A9A',
 } as const;
 
-const DEMO_USERS: Array<{
-  pessoaId: string;
-  nome: string;
-  perfil: string;
-  tipo: TipoPerfil;
-  destino: string;
-}> = [
-  { pessoaId: 'p01', nome: 'Pedro Almeida', perfil: 'Administração', tipo: 'administracao', destino: '/' },
-  { pessoaId: 'p03', nome: 'Fernanda Sousa', perfil: 'Financeiro', tipo: 'financeiro', destino: '/' },
-  { pessoaId: 'p04', nome: 'Rafael Duarte', perfil: 'Gerente de Obras', tipo: 'gerente_obras', destino: '/' },
-  { pessoaId: 'cliente-o01', nome: 'Mariana Costa Lima', perfil: 'Cliente', tipo: 'cliente', destino: '/portal' },
-];
+const PERFIL_LABEL: Record<TipoPerfil, string> = {
+  administracao: 'Administração',
+  financeiro: 'Financeiro',
+  gerente_obras: 'Gerente de Obras',
+  cliente: 'Cliente',
+};
 
 function IconEye({ open }: { open: boolean }) {
   if (open) {
@@ -113,14 +107,14 @@ function IlustracaoLogin() {
         <g fill="#777268" fontFamily="Inter, sans-serif" fontSize="9" letterSpacing="0.7">
           <text x="254" y="624">8,40 M</text>
           <text x="15" y="340" transform="rotate(-90 15 340)">11,20 M</text>
-          <text x="74" y="54" fontSize="12" fontWeight="700">APARTAMENTO 22 · ESTUDO PRELIMINAR</text>
+          <text x="74" y="54" fontSize="12" fontWeight="700">APARTAMENTO · ESTUDO PRELIMINAR</text>
         </g>
       </g>
 
       <g transform="translate(522 700)">
         <rect width="134" height="54" rx="3" fill={C.acento} />
         <text x="16" y="22" fill="#000000" fontFamily="Inter, sans-serif" fontSize="9" fontWeight="700" letterSpacing="1.4">PLANTA</text>
-        <text x="16" y="40" fill="#000000" fontFamily="Space Grotesk, sans-serif" fontSize="15" fontWeight="700">22 · MCL</text>
+        <text x="16" y="40" fill="#000000" fontFamily="Space Grotesk, sans-serif" fontSize="15" fontWeight="700">RESIDENCIAL</text>
       </g>
     </svg>
   );
@@ -128,17 +122,37 @@ function IlustracaoLogin() {
 
 export default function Login() {
   const navigate = useNavigate();
-  const setPerfil = useStore(s => s.setPerfil);
+  const state = useStore();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [erroDemo, setErroDemo] = useState('');
+
+  const usuariosDemo = state.usuarios
+    .filter((usuario) => usuario.ativo)
+    .map((usuario) => {
+      const pessoa = usuario.pessoa_id ? state.pessoas.find((item) => item.id === usuario.pessoa_id) : undefined;
+      const obra = usuario.obra_id ? state.obras.find((item) => item.id === usuario.obra_id) : undefined;
+      return {
+        id: usuario.id,
+        nome: pessoa?.nome ?? obra?.cliente ?? usuario.nome_exibicao,
+        perfil: PERFIL_LABEL[usuario.perfil],
+        avatarId: pessoa?.id ?? usuario.id,
+        destino: usuario.perfil === 'cliente' ? '/portal' : '/',
+      };
+    });
 
   const handleEntrar = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
-  const handleDemo = (tipo: TipoPerfil, destino: string) => {
-    setPerfil(tipo);
+  const handleDemo = (usuarioId: string, destino: string) => {
+    const erro = state.entrarComoUsuario(usuarioId);
+    if (erro) {
+      setErroDemo(erro);
+      return;
+    }
+    setErroDemo('');
     navigate(destino, { replace: true });
   };
 
@@ -274,11 +288,11 @@ export default function Login() {
               Demonstração
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              {DEMO_USERS.map(u => (
+              {usuariosDemo.map(u => (
                 <button
-                  key={u.tipo}
+                  key={u.id}
                   type="button"
-                  onClick={() => handleDemo(u.tipo, u.destino)}
+                  onClick={() => handleDemo(u.id, u.destino)}
                   style={{
                     display: 'flex', alignItems: 'center', gap: '12px',
                     fontFamily: 'Inter, sans-serif', background: 'none',
@@ -296,7 +310,7 @@ export default function Login() {
                     e.currentTarget.style.background = 'none';
                   }}
                 >
-                  <Avatar pessoaId={u.pessoaId} nome={u.nome} tamanho={36} />
+                  <Avatar pessoaId={u.avatarId} nome={u.nome} tamanho={36} />
                   <div>
                     <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, lineHeight: '18px' }}>
                       {u.nome}
@@ -308,6 +322,7 @@ export default function Login() {
                 </button>
               ))}
             </div>
+            {erroDemo && <p role="alert" style={{ margin: '10px 0 0', color: '#C94141', fontFamily: 'Inter, sans-serif', fontSize: '13px' }}>{erroDemo}</p>}
           </div>
 
           {/* Link primeiro acesso */}

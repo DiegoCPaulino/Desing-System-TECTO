@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import { obraDoClienteAtivo } from '../state/sessao';
+import { adicionaisDaObra } from '../state/visibilidade';
 import TituloSecao from '../components/TituloSecao';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -52,17 +55,33 @@ function IconChevron({ open }: { open: boolean }) {
   );
 }
 
+function formatarDataLonga(data: string) {
+  return new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
+    .format(new Date(`${data}T12:00:00`));
+}
+
+function formatarDataCurta(data: string) {
+  return data.split('-').reverse().join('/');
+}
+
 export default function PortalMinhaObra() {
   const state = useStore();
   const [expandedAmbientes, setExpandedAmbientes] = useState<Set<string>>(new Set());
 
-  const obra = state.obras.find(o => o.id === 'o01')!;
-  const ambientes = state.ambientes.filter(a => a.obra_id === 'o01');
-  const tectoPct = calcularPctObra(state, 'o01');
+  const obra = obraDoClienteAtivo(state);
+
+  if (!obra) {
+    return <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px' }}><EstadoVazio mensagem="Seu acesso ainda não tem uma obra associada. A obra aparece aqui quando o vínculo for registrado." /></div>;
+  }
+
+  const ambientes = state.ambientes.filter(a => a.obra_id === obra.id);
+  const tectoPct = calcularPctObra(state, obra.id);
+  const adicionais = adicionaisDaObra(state, obra.id);
+  const ultimoAdicional = [...adicionais].sort((a, b) => b.aprovado_em.localeCompare(a.aprovado_em))[0];
 
   // Most recent finalized diary for "O que aconteceu hoje"
   const diarioHoje = state.diarios
-    .filter(d => d.obra_id === 'o01' && d.estado === 'finalizado')
+    .filter(d => d.obra_id === obra.id && d.estado === 'finalizado')
     .sort((a, b) => b.data.localeCompare(a.data))[0];
 
   const diarioData = diarioHoje?.data ?? HOJE;
@@ -72,8 +91,7 @@ export default function PortalMinhaObra() {
   });
   const diarioFotos = (diarioHoje?.fotos ?? []).slice(0, 3);
 
-  // People working today (presencas on HOJE for obra o01)
-  const presencasHoje = state.presencas.filter(p => p.obra_id === 'o01' && p.data === HOJE);
+  const presencasHoje = state.presencas.filter(p => p.obra_id === obra.id && p.data === HOJE);
   const pessoasHoje = [...new Set(presencasHoje.map(p => p.pessoa_id))].map((pid) => {
     const pessoa = state.pessoas.find(p => p.id === pid);
     return { id: pid, name: pessoa?.nome ?? '?', role: pessoa?.funcao ?? '?' };
@@ -89,13 +107,20 @@ export default function PortalMinhaObra() {
   };
 
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '40px 32px 80px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div className="portal-minha-obra" style={{ maxWidth: '1120px', margin: '0 auto', padding: '40px 32px 80px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <style>{`
+        @media (max-width: 700px) {
+          .portal-minha-obra { padding: 24px 16px 56px !important; }
+          .portal-minha-obra-grid { grid-template-columns: 1fr !important; }
+          .portal-minha-obra-hero { height: 260px !important; }
+        }
+      `}</style>
 
       {/* ── Hero ── */}
-      <div style={{ position: 'relative', height: '320px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#888' }}>
+      <div className="portal-minha-obra-hero" style={{ position: 'relative', height: '320px', borderRadius: '12px', overflow: 'hidden', backgroundColor: '#888' }}>
         <img
           src="https://images.unsplash.com/photo-1503174971373-b1f69350bdd1?w=1120&h=320&fit=crop&auto=format"
-          alt="Reforma do apartamento Itaim Bibi"
+          alt={`Reforma de ${obra.codigo}`}
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
         {/* Gradient overlay */}
@@ -106,13 +131,13 @@ export default function PortalMinhaObra() {
             Reforma do apartamento
           </h1>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', color: 'rgba(255,255,255,0.88)', marginTop: '6px' }}>
-            Itaim Bibi · início em {obra.inicio.split('-').reverse().join('/')}
+            {obra.endereco} · início em {obra.inicio.split('-').reverse().join('/')}
           </p>
         </div>
       </div>
 
       {/* ── Faixa escopo ampliado ── */}
-      <div style={{
+      {ultimoAdicional && <div style={{
         display: 'flex', alignItems: 'flex-start', gap: '12px',
         backgroundColor: '#FFF6D6', border: '1px solid #FFC213', borderRadius: '10px',
         padding: '14px 18px',
@@ -121,14 +146,14 @@ export default function PortalMinhaObra() {
           <path d="M8 2L1.5 13h13L8 2z"/><path d="M8 6v4M8 11.5v.5"/>
         </svg>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: '#363636', margin: 0, lineHeight: '1.6' }}>
-          <strong>Escopo ampliado em 19/08.</strong>{' '}
-          Dois serviços adicionais aprovados acrescentaram novos itens ao cronograma.
+          <strong>Escopo ampliado em {formatarDataCurta(ultimoAdicional.aprovado_em)}.</strong>{' '}
+          {adicionais.length} {adicionais.length === 1 ? 'serviço adicional aprovado acrescentou' : 'serviços adicionais aprovados acrescentaram'} novos itens ao cronograma.
           O percentual pode recuar temporariamente até que os novos serviços sejam executados.
         </p>
-      </div>
+      </div>}
 
       {/* ── Andamento + Previsão ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'start' }}>
+      <div className="portal-minha-obra-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'start' }}>
 
         <Card>
           <TituloSecao margemInferior={20}>Andamento</TituloSecao>
@@ -175,7 +200,7 @@ export default function PortalMinhaObra() {
             Previsão de entrega
           </p>
           <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '24px', fontWeight: 700, color: C.tinta, lineHeight: '1.2', letterSpacing: '-0.02em' }}>
-            30 de setembro de 2026
+            {formatarDataLonga(obra.previsao_termino)}
           </p>
         </Card>
       </div>
@@ -186,7 +211,13 @@ export default function PortalMinhaObra() {
           <TituloSecao margemInferior={20}>Ambiente por ambiente</TituloSecao>
         </div>
 
-        {ambientes.map((amb, idx) => {
+        {ambientes.length === 0 ? (
+          <EstadoVazio
+            compacto
+            mensagem="Sua obra ainda não tem ambientes cadastrados. O acompanhamento aparece aqui quando a estrutura for definida."
+            style={{ margin: '0 28px 28px' }}
+          />
+        ) : ambientes.map((amb, idx) => {
           const pct = calcularPctAmbiente(state, amb.id);
           const done = pct === 100;
           const isOpen = expandedAmbientes.has(amb.id);
@@ -228,7 +259,9 @@ export default function PortalMinhaObra() {
               {isOpen && (
                 <div style={{ backgroundColor: '#FAFAFA', borderTop: `1px solid ${C.borda}`, padding: '16px 28px 20px calc(28px + 160px + 16px)' }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {itens.map(item => (
+                    {itens.length === 0 ? (
+                      <EstadoVazio compacto mensagem="Este ambiente ainda não tem serviços detalhados." />
+                    ) : itens.map(item => (
                       <div key={item.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
                         <div style={{ marginTop: '1px', flexShrink: 0 }}>
                           {item.executado ? <IconCheck /> : <IconCircle />}
@@ -247,17 +280,31 @@ export default function PortalMinhaObra() {
       </Card>
 
       {/* ── O Que Aconteceu Hoje + Quem Está na Sua Obra ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'start' }}>
+      <div className="portal-minha-obra-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', alignItems: 'start' }}>
 
         {/* O Que Aconteceu Hoje */}
         <Card>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '20px', gap: '16px' }}>
             <TituloSecao margemInferior={20}>O que aconteceu hoje</TituloSecao>
-            <DataComDiaSemana data={diarioData} style={{ justifyContent: 'flex-end', marginTop: '-2px' }} />
+            {diarioHoje && <DataComDiaSemana data={diarioData} style={{ justifyContent: 'flex-end', marginTop: '-2px' }} />}
           </div>
 
+          {!diarioHoje ? (
+            <EstadoVazio
+              compacto
+              mensagem="Sua obra ainda não tem diários publicados. O primeiro resumo aparece aqui depois do registro do gerente."
+              acao={(
+                <Link to="/portal/diario" style={{ color: C.grafite, fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                  Ver diário da obra
+                </Link>
+              )}
+            />
+          ) : (
+          <>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-            {diarioTexto.slice(0, 3).map((line, i) => (
+            {diarioTexto.length === 0 ? (
+              <EstadoVazio compacto mensagem="Este diário ainda não tem um resumo publicado." />
+            ) : diarioTexto.slice(0, 3).map((line, i) => (
               <p key={i} style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', lineHeight: '23px', color: C.grafite }}>
                 {line}
               </p>
@@ -281,13 +328,17 @@ export default function PortalMinhaObra() {
           }}>
             Ver todos os dias →
           </Link>
+          </>
+          )}
         </Card>
 
         {/* Quem Está na Sua Obra */}
         <Card>
           <TituloSecao margemInferior={20}>Quem está na sua obra</TituloSecao>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {pessoasHoje.map(({ id, name, role }) => (
+            {pessoasHoje.length === 0 ? (
+              <EstadoVazio compacto mensagem="A equipe de hoje ainda não foi confirmada. Os nomes aparecem aqui depois do registro de presença." />
+            ) : pessoasHoje.map(({ id, name, role }) => (
               <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: '#FAFAFA', borderRadius: '10px', padding: '12px 14px' }}>
                 <Avatar pessoaId={id} nome={name} tamanho={38} />
                 <div>

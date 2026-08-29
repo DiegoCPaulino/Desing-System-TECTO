@@ -4,8 +4,11 @@ import Avatar from '../components/Avatar';
 import CabecalhoTabela from '../components/CabecalhoTabela';
 import DataComDiaSemana from '../components/DataComDiaSemana';
 import TituloSecao from '../components/TituloSecao';
+import ValorMonetario from '../components/ValorMonetario';
+import ChipVinculo from '../components/ChipVinculo';
 import { useStore } from '../state/store';
 import { HOJE } from '../state/dados-iniciais';
+import type { TipoVinculo } from '../state/types';
 
 const C = {
   acento: '#FFC213',
@@ -17,6 +20,15 @@ const C = {
   superficie: '#FFFFFF',
   neutro: '#9A9A9A',
 } as const;
+
+const TIPOS_VINCULO: TipoVinculo[] = [
+  'funcionario_proprio',
+  'terceirizado',
+  'gerente_obras',
+  'assistente_gerenciamento',
+  'administracao',
+  'financeiro',
+];
 
 function BlocoReferencia({
   nome,
@@ -89,7 +101,7 @@ export default function DesignSystemPage() {
       <main style={{ maxWidth: '1180px', margin: '0 auto', padding: '40px clamp(20px, 5vw, 48px) 80px' }}>
         <div style={{ marginBottom: '28px' }}>
           <p style={{ margin: 0, fontSize: '13px', lineHeight: '20px', color: C.tintaFraca }}>
-            Esta página usa diretamente os quatro componentes de <code style={{ fontFamily: "'JetBrains Mono', monospace", color: C.grafite }}>src/components</code>. As variações abaixo correspondem às propriedades públicas de cada um.
+            Esta página usa diretamente os seis componentes do design system em <code style={{ fontFamily: "'JetBrains Mono', monospace", color: C.grafite }}>src/components</code>. As variações abaixo correspondem às propriedades públicas de cada um.
           </p>
         </div>
 
@@ -194,6 +206,68 @@ export default function DesignSystemPage() {
                 <RotuloEstado>Grade compacta</RotuloEstado>
                 <div style={{ marginTop: '10px', width: '54px', padding: '10px', border: `1px solid ${C.borda}`, borderRadius: '8px', textAlign: 'center' }}>
                   <DataComDiaSemana data={HOJE} modo="grade" />
+                </div>
+              </div>
+            </div>
+          </BlocoReferencia>
+
+          <BlocoReferencia
+            nome="ValorMonetario"
+            descricao="Formata centavos, preserva símbolo e número na mesma linha, usa numerais tabulares e destaca valores negativos."
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '18px' }}>
+                <div>
+                  <RotuloEstado>Positivo</RotuloEstado>
+                  <div style={{ marginTop: '10px', fontSize: '18px', fontWeight: 700 }}>
+                    <ValorMonetario valorCentavos={14832000} alinhamento="left" />
+                  </div>
+                </div>
+                <div>
+                  <RotuloEstado>Zero</RotuloEstado>
+                  <div style={{ marginTop: '10px', fontSize: '18px', fontWeight: 700 }}>
+                    <ValorMonetario valorCentavos={0} alinhamento="left" />
+                  </div>
+                </div>
+                <div>
+                  <RotuloEstado>Negativo</RotuloEstado>
+                  <div style={{ marginTop: '10px', fontSize: '18px', fontWeight: 700 }}>
+                    <ValorMonetario valorCentavos={-40000} alinhamento="left" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <RotuloEstado>Coluna de tabela · alinhado à direita</RotuloEstado>
+                <div style={{ marginTop: '10px', padding: '12px 14px', border: `1px solid ${C.borda}`, borderRadius: '8px', textAlign: 'right', fontSize: '15px' }}>
+                  <ValorMonetario valorCentavos={1248000} />
+                </div>
+              </div>
+
+              <div>
+                <RotuloEstado>Tela estreita · símbolo e número inseparáveis</RotuloEstado>
+                <div style={{ marginTop: '10px', width: '128px', maxWidth: '100%', overflowX: 'auto', padding: '10px 12px', border: `1px solid ${C.borda}`, borderRadius: '8px', fontSize: '15px' }}>
+                  <ValorMonetario valorCentavos={16080000} alinhamento="left" />
+                </div>
+              </div>
+            </div>
+          </BlocoReferencia>
+
+          <BlocoReferencia
+            nome="ChipVinculo"
+            descricao="Seis tipos de vínculo diferenciados primeiro por tratamento visual, sem reutilizar cores semânticas."
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div>
+                <RotuloEstado>Padrão · seis tipos</RotuloEstado>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: '12px' }}>
+                  {TIPOS_VINCULO.map(tipo => <ChipVinculo key={tipo} tipo={tipo} />)}
+                </div>
+              </div>
+              <div>
+                <RotuloEstado>Compacto · seis tipos</RotuloEstado>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                  {TIPOS_VINCULO.map(tipo => <ChipVinculo key={tipo} tipo={tipo} compacto />)}
                 </div>
               </div>
             </div>

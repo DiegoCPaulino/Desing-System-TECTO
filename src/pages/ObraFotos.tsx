@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, obraPorSlug } from '../state/store';
+import { ambientesComMidia, ambientesDaObra, midiasPorData } from '../state/midia';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -11,6 +13,8 @@ const C = {
   fundo: '#FAFAFA',
   superficie: '#FFFFFF',
   neutro: '#9A9A9A',
+  positivo: '#2E9E5B',
+  atencao: '#E8833A',
 } as const;
 
 const MESES_FULL = ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'];
@@ -48,11 +52,23 @@ function IconDownload() {
     </svg>
   );
 }
+function IconUpload() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7.5 12V4M4 7l3.5-3.5L11 7" /><path d="M2 13h11" />
+    </svg>
+  );
+}
+function IconPlay() {
+  return <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M7 4.8v10.4L15 10 7 4.8Z" /></svg>;
+}
 
 interface FotoEntry {
+  id: string;
   url: string;
   data: string;
-  diarioId: string;
+  tipo: 'foto' | 'video';
+  ambienteId: string;
   index: number;
 }
 
@@ -62,55 +78,60 @@ export default function ObraFotos() {
   const [activeAmbiente, setActiveAmbiente] = useState('todos');
   const [ordem, setOrdem] = useState<'recentes' | 'antigas'>('recentes');
   const [lightbox, setLightbox] = useState<{ index: number } | null>(null);
+  const [envioAberto, setEnvioAberto] = useState(false);
+  const [ambienteEnvio, setAmbienteEnvio] = useState('');
+  const [arquivoEnvio, setArquivoEnvio] = useState<File | null>(null);
+  const [erroEnvio, setErroEnvio] = useState('');
+  const [confirmacaoEnvio, setConfirmacaoEnvio] = useState('');
 
   const obra = obraId ? obraPorSlug(state, obraId) : undefined;
 
-  const ambientesDaObra = useMemo(
-    () => (obra ? state.ambientes.filter(a => a.obra_id === obra.id) : []),
+  const ambientesDisponiveis = useMemo(
+    () => (obra ? ambientesDaObra(state, obra.id) : []),
     [state.ambientes, obra]
   );
-  const AMBIENTE_TABS = useMemo(
-    () => [{ key: 'todos', label: 'Todos' }, ...ambientesDaObra.map(a => ({ key: a.id, label: a.nome }))],
-    [ambientesDaObra]
+  const ambientesDoFiltro = useMemo(
+    () => (obra ? ambientesComMidia(state, obra.id) : []),
+    [state.midias, state.ambientes, obra]
   );
 
-  // Collect all photos from this obra's diaries
-  const todasFotos: FotoEntry[] = useMemo(() => {
+  const gruposRecentes = useMemo(() => {
     if (!obra) return [];
-    const entries: FotoEntry[] = [];
-    let globalIdx = 0;
-    const diariosFiltrados = [...state.diarios.filter(d => d.obra_id === obra.id && d.fotos.length > 0)]
-      .sort((a, b) => b.data.localeCompare(a.data));
-    for (const d of diariosFiltrados) {
-      for (const url of d.fotos) {
-        entries.push({ url, data: d.data, diarioId: d.id, index: globalIdx++ });
-      }
-    }
-    return entries;
-  }, [state.diarios, obra]);
+    return midiasPorData(state, obra.id, activeAmbiente === 'todos' ? undefined : activeAmbiente);
+  }, [state.midias, obra, activeAmbiente]);
+
+  const totalFotos = useMemo(
+    () => obra ? midiasPorData(state, obra.id).reduce((total, grupo) => total + grupo.midias.length, 0) : 0,
+    [state.midias, obra]
+  );
+
+  const AMBIENTE_TABS = useMemo(
+    () => [
+      { key: 'todos', label: `Todos (${totalFotos})` },
+      ...ambientesDoFiltro.map(({ ambiente, quantidade }) => ({ key: ambiente.id, label: `${ambiente.nome} (${quantidade})` })),
+    ],
+    [ambientesDoFiltro, totalFotos]
+  );
 
   if (!obra) return null;
 
-  // Since photos have no ambiente tag, ambiente filter is decorative
-  const fotosVisiveis = useMemo(() => {
-    const sorted = ordem === 'antigas' ? [...todasFotos].reverse() : todasFotos;
-    return sorted;
-  }, [todasFotos, ordem]);
-
-  // Group by date
   const groups = useMemo(() => {
-    const map: Record<string, FotoEntry[]> = {};
-    for (const f of fotosVisiveis) {
-      if (!map[f.data]) map[f.data] = [];
-      map[f.data].push(f);
-    }
-    const dates = Object.keys(map);
-    if (ordem === 'antigas') dates.sort((a, b) => a.localeCompare(b));
-    else dates.sort((a, b) => b.localeCompare(a));
-    return dates.map(data => ({ data, fotos: map[data] }));
-  }, [fotosVisiveis, ordem]);
+    const ordenados = ordem === 'antigas' ? [...gruposRecentes].reverse() : gruposRecentes;
+    let index = 0;
+    return ordenados.map((grupo) => ({
+      data: grupo.data,
+      fotos: grupo.midias.map((midia): FotoEntry => ({
+        id: midia.id,
+        url: midia.url,
+        data: midia.data,
+        tipo: midia.tipo,
+        ambienteId: midia.ambiente_id,
+        index: index++,
+      })),
+    }));
+  }, [gruposRecentes, ordem]);
 
-  const totalFotos = todasFotos.length;
+  const fotosVisiveis = useMemo(() => groups.flatMap((grupo) => grupo.fotos), [groups]);
 
   const handleOpen = (absoluteIdx: number) => {
     setLightbox({ index: absoluteIdx });
@@ -125,32 +146,117 @@ export default function ObraFotos() {
 
   const currentFoto = lightbox !== null ? fotosVisiveis[lightbox.index] : null;
 
+  const handleEnviarMidia = () => {
+    const erro = state.adicionarMidiaNaObra({
+      obra_id: obra.id,
+      ambiente_id: ambienteEnvio,
+      url: arquivoEnvio ? URL.createObjectURL(arquivoEnvio) : '',
+      tipo: arquivoEnvio?.type.startsWith('video/') ? 'video' : 'foto',
+    });
+
+    if (erro) {
+      setErroEnvio(erro);
+      setConfirmacaoEnvio('');
+      return;
+    }
+
+    setErroEnvio('');
+    setConfirmacaoEnvio('Mídia enviada.');
+    setActiveAmbiente(ambienteEnvio);
+    setArquivoEnvio(null);
+    setAmbienteEnvio('');
+    setEnvioAberto(false);
+  };
+
   return (
-    <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+    <div className="obra-fotos-root" style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+      <style>{`
+        @media (max-width: 900px) {
+          .obra-fotos-envio-grid { grid-template-columns: 1fr !important; }
+          .obra-fotos-envio-grid > button { width: 100%; }
+        }
+        @media (max-width: 600px) {
+          .obra-fotos-root { padding: 24px 16px 88px !important; }
+          .obra-fotos-title { align-items: flex-start !important; gap: 16px !important; }
+          .obra-fotos-actions { flex-direction: column !important; align-items: stretch !important; }
+          .obra-fotos-actions > button { justify-content: center !important; }
+          .obra-fotos-filtros { align-items: stretch !important; flex-direction: column !important; }
+          .obra-fotos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
+      `}</style>
 
       {/* Title row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+      <div className="obra-fotos-title" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
         <div>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '26px', fontWeight: 700, color: C.tinta, margin: '0 0 4px', letterSpacing: '-0.02em' }}>
             Fotos da obra
           </h1>
           <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', color: C.tintaFraca, margin: 0 }}>
-            {totalFotos} foto{totalFotos !== 1 ? 's' : ''}
+            {totalFotos} mídia{totalFotos !== 1 ? 's' : ''}
           </p>
         </div>
-        <button style={{
-          display: 'inline-flex', alignItems: 'center', gap: '7px',
-          fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500,
-          color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
-          borderRadius: '8px', padding: '9px 16px', cursor: 'pointer',
-        }}>
-          <IconDownload />
-          Baixar todas
-        </button>
+        <div className="obra-fotos-actions" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <button
+            type="button"
+            onClick={() => { setEnvioAberto((aberto) => !aberto); setErroEnvio(''); setConfirmacaoEnvio(''); }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 700, color: C.tinta, backgroundColor: C.acento, border: 'none', borderRadius: '8px', padding: '10px 16px', cursor: 'pointer' }}
+          >
+            <IconUpload />
+            Enviar mídia
+          </button>
+          <button style={{
+            display: 'inline-flex', alignItems: 'center', gap: '7px',
+            fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 500,
+            color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,
+            borderRadius: '8px', padding: '9px 16px', cursor: 'pointer',
+          }}>
+            <IconDownload />
+            Baixar todas
+          </button>
+        </div>
       </div>
 
+      {confirmacaoEnvio && (
+        <p role="status" aria-live="polite" data-confirmacao-acao="true" style={{ margin: '-8px 0 20px', padding: '10px 12px', borderRadius: '8px', backgroundColor: '#EDFAF3', color: C.positivo, fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 600 }}>
+          {confirmacaoEnvio}
+        </p>
+      )}
+
+      {envioAberto && (
+        <section aria-label="Enviar mídia" style={{ marginBottom: '24px', padding: '20px', border: `1px solid ${C.borda}`, borderRadius: '12px', backgroundColor: C.superficie }}>
+          <h2 style={{ margin: '0 0 16px', fontFamily: "'Space Grotesk', sans-serif", fontSize: '18px', color: C.tinta }}>Enviar mídia</h2>
+          <div className="obra-fotos-envio-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(180px, 1fr) minmax(220px, 1fr) auto', gap: '12px', alignItems: 'end' }}>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, color: C.grafite }}>
+              Ambiente
+              <select
+                aria-required="true"
+                value={ambienteEnvio}
+                onChange={(event) => { setAmbienteEnvio(event.target.value); setErroEnvio(''); }}
+                style={{ width: '100%', padding: '10px 11px', border: `1px solid ${erroEnvio && !ambienteEnvio ? C.atencao : C.borda}`, borderRadius: '8px', backgroundColor: C.superficie, color: C.grafite, fontFamily: 'Inter, sans-serif', fontSize: '13px' }}
+              >
+                <option value="">Escolha o ambiente</option>
+                {ambientesDisponiveis.map((ambiente) => <option key={ambiente.id} value={ambiente.id}>{ambiente.nome}</option>)}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontFamily: 'Inter, sans-serif', fontSize: '12px', fontWeight: 600, color: C.grafite }}>
+              Arquivo
+              <input
+                type="file"
+                accept="image/*,video/*"
+                onChange={(event) => { setArquivoEnvio(event.target.files?.[0] ?? null); setErroEnvio(''); }}
+                style={{ width: '100%', padding: '8px', boxSizing: 'border-box', border: `1px solid ${C.borda}`, borderRadius: '8px', backgroundColor: C.superficie, color: C.tintaFraca, fontFamily: 'Inter, sans-serif', fontSize: '12px' }}
+              />
+            </label>
+            <button type="button" onClick={handleEnviarMidia} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', backgroundColor: C.acento, color: C.tinta, fontFamily: 'Inter, sans-serif', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+              Enviar mídia
+            </button>
+          </div>
+          {erroEnvio && <p role="alert" style={{ margin: '10px 0 0', color: C.atencao, fontFamily: 'Inter, sans-serif', fontSize: '13px', lineHeight: '19px' }}>{erroEnvio}</p>}
+        </section>
+      )}
+
       {/* Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '16px' }}>
+      <div className="obra-fotos-filtros" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', gap: '16px' }}>
         {/* Ambiente tabs */}
         <div style={{ display: 'flex', gap: '0', borderBottom: `1px solid ${C.borda}`, overflowX: 'auto' }}>
           {AMBIENTE_TABS.map(({ key, label }) => {
@@ -186,9 +292,13 @@ export default function ObraFotos() {
 
       {/* Groups */}
       {groups.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: C.neutro, fontSize: '14px' }}>
-          Nenhuma foto encontrada.
-        </div>
+        <EstadoVazio
+          mensagem={
+            activeAmbiente === 'todos'
+              ? 'Esta obra ainda não tem mídias. As primeiras aparecem aqui quando o gerente registrar o dia.'
+              : 'Este ambiente ainda não tem mídias. Elas aparecem aqui quando o gerente registrar o serviço.'
+          }
+        />
       )}
 
       {groups.map(group => (
@@ -202,26 +312,35 @@ export default function ObraFotos() {
               {formatarTituloSecao(group.data)}
             </span>
             <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: C.neutro }}>
-              · {group.fotos.length} foto{group.fotos.length !== 1 ? 's' : ''}
+              · {group.fotos.length} mídia{group.fotos.length !== 1 ? 's' : ''}
             </span>
             <div style={{ flex: 1, height: '1px', backgroundColor: C.borda }} />
           </div>
 
           {/* Photo grid: 5 per row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
+          <div className="obra-fotos-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>
             {group.fotos.map(foto => (
               <div
-                key={foto.index}
+                key={foto.id}
                 onClick={() => handleOpen(foto.index)}
                 style={{ position: 'relative', paddingBottom: '100%', cursor: 'zoom-in', borderRadius: '8px', overflow: 'hidden', backgroundColor: '#D8D8D8' }}
-                onMouseEnter={e => { (e.currentTarget.querySelector('img') as HTMLImageElement).style.transform = 'scale(1.04)'; }}
-                onMouseLeave={e => { (e.currentTarget.querySelector('img') as HTMLImageElement).style.transform = 'scale(1)'; }}
+                onMouseEnter={e => { const el = e.currentTarget.querySelector('img, video') as HTMLElement | null; if (el) el.style.transform = 'scale(1.04)'; }}
+                onMouseLeave={e => { const el = e.currentTarget.querySelector('img, video') as HTMLElement | null; if (el) el.style.transform = 'scale(1)'; }}
               >
-                <img
-                  src={foto.url}
-                  alt=""
-                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.2s ease' }}
-                />
+                {foto.tipo === 'video' ? (
+                  <>
+                    <video src={foto.url} muted preload="metadata" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.2s ease' }} />
+                    <span style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', color: C.superficie }}>
+                      <span style={{ width: '38px', height: '38px', borderRadius: '50%', display: 'grid', placeItems: 'center', backgroundColor: 'rgba(0,0,0,0.55)' }}><IconPlay /></span>
+                    </span>
+                  </>
+                ) : (
+                  <img
+                    src={foto.url}
+                    alt=""
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.2s ease' }}
+                  />
+                )}
               </div>
             ))}
           </div>
@@ -270,12 +389,21 @@ export default function ObraFotos() {
           )}
 
           {/* Image */}
-          <img
-            src={currentFoto.url.replace('w=280&h=280', 'w=900&h=700')}
-            alt=""
-            onClick={e => e.stopPropagation()}
-            style={{ maxWidth: 'min(900px, 90vw)', maxHeight: '80vh', objectFit: 'contain', borderRadius: '4px', display: 'block' }}
-          />
+          {currentFoto.tipo === 'video' ? (
+            <video
+              src={currentFoto.url}
+              controls
+              onClick={e => e.stopPropagation()}
+              style={{ maxWidth: 'min(900px, 90vw)', maxHeight: '80vh', borderRadius: '4px', display: 'block' }}
+            />
+          ) : (
+            <img
+              src={currentFoto.url.replace('w=280&h=280', 'w=900&h=700')}
+              alt=""
+              onClick={e => e.stopPropagation()}
+              style={{ maxWidth: 'min(900px, 90vw)', maxHeight: '80vh', objectFit: 'contain', borderRadius: '4px', display: 'block' }}
+            />
+          )}
 
           {/* Next */}
           {lightbox.index < fotosVisiveis.length - 1 && (

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useStore, calcularPctObra, calcularPctAmbiente, obraPorSlug } from '../state/store';
 import TituloSecao from '../components/TituloSecao';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -52,6 +53,7 @@ export default function ObraAndamento() {
   const state = useStore();
   const { obraId } = useParams<{ obraId: string }>();
   const [expandedTecto, setExpandedTecto] = useState<Set<string>>(new Set());
+  const [confirmacao, setConfirmacao] = useState<string | null>(null);
 
   const perfilAtivo = state.perfil_ativo;
   const pessoaId = perfilAtivo === 'gerente_obras' ? 'p04' : perfilAtivo === 'financeiro' ? 'p03' : 'p01';
@@ -75,6 +77,9 @@ export default function ObraAndamento() {
 
   const handleMarcarAmbiente = (ambienteId: string) => {
     state.marcarTodosItensAmbiente({ ambiente_id: ambienteId, executado: true, pessoa_id: pessoaId });
+    const ambiente = ambientes.find(amb => amb.id === ambienteId);
+    setConfirmacao(`Concluído. ${ambiente?.nome ?? 'Ambiente'} está com todos os serviços marcados.`);
+    setTimeout(() => setConfirmacao(null), 3000);
   };
 
   const cardStyle: React.CSSProperties = {
@@ -84,6 +89,22 @@ export default function ObraAndamento() {
 
   return (
     <div style={{ padding: '28px 40px 80px', fontFamily: 'Inter, sans-serif', backgroundColor: C.fundo, minHeight: '100%' }}>
+
+      {confirmacao && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-confirmacao-acao="true"
+          style={{
+            position: 'fixed', bottom: '32px', left: '50%', transform: 'translateX(-50%)',
+            zIndex: 200, maxWidth: 'calc(100vw - 32px)', padding: '12px 24px', borderRadius: '8px',
+            backgroundColor: C.grafite, color: C.superficie, boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+            fontSize: '14px', fontWeight: 500, textAlign: 'center',
+          }}
+        >
+          ✓ {confirmacao}
+        </div>
+      )}
 
       {/* Two-column layout */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', alignItems: 'start' }}>
@@ -112,9 +133,7 @@ export default function ObraAndamento() {
 
           {/* Per-ambiente */}
           {ambientes.length === 0 ? (
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, margin: 0 }}>
-              Nenhum ambiente cadastrado para esta obra ainda.
-            </p>
+            <EstadoVazio compacto mensagem="Esta obra ainda não tem ambientes. O andamento aparece aqui quando a estrutura da obra for cadastrada." />
           ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
             {ambientes.map(amb => {
@@ -145,7 +164,9 @@ export default function ObraAndamento() {
 
                   {isOpen && (
                     <div style={{ paddingBottom: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {itens.map(item => (
+                      {itens.length === 0 ? (
+                        <EstadoVazio compacto mensagem="Este ambiente ainda não tem serviços. Eles aparecem aqui quando o orçamento for detalhado." />
+                      ) : itens.map(item => (
                         <div key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '4px' }}>
                           {item.executado ? <IconCheck /> : <IconCircleEmpty />}
                           <span style={{
@@ -190,9 +211,7 @@ export default function ObraAndamento() {
 
             {/* Per-ambiente — no detail, with "marcar" button */}
             {ambientes.length === 0 ? (
-              <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro, margin: 0 }}>
-                Nenhum ambiente cadastrado para esta obra ainda.
-              </p>
+              <EstadoVazio compacto mensagem="Esta obra ainda não tem ambientes. O andamento geral aparece aqui quando a estrutura da obra for cadastrada." />
             ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
               {ambientes.map(amb => {
@@ -210,6 +229,7 @@ export default function ObraAndamento() {
                     {!isDone && (
                       <button
                         onClick={() => handleMarcarAmbiente(amb.id)}
+                        aria-label={`Concluir ${amb.nome}`}
                         style={{
                           fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 500,
                           color: C.grafite, backgroundColor: C.superficie, border: `1px solid ${C.borda}`,

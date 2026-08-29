@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useStore, calcularPctObra, getGerenteDaObra, formatarReais, obraSlug } from '../state/store';
+import { useStore, calcularPctObra, getGerenteDaObra, obraSlug } from '../state/store';
 import Avatar from '../components/Avatar';
+import EstadoVazio from '../components/EstadoVazio';
 
 const C = {
   acento: '#FFC213',
@@ -41,13 +42,18 @@ const FILTER_TABS = [
   { label: 'Concluídas', key: 'concluida' },
 ];
 
-const OBRA_PHOTOS: Record<string, string> = {
-  o01: 'https://images.unsplash.com/photo-1618832515490-e181c4794a45?w=640&h=360&fit=crop&auto=format',
-  o02: 'https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?w=640&h=360&fit=crop&auto=format',
-  o03: 'https://images.unsplash.com/photo-1505798577917-a65157d3320a?w=640&h=360&fit=crop&auto=format',
-  o04: 'https://images.unsplash.com/photo-1523413363574-c30aa1c2a516?w=640&h=360&fit=crop&auto=format',
-  o05: 'https://images.unsplash.com/photo-1634586648651-f1fb9ec10d90?w=640&h=360&fit=crop&auto=format',
-};
+const OBRA_PHOTOS = [
+  'https://images.unsplash.com/photo-1618832515490-e181c4794a45?w=640&h=360&fit=crop&auto=format',
+  'https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?w=640&h=360&fit=crop&auto=format',
+  'https://images.unsplash.com/photo-1505798577917-a65157d3320a?w=640&h=360&fit=crop&auto=format',
+  'https://images.unsplash.com/photo-1523413363574-c30aa1c2a516?w=640&h=360&fit=crop&auto=format',
+  'https://images.unsplash.com/photo-1634586648651-f1fb9ec10d90?w=640&h=360&fit=crop&auto=format',
+];
+
+function fotoDaObra(chave: string) {
+  const indice = [...chave].reduce((total, caractere) => total + caractere.charCodeAt(0), 0) % OBRA_PHOTOS.length;
+  return OBRA_PHOTOS[indice];
+}
 
 function StatusBadge({ label, bg, color }: { label: string; bg: string; color: string }) {
   return (
@@ -157,16 +163,14 @@ export default function CarteiraDObras() {
 
       {/* Grid */}
       {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0', color: C.neutro, fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
-          Nenhuma obra encontrada.
-        </div>
+        <EstadoVazio mensagem="Não há obras nesta visão. Ajuste a busca ou escolha outro status para continuar." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           {filtered.map(({ obra, pct, gerente }) => {
             const statusStyle = STATUS_STYLES[obra.estado] ?? STATUS_STYLES.em_andamento;
             const statusLabel = ESTADO_PT[obra.estado] ?? obra.estado;
             const gerenteNome = gerente ? gerente.nome : '—';
-            const photo = OBRA_PHOTOS[obra.id];
+            const photo = fotoDaObra(obra.id);
             const isSmall = obra.tipo === 'pequeno_servico';
             return (
               <div
