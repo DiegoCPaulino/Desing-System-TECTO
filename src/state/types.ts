@@ -237,9 +237,6 @@ export interface TipoDocumento {
   pai_id?: string;
 }
 
-// Mídia deixa de ser uma URL solta em `Diario.fotos` e passa a ter ambiente.
-// A coleção é ADITIVA: `Diario.fotos` continua existindo e continua sendo o
-// que as telas atuais leem.
 /**
  * As três modalidades da `RN-131`. A modalidade pertence ao registro do custo,
  * nunca ao cadastro do prestador (`RN-133`): o mesmo eletricista pode ser
@@ -385,6 +382,9 @@ export interface AdicionalObra {
   valor_centavos: number;
 }
 
+// Mídia deixa de ser uma URL solta em `Diario.fotos` e passa a ter ambiente.
+// A coleção é ADITIVA: `Diario.fotos` continua existindo e continua sendo o
+// que as telas atuais leem.
 export interface Midia {
   id: string;
   obra_id: string;
@@ -396,6 +396,36 @@ export interface Midia {
 }
 
 export type TipoPerfil = 'administracao' | 'financeiro' | 'gerente_obras' | 'cliente';
+
+/**
+ * A camada de credencial do `INV-01` — "Pessoa, Vínculo, Usuário e Papel são
+ * quatro camadas distintas". O glossário define Usuário como "credencial de
+ * acesso ao sistema, ligada a uma Pessoa. Nem toda Pessoa tem Usuário".
+ *
+ * Ela não existia: a sessão guardava só o perfil, e por isso o Portal não
+ * tinha como saber QUEM estava logado — daí o nome do cliente escrito dentro
+ * do `PortalLayout`.
+ *
+ * **Desvio consciente do `INV-01`, só no protótipo.** Para os três perfis
+ * internos o Usuário aponta para uma `Pessoa`, como manda o invariante. Para o
+ * Cliente ele aponta para a `Obra`, porque `Obra.cliente` é um nome em texto e
+ * o Cliente ainda não é uma Pessoa no estado. Transformá-lo em Pessoa é a
+ * modelagem correta e está registrada como pendência: ver `docs/DECISOES.md`.
+ * O que impede fazer agora é que o Painel conta `pessoas.filter(ativo)` sob o
+ * rótulo "com vínculo ativo", e acrescentar cinco clientes faria esse número
+ * mentir numa tela que não é minha.
+ */
+export interface Usuario {
+  id: string;
+  perfil: TipoPerfil;
+  nome_exibicao: string;
+  email: string;
+  /** Perfis internos. */
+  pessoa_id?: string;
+  /** Cliente: a Obra dele. Ver a nota acima. */
+  obra_id?: string;
+  ativo: boolean;
+}
 
 export interface ItemForaEscopo {
   id: string;
@@ -435,4 +465,5 @@ export interface AppState {
   despesas_empresa: DespesaEmpresa[];
   contratos_terceirizado: ContratoTerceirizado[];
   parcelas_contrato: ParcelaContrato[];
+  usuarios: Usuario[];
 }

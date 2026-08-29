@@ -28,7 +28,15 @@ export type CelulaValor =
 
 type Store = AppState & {
   perfil_ativo: TipoPerfil | null;
+  /**
+   * Quem está logado, e não só com que papel. Sem isto o Portal não tem como
+   * saber de quem é a obra — era essa a falta que obrigava o `PortalLayout` a
+   * ter o nome do cliente escrito no código.
+   */
+  usuario_ativo_id: string | null;
   setPerfil: (perfil: TipoPerfil | null) => void;
+  /** Entrada por Usuário, quando a tela souber qual. Devolve erro ou undefined. */
+  entrarComoUsuario: (usuario_id: string) => string | undefined;
   resetarDados: () => void;
   marcarItem: (args: { item_id: string; executado: boolean; pessoa_id: string }) => void;
   marcarTodosItensAmbiente: (args: { ambiente_id: string; executado: boolean; pessoa_id: string }) => void;
@@ -77,10 +85,29 @@ export const useStore = create<Store>(() => ({
   ...DADOS_INICIAIS,
 
   perfil_ativo: null,
-  setPerfil: (perfil) => useStore.setState({ perfil_ativo: perfil }),
+  usuario_ativo_id: null,
+
+  /**
+   * Continua recebendo o perfil, porque é assim que o Login e os layouts
+   * chamam. Além de gravar o perfil, resolve o Usuário de demonstração
+   * correspondente — um por perfil, conforme a `RN-138`.
+   */
+  setPerfil: (perfil) => {
+    const usuario = perfil
+      ? useStore.getState().usuarios.find((u) => u.perfil === perfil && u.ativo)
+      : undefined;
+    useStore.setState({ perfil_ativo: perfil, usuario_ativo_id: usuario?.id ?? null });
+  },
 
   resetarDados: () => {
     useStore.setState({ ...DADOS_INICIAIS });
+  },
+
+  entrarComoUsuario: (usuario_id) => {
+    const usuario = useStore.getState().usuarios.find((u) => u.id === usuario_id && u.ativo);
+    if (!usuario) return 'Usuário não encontrado ou inativo.';
+    useStore.setState({ perfil_ativo: usuario.perfil, usuario_ativo_id: usuario.id });
+    return undefined;
   },
 
   marcarItem: ({ item_id, executado, pessoa_id }) => {

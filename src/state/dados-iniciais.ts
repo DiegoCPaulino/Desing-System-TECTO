@@ -1092,6 +1092,19 @@ const DADOS: AppState = {
     { id: 'pc08', contrato_id: 'ct04', numero: 2, valor_centavos: 120000, situacao: 'pendente' },
   ],
 
+  // ─── USUÁRIOS ─────────────────────────────────────────────────────────────
+  // A camada de credencial do INV-01. Os quatro que aparecem no Login de
+  // demonstração. O e-mail existe para a tela de acesso ter o que exibir; não
+  // há autenticação real na maquete.
+  usuarios: [
+    { id: 'u01', perfil: 'administracao', nome_exibicao: 'Pedro Almeida',       email: 'pedro@tecto.com.br',    pessoa_id: 'p01', ativo: true },
+    { id: 'u02', perfil: 'financeiro',    nome_exibicao: 'Fernanda Sousa',      email: 'fernanda@tecto.com.br', pessoa_id: 'p03', ativo: true },
+    { id: 'u03', perfil: 'gerente_obras', nome_exibicao: 'Rafael Duarte',       email: 'rafael@tecto.com.br',   pessoa_id: 'p04', ativo: true },
+    // RN-138: exatamente um login por Cliente. Este aponta para a Obra, e o
+    // nome dele vem de `Obra.cliente` — ver a nota em `Usuario`.
+    { id: 'u04', perfil: 'cliente',       nome_exibicao: 'Mariana Costa Lima',  email: 'mariana.lima@email.com', obra_id: 'o01', ativo: true },
+  ],
+
   // ─── ITENS FORA DO ESCOPO ─────────────────────────────────────────────────
   itens_fora_escopo: [],
 };
