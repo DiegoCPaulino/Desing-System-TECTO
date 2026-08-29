@@ -12,6 +12,7 @@ import type {
   Vinculo,
 } from './types';
 import type { Periodo } from './indicadores';
+import { todosOsCiclos } from './fechamento';
 
 /**
  * PESSOA — as duas leituras que a T6 precisa e que ainda não existiam.
@@ -275,6 +276,36 @@ export function fichaDaPessoa(state: AppState, pessoa_id: string): FichaDaPessoa
     lancamentos: lancamentosDaPessoa(state, pessoa_id),
     obras: obrasDaPessoa(state, pessoa_id),
   };
+}
+
+// ─── Onde um lançamento novo cai ─────────────────────────────────────────────
+
+/**
+ * Monta o `NovoLancamento` de uma Pessoa com os campos que a tela não tem como
+ * saber: a data do fato e o ciclo em que a primeira parcela cai.
+ *
+ * Existe para que o formulário **não decida** isso. A `RN-073` manda a correção
+ * cair no ciclo seguinte e o Fechamento trava período fechado — se a tela
+ * escolhesse o ciclo, escolheria errado uma hora, e o erro só apareceria no
+ * bolso de alguém. Aqui a escolha é uma só: o primeiro ciclo ABERTO da pessoa.
+ *
+ * Devolve `undefined` quando a pessoa não tem ciclo aberto — quem não tem
+ * ciclo não tem onde descontar, e inventar um período seria pior que recusar.
+ */
+export function novoLancamentoParaPessoa(
+  state: AppState,
+  pessoa_id: string,
+  valor_centavos: number,
+  parcelas: number,
+  hoje: string
+): { pessoa_id: string; valor_centavos: number; parcelas: number; data: string; primeiro_ciclo_fim: string } | undefined {
+  const ciclo = todosOsCiclos(state)
+    .filter((c) => c.estado === 'aberto' && c.periodo_fim && c.pessoas.includes(pessoa_id))
+    .sort((a, b) => a.periodo_fim!.localeCompare(b.periodo_fim!))[0];
+
+  if (!ciclo?.periodo_fim) return undefined;
+
+  return { pessoa_id, valor_centavos, parcelas, data: hoje, primeiro_ciclo_fim: ciclo.periodo_fim };
 }
 
 // ─── Rótulos ─────────────────────────────────────────────────────────────────

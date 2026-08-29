@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useStore } from '../state/store';
 import type { TipoVinculo } from '../state/types';
 import Avatar from '../components/Avatar';
@@ -102,10 +103,10 @@ export default function Equipe() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           {filtered.map(({ pessoa, tipo }) => {
             return (
-              <div key={pessoa.id} style={{
+              <Link key={pessoa.id} to={`/equipe/${pessoa.id}`} style={{
                 backgroundColor: C.superficie, borderRadius: '12px', border: `1px solid ${C.borda}`,
                 padding: '24px 20px', display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: '12px', textAlign: 'center',
+                gap: '12px', textAlign: 'center', textDecoration: 'none', color: 'inherit',
               }}>
                 <Avatar pessoaId={pessoa.id} nome={pessoa.nome} tamanho={52} />
                 <div>
@@ -117,7 +118,7 @@ export default function Equipe() {
                   </p>
                 </div>
                 <ChipVinculo tipo={tipo} />
-              </div>
+              </Link>
             );
           })}
         </div>
