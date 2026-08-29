@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useStore } from '../state/store';
+import { obraDoClienteAtivo } from '../state/sessao';
 import Avatar from '../components/Avatar';
 import DataComDiaSemana from '../components/DataComDiaSemana';
 import EstadoVazio from '../components/EstadoVazio';
@@ -97,10 +98,14 @@ export default function PortalDiario() {
   const state = useStore();
   const [filter, setFilter] = useState<'todos' | 'com_fotos'>('todos');
   const [lightbox, setLightbox] = useState<{ photos: string[]; index: number } | null>(null);
+  const obra = obraDoClienteAtivo(state);
 
-  // 5 most recent finalized diarios for obra o01, sorted newest first
+  if (!obra) {
+    return <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px' }}><EstadoVazio mensagem="Seu acesso ainda não tem uma obra associada. Os diários aparecem aqui quando o vínculo for registrado." /></div>;
+  }
+
   const allDiarios = state.diarios
-    .filter(d => d.obra_id === 'o01' && d.estado === 'finalizado')
+    .filter(d => d.obra_id === obra.id && d.estado === 'finalizado')
     .sort((a, b) => b.data.localeCompare(a.data))
     .slice(0, 5);
 
@@ -109,10 +114,17 @@ export default function PortalDiario() {
     : allDiarios;
 
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="portal-diario" style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px', fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        @media (max-width: 700px) {
+          .portal-diario { padding: 28px 16px 56px !important; }
+          .portal-diario-header { align-items: flex-start !important; flex-direction: column !important; margin-bottom: 32px !important; }
+          .portal-diario-item { gap: 12px !important; }
+        }
+      `}</style>
 
       {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '48px', gap: '24px' }}>
+      <div className="portal-diario-header" style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: '48px', gap: '24px' }}>
         <div>
           <h1 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '36px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.02em', margin: 0, lineHeight: '1.1' }}>
             Diário da obra
@@ -169,7 +181,7 @@ export default function PortalDiario() {
             const hasPhotos = diario.fotos.length > 0;
 
             return (
-              <div key={diario.id} style={{ display: 'flex', gap: '28px', alignItems: 'flex-start' }}>
+              <div className="portal-diario-item" key={diario.id} style={{ display: 'flex', gap: '28px', alignItems: 'flex-start' }}>
                 {/* Timeline dot */}
                 <div style={{ flexShrink: 0, marginTop: '18px', zIndex: 1 }}>
                   <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: semExecucao ? '#F5F5F3' : C.superficie, border: `2px solid ${semExecucao ? C.neutro : C.acento}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

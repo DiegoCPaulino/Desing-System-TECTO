@@ -1,6 +1,11 @@
 import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useStore } from '../state/store';
+import {
+  chaveDeAvatarDoUsuarioAtivo,
+  nomeDoUsuarioAtivo,
+  obraDoClienteAtivo,
+} from '../state/sessao';
 import Avatar from '../components/Avatar';
 
 const C = {
@@ -34,10 +39,13 @@ export default function PortalLayout() {
   const navigate = useNavigate();
   // Sem checagem de perfil aqui: GuardaPerfil, acima deste layout, já garantiu
   // que só o Cliente chega até o portal.
-  const setPerfil = useStore(s => s.setPerfil);
+  const state = useStore();
+  const nomeUsuario = nomeDoUsuarioAtivo(state);
+  const chaveAvatar = chaveDeAvatarDoUsuarioAtivo(state);
+  const obra = obraDoClienteAtivo(state);
 
   const handleLogout = () => {
-    setPerfil(null);
+    state.setPerfil(null);
     navigate('/entrar', { replace: true });
   };
 
@@ -48,6 +56,17 @@ export default function PortalLayout() {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: C.fundo, display: 'flex', flexDirection: 'column', fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        @media (max-width: 900px) {
+          .portal-user-name { display: none; }
+        }
+        @media (max-width: 700px) {
+          .portal-header-inner { height: auto !important; min-height: 64px; padding: 10px 16px 0 !important; flex-wrap: wrap; row-gap: 8px; }
+          .portal-nav { position: static !important; order: 3; width: 100%; transform: none !important; overflow-x: auto; }
+          .portal-nav a { height: 44px !important; padding: 0 18px !important; white-space: nowrap; }
+          .portal-footer { padding: 16px !important; }
+        }
+      `}</style>
 
       {/* ── Header ── */}
       <header style={{
@@ -55,7 +74,7 @@ export default function PortalLayout() {
         borderBottom: `1px solid ${C.borda}`,
         position: 'sticky', top: 0, zIndex: 100,
       }}>
-        <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 32px', height: '66px', display: 'flex', alignItems: 'center', gap: '0' }}>
+        <div className="portal-header-inner" style={{ maxWidth: '1120px', margin: '0 auto', padding: '0 32px', height: '66px', display: 'flex', alignItems: 'center', gap: '0' }}>
 
           {/* Logo */}
           <Link to="/portal" style={{ textDecoration: 'none', marginRight: 'auto' }}>
@@ -67,7 +86,7 @@ export default function PortalLayout() {
           </Link>
 
           {/* Nav */}
-          <nav style={{ display: 'flex', gap: '0', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
+          <nav className="portal-nav" style={{ display: 'flex', gap: '0', position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
             {NAV_ITEMS.map(({ label, path }) => {
               const active = isActive(path);
               return (
@@ -97,10 +116,10 @@ export default function PortalLayout() {
 
           {/* User */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginLeft: 'auto' }}>
-            <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite }}>
-              Mariana Costa Lima
+            <span className="portal-user-name" style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite }}>
+              {nomeUsuario}
             </span>
-            <Avatar pessoaId="cliente-o01" nome="Mariana Costa Lima" tamanho={36} />
+            <Avatar pessoaId={chaveAvatar} nome={nomeUsuario} tamanho={36} />
             <button
               onClick={handleLogout}
               title="Sair"
@@ -120,7 +139,7 @@ export default function PortalLayout() {
       </main>
 
       {/* ── Footer ── */}
-      <footer style={{ borderTop: `1px solid ${C.borda}`, backgroundColor: C.superficie, padding: '20px 32px' }}>
+      <footer className="portal-footer" style={{ borderTop: `1px solid ${C.borda}`, backgroundColor: C.superficie, padding: '20px 32px' }}>
         <div style={{ maxWidth: '1120px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ backgroundColor: C.acento, padding: '4px 10px', borderRadius: '3px', flexShrink: 0 }}>
             <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '13px', fontWeight: 700, color: C.tinta, letterSpacing: '-0.04em' }}>
@@ -128,7 +147,7 @@ export default function PortalLayout() {
             </span>
           </div>
           <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: C.neutro }}>
-            Rua Joaquim Floriano, 820 — Itaim Bibi
+            {obra?.endereco ?? 'Endereço da obra não informado'}
           </span>
         </div>
       </footer>

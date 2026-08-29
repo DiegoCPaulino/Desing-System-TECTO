@@ -7,6 +7,10 @@ import {
   naoLidasDoPerfil,
   notificacoesDoPerfil,
 } from '../state/notificacoes';
+import {
+  chaveDeAvatarDoUsuarioAtivo,
+  nomeDoUsuarioAtivo,
+} from '../state/sessao';
 import Avatar from '../components/Avatar';
 
 const C = {
@@ -111,9 +115,8 @@ export default function AppLayout() {
   const notificacoes = notificacoesDoPerfil(state, perfil);
   const quantidadeNaoLidas = contarNaoLidas(state, perfil);
 
-  // Derive user info from profile
-  const pessoaId = isAdmin ? 'p01' : isFinanceiro ? 'p03' : 'p04';
-  const pessoa = state.pessoas.find(p => p.id === pessoaId);
+  const nomeUsuario = nomeDoUsuarioAtivo(state);
+  const chaveAvatar = chaveDeAvatarDoUsuarioAtivo(state);
   const perfilLabel = isAdmin ? 'ADMINISTRAÇÃO' : isFinanceiro ? 'FINANCEIRO' : 'GERENTE DE OBRAS';
 
   const handleLogout = () => {
@@ -217,13 +220,13 @@ export default function AppLayout() {
           {/* User footer */}
           <div className="tecto-app-user" style={{ padding: '16px 20px', borderTop: `1px solid ${C.borda}`, display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
             <Avatar
-              pessoaId={pessoa?.id ?? pessoaId}
-              nome={pessoa?.nome ?? (isAdmin ? 'Pedro Almeida' : 'Rafael Duarte')}
+              pessoaId={chaveAvatar}
+              nome={nomeUsuario}
               tamanho={36}
             />
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '14px', fontWeight: 500, color: C.grafite, lineHeight: '18px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {pessoa?.nome ?? (isAdmin ? 'Pedro Almeida' : 'Rafael Duarte')}
+                {nomeUsuario}
               </p>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
                 <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: C.tintaFraca }}>
@@ -353,8 +356,8 @@ export default function AppLayout() {
             </div>
 
             <Avatar
-              pessoaId={pessoa?.id ?? pessoaId}
-              nome={pessoa?.nome ?? (isAdmin ? 'Pedro Almeida' : 'Rafael Duarte')}
+              pessoaId={chaveAvatar}
+              nome={nomeUsuario}
               tamanho={38}
               style={{ cursor: 'pointer' }}
             />

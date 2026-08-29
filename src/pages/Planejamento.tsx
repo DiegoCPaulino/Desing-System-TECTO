@@ -43,12 +43,12 @@ const C = {
 const MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
 const MOTIVOS = ['Doente', 'Dispensado pela empresa', 'Falta', 'Folga', 'Férias', 'Afastado', 'Obra parada'];
 
-const OBRA_COR: Record<string, string> = {
-  o01: C.informativo,
-  o02: C.positivo,
-  o04: C.grafite,
-  o05: C.atencao,
-};
+const CORES_OBRA = [C.informativo, C.positivo, C.grafite, C.atencao];
+
+function corDaObra(chave: string) {
+  const indice = [...chave].reduce((total, caractere) => total + caractere.charCodeAt(0), 0) % CORES_OBRA.length;
+  return CORES_OBRA[indice];
+}
 
 function obraSigla(codigo: string): string {
   const parte = codigo.split(' - ')[1];
@@ -364,7 +364,7 @@ export default function Planejamento() {
       {/* ── Legenda ── */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', marginTop: '16px' }}>
         {obras.map((o) => (
-          <LegendaItem key={o.id} cor={OBRA_COR[o.id] ?? C.neutro} label={o.codigo} />
+          <LegendaItem key={o.id} cor={corDaObra(o.id)} label={o.codigo} />
         ))}
         <LegendaItem cor={C.neutro} label="Ausência" quadrado />
         <LegendaItem cor={C.tintaFraca} label="Em aberto" tracejado />
@@ -401,7 +401,7 @@ export default function Planejamento() {
                   <MenuOpt
                     key={o.id}
                     label={o.codigo}
-                    dot={OBRA_COR[o.id] ?? C.neutro}
+                    dot={corDaObra(o.id)}
                     onClick={() => escolherObra(o.id)}
                   />
                 ))}
@@ -525,7 +525,7 @@ function CelulaConteudo({ state, cel }: { state: StoreState; cel?: Cel }) {
 
   if (tipo === 'alocada') {
     const obra = state.obras.find((o) => o.id === cel!.obra_id)!;
-    const cor = OBRA_COR[obra.id] ?? C.neutro;
+    const cor = corDaObra(obra.id);
     return (
       <div title={alteradaTip} style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {markers}

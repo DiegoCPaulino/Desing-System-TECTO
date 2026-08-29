@@ -10,6 +10,7 @@ import TituloSecao from '../components/TituloSecao';
 import CabecalhoTabela from '../components/CabecalhoTabela';
 import ValorMonetario from '../components/ValorMonetario';
 import EstadoVazio from '../components/EstadoVazio';
+import { obraDoClienteAtivo } from '../state/sessao';
 
 const C = {
   acento: '#FFC213',
@@ -54,16 +55,31 @@ function formatarDataCurta(data: string) {
 
 export default function PortalFinanceiro() {
   const state = useStore();
-  const obraId = 'o01';
-  const parcelas = recebimentosDaObra(state, obraId);
-  const adicionais = adicionaisDaObra(state, obraId);
-  const materiais = custosVisiveisAoCliente(state, obraId)
+  const obra = obraDoClienteAtivo(state);
+
+  if (!obra) {
+    return <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px' }}><EstadoVazio mensagem="Seu acesso ainda não tem uma obra associada. O financeiro aparece aqui quando o vínculo for registrado." /></div>;
+  }
+
+  const parcelas = recebimentosDaObra(state, obra.id);
+  const adicionais = adicionaisDaObra(state, obra.id);
+  const materiais = custosVisiveisAoCliente(state, obra.id)
     .filter((custo) => custo.modalidade_rotulo !== 'Serviço TECTO');
-  const totais = totaisDaObra(state, obraId);
+  const totais = totaisDaObra(state, obra.id);
   const totalAdicionais = adicionais.reduce((soma, adicional) => soma + adicional.valor_centavos, 0);
 
   return (
-    <div style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px', fontFamily: 'Inter, sans-serif' }}>
+    <div className="portal-financeiro" style={{ maxWidth: '1120px', margin: '0 auto', padding: '48px 32px 80px', fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        @media (max-width: 900px) {
+          .portal-financeiro-resumo { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
+        @media (max-width: 700px) {
+          .portal-financeiro { padding: 28px 16px 56px !important; }
+          .portal-financeiro-resumo { grid-template-columns: 1fr !important; }
+          .portal-financeiro-tabela { overflow-x: auto; }
+        }
+      `}</style>
 
       {/* ── Title ── */}
       <div style={{ marginBottom: '40px' }}>
@@ -73,7 +89,7 @@ export default function PortalFinanceiro() {
       </div>
 
       {/* ── Top summary cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '28px' }}>
+      <div className="portal-financeiro-resumo" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginBottom: '28px' }}>
 
         {/* Total da obra */}
         <Card style={{ padding: '28px' }}>
@@ -112,7 +128,7 @@ export default function PortalFinanceiro() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* ── Parcelas ── */}
-        <Card>
+        <Card style={{ overflowX: 'auto' }}>
           <div style={{ padding: '24px 28px 20px' }}>
             <TituloSecao>Parcelas</TituloSecao>
           </div>
