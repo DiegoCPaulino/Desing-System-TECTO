@@ -24,6 +24,7 @@ import PrimeiroAcesso from './pages/PrimeiroAcesso';
 import SemAcesso from './pages/SemAcesso';
 import Fechamento from './pages/Fechamento';
 import Indicadores from './pages/Indicadores';
+import ObraFinanceiro from './pages/ObraFinanceiro';
 
 type RouteHandle = { title?: string; perfis?: TipoPerfil[]; obraScoped?: boolean };
 
@@ -99,7 +100,7 @@ export const rotas = [
           { path: 'obras/:obraId/checklist', handle: { perfis: TODOS_INTERNOS, obraScoped: true, title: 'Checklist de execução' }, Component: ObraChecklist },
           { path: 'obras/:obraId/andamento', handle: { perfis: TODOS_INTERNOS, obraScoped: true, title: 'Andamento' }, Component: ObraAndamento },
           { path: 'obras/:obraId/fotos', handle: { perfis: TODOS_INTERNOS, obraScoped: true, title: 'Fotos' }, Component: ObraFotos },
-          { path: 'obras/:obraId/financeiro', handle: { perfis: ADMIN_FINANCEIRO, obraScoped: true, title: 'Financeiro da obra' }, Component: EmBreve },
+          { path: 'obras/:obraId/financeiro', handle: { perfis: ADMIN_FINANCEIRO, obraScoped: true, title: 'Financeiro da obra' }, Component: ObraFinanceiro },
           { path: 'obras/:obraId/documentos', handle: { perfis: TODOS_INTERNOS, obraScoped: true, title: 'Documentos' }, Component: EmBreve },
           { path: 'planejamento', handle: { perfis: TODOS_INTERNOS, title: 'Planejamento semanal' }, Component: Planejamento },
           { path: 'equipe', handle: { perfis: TODOS_INTERNOS }, Component: Equipe },
